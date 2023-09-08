@@ -1,5 +1,5 @@
 <template>
-    <v-container>
-      Bonjour
-    </v-container>
+  <v-container>
+    Bonjour
+  </v-container>
 </template>

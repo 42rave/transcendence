@@ -21,7 +21,8 @@ services:
     build:
       context: back
       dockerfile: Dockerfile
-    env_file: .env
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     depends_on:

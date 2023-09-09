@@ -8,7 +8,7 @@ up:
 	docker compose up -d --build
 
 stop:
-	docekr compose stop
+	docker compose stop
 
 down:
 	docker compose down

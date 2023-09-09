@@ -4,4 +4,6 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["npm", "run", "start:dev"]
+RUN npx prisma generate
+
+CMD ["npm", "run", "start:migrate:dev"]

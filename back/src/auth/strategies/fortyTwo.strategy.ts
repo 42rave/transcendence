@@ -4,7 +4,7 @@ import { Strategy } from 'passport-42';
 import { AuthService } from 'src/auth/auth.service';
 import { UserService } from 'src/user/user.service';
 import intraConfig from 'src/config/intra.config';
-import {UserDto} from "../../types/user.dto";
+import { UserDto } from "../../types/user.dto";
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy){

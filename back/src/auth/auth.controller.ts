@@ -18,4 +18,10 @@ export class AuthController {
     console.log(authConfig);
     res.cookie('access_token', token.access_token, {httpOnly: true}).redirect(authConfig.webAppURL);
   }
+
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  async me(@Req() req: any) {
+    return req.user;
+  }
 }

@@ -1,8 +1,5 @@
 import { defineStore } from 'pinia';
 
-/* TODO: Use api route to fetch user instead of localStorage
- * The uses of localStorage is only for demo purpose
- */
 export const useAuthStore = defineStore('auth', {
     state: () => ({
       user: null,
@@ -12,21 +9,17 @@ export const useAuthStore = defineStore('auth', {
     },
     actions: {
       login(data: any) {
-        console.log('login action: ', data);
-        this.user = data;
-        localStorage.setItem('user', JSON.stringify(data));
+        window.location.href = 'http://localhost:3000/auth/login';
       },
-      logout() {
-        console.log('logout action');
-        this.user = null;
-        localStorage.removeItem('user');
+      async logout() {
+        await $fetch('http://localhost:3000/auth/logout', { credentials: 'include' }).then((res) => {
+          this.user = null;
+        }).catch(() => {});
       },
-      fetchUser() {
-        console.log('fetchUser action');
-        const user = localStorage.getItem('user');
-        if (user) {
-          this.user = JSON.parse(user);
-        }
+      async fetchUser() {
+        await $fetch('http://localhost:3000/auth/me', { credentials: 'include' }).then((res) => {
+          this.user = res;
+        }).catch(() => {});
       }
     },
 });

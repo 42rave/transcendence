@@ -35,8 +35,8 @@ export default defineNuxtComponent({
 <template>
   <v-app dark>
     <div v-if="$auth.isAuthenticated" class="w-100 h-100">
-      <LayoutAppBar @onDrawerClick="drawer = !drawer" />
-      <LayoutNavBar :drawer="drawer" :routes="routes" />
+      <LayoutAppBar @drawer:click="drawer = !drawer" />
+      <LayoutNavBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer" :routes="routes" />
       <v-main>
         <v-container fluid>
           <slot />
@@ -48,18 +48,3 @@ export default defineNuxtComponent({
     </div>
   </v-app>
 </template>
-
-<style scoped>
-.nuxt-link {
-  color: inherit;
-  text-decoration: none;
-  display: inline-flex;
-  width: 100%;
-}
-.v-list-item {
-  padding: unset !important;
-}
-.v-list-item__content {
-  height: 100% !important;
-}
-</style>

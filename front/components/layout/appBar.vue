@@ -1,9 +1,7 @@
 <template>
   <v-app-bar app>
-    <v-app-bar-nav-icon @click.stop="$emit('onDrawerClick')"></v-app-bar-nav-icon>
+    <v-app-bar-nav-icon @click.stop="$emit('drawer:click')"></v-app-bar-nav-icon>
     <v-toolbar-title>Application</v-toolbar-title>
-
-    <v-spacer></v-spacer>
 
     {{ $auth.user.login }}
     <v-avatar id="menu-activator" class="avatar mx-4" size="40px" color="grey" dark>
@@ -18,9 +16,7 @@
             :value="index"
         >
           <v-list-item-title @click="item.action">
-            <v-list-item-icon>
-              <v-icon size="1rem">{{ item.icon }}</v-icon>
-            </v-list-item-icon>
+            <v-icon size="1rem">{{ item.icon }}</v-icon>
             {{ item.title }}
           </v-list-item-title>
         </v-list-item>

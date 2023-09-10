@@ -42,6 +42,7 @@ export default defineNuxtComponent({
           <slot />
         </v-container>
       </v-main>
+      <LayoutAlert />
     </div>
     <div v-else>
       <WidgetLogin />

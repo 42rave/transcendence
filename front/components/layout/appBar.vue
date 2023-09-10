@@ -3,7 +3,7 @@
     <v-app-bar-nav-icon @click.stop="$emit('drawer:click')"></v-app-bar-nav-icon>
     <v-toolbar-title>Application</v-toolbar-title>
 
-    {{ $auth.user.login }}
+    {{ $auth.user.username }}
     <v-avatar id="menu-activator" class="avatar mx-4" size="40px" color="grey" dark>
       <v-img v-if="$auth.user.avatar" :src="$auth.user.avatar"></v-img>
       <v-icon v-else>mdi-account</v-icon>

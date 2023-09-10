@@ -4,6 +4,6 @@ export default defineNuxtConfig({
   css: ['vuetify/lib/styles/main.sass', '@mdi/font/css/materialdesignicons.css'],
   build: { transpile: ['vuetify'] },
   modules: ['@pinia/nuxt'],
-  plugins: ['~/plugins/vuetify.ts', '~/plugins/auth.ts'],
+  plugins: ['~/plugins/vuetify.ts', '~/plugins/auth.ts', '~/plugins/mitt.ts'],
   ssr: false,
 })

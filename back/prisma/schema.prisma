@@ -12,5 +12,5 @@ model User {
   username  String
   avatar    String
   totpKey   String?
-  twoFAEnabled Boolean
+  twoFAEnabled Boolean @default(false)
 }

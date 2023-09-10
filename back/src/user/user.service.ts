@@ -15,7 +15,6 @@ export class UserService {
   }
 
   async getById(id: number) {
-    console.log('type of id: ', typeof id);
     return await this.prisma.user.findUnique({ where: { id: id } });
   }
 

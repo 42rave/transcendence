@@ -21,7 +21,6 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req: any, @Res() res: any) {
     const token: { access_token: string } = await this.authService.validateUser(req.user);
-    console.log(authConfig);
     res.cookie('access_token', token.access_token, {httpOnly: true}).redirect(authConfig.webAppURL);
   }
 

@@ -11,6 +11,12 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async login() {}
 
+  @Get('logout')
+  @UseGuards(AuthGuard('jwt'))
+  async logout(@Req() req: any, @Res() res: any) {
+    res.clearCookie('access_token', {httpOnly: true}).status(200).send();
+  }
+
   @Get('callback')
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req: any, @Res() res: any) {

@@ -6,7 +6,7 @@ COPY . .
 
 RUN npm install
 
-RUN npx prisma generate
+ENTRYPOINT [ "./entrypoint.sh" ]
 
 CMD ["npm", "run", "start:migrate:dev"]
 

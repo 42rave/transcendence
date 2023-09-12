@@ -35,6 +35,8 @@ services:
     restart: always
     volumes:
       - ./back/:/app
+    networks:
+      - db-back
 
 
   database:
@@ -51,9 +53,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - db-back
 
 volumes:
   postgres_volume:
     name: postgres_volume
+
+networks:
+  db-back:
+    name: 42rave_db-back
+  default:
+    name: 42rave_default
 
 

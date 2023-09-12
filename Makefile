@@ -2,7 +2,8 @@ FRONT=./front/
 
 BACK=./back/
 
-all: install_depencies_back install_depencies_front up
+all: install_depencies_back install_depencies_front 
+	$(MAKE) up
 
 up:
 	docker compose up -d --build
@@ -30,6 +31,7 @@ clean_node_modules:
 	rm -rfv ${BACK}node_modules dist
 	rm -rfv ${FRONT}node_modules .nuxt
 
-re: clean up
+re: clean 
+	$(MAKE) up
 
 PHONY: up stop re down install_depencies_back install_depencies_front clean fclean clean_node_modules

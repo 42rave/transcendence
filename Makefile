@@ -2,7 +2,7 @@ FRONT=./front/
 
 BACK=./back/
 
-all: install_depencies_back install_depencies_front
+all: install_depencies_back install_depencies_front up
 
 up:
 	docker compose up -d --build
@@ -21,12 +21,12 @@ install_depencies_front:
 
 clean:
 	docker compose down
-	docker system prune --volumes -a -f
-	rm -rf postgres_volume
 
 fclean: clean
 	rm -rfv ${BACK}node_modules dist
 	rm -rfv ${FRONT}node_modules .nuxt
+	docker system prune --volumes -a -f
+	docker volume rm postgres_volume
 
 re: clean up
 

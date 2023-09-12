@@ -22,6 +22,7 @@ install_depencies_front:
 clean:
 	docker compose down
 	docker system prune --volumes -a -f
+	rm -rf postgres_volume
 
 fclean: clean
 	rm -rfv ${BACK}node_modules dist

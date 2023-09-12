@@ -4,6 +4,9 @@ WORKDIR /app
 
 COPY . .
 
-RUN npx prisma generate
+RUN npm install
+
+ENTRYPOINT [ "./entrypoint.sh" ]
 
 CMD ["npm", "run", "start:migrate:dev"]
+

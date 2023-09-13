@@ -6,7 +6,6 @@ export default defineNuxtComponent({
   data() {
     return {
       drawer: true,
-      socket: undefined,
       routes: {
         home: {
           name: 'Home',
@@ -14,9 +13,9 @@ export default defineNuxtComponent({
           icon: 'mdi-home',
         },
         about: {
-          name: 'About',
-          path: '/about',
-          icon: 'mdi-information',
+          name: 'Chat',
+          path: '/chat',
+          icon: 'mdi-chat',
         },
       },
     }
@@ -30,11 +29,6 @@ export default defineNuxtComponent({
       ],
     }
   },
-  mounted() {
-    this.socket = this.$nuxtSocket({
-      reconnection: true,
-    });
-  }
 })
 </script>
 
@@ -45,7 +39,7 @@ export default defineNuxtComponent({
       <LayoutNavBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer" :routes="routes" />
       <v-main>
         <v-container fluid>
-          <slot :socket="socket" />
+          <slot />
         </v-container>
       </v-main>
       <LayoutAlert />
@@ -55,3 +49,15 @@ export default defineNuxtComponent({
     </div>
   </v-app>
 </template>
+
+<style scoped>
+.v-container {
+  padding: 0;
+  height: inherit;
+  display: flex;
+  flex-direction: column;
+}
+.v-main {
+  height: 100%;
+}
+</style>

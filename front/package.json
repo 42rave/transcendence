@@ -16,6 +16,7 @@
     "@mdi/font": "^7.2.96",
     "@pinia/nuxt": "^0.4.11",
     "mitt": "^3.0.1",
+    "nuxt-socket-io": "^3.0.13",
     "pinia": "^2.1.6",
     "sass": "^1.66.1",
     "vuetify": "^3.4.0-alpha.1"

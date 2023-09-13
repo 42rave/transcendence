@@ -6,6 +6,7 @@ export default defineNuxtComponent({
   data() {
     return {
       drawer: true,
+      socket: undefined,
       routes: {
         home: {
           name: 'Home',
@@ -29,6 +30,11 @@ export default defineNuxtComponent({
       ],
     }
   },
+  mounted() {
+    this.socket = this.$nuxtSocket({
+      reconnection: true,
+    });
+  }
 })
 </script>
 
@@ -39,7 +45,7 @@ export default defineNuxtComponent({
       <LayoutNavBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer" :routes="routes" />
       <v-main>
         <v-container fluid>
-          <slot />
+          <slot :socket="socket" />
         </v-container>
       </v-main>
       <LayoutAlert />

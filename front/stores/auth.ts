@@ -9,16 +9,23 @@ export const useAuthStore = defineStore('auth', {
     },
     actions: {
       login(data: any) {
-        window.location.href = 'http://localhost:3000/auth/login';
+        const config = useRuntimeConfig();
+        window.location.href = new URL('/auth/login', config.app.API_URL as string).toString();
       },
       async logout() {
-        await $fetch('http://localhost:3000/auth/logout', { credentials: 'include' }).then((res) => {
+        const config = useRuntimeConfig();
+        await $fetch(new URL('/auth/logout', config.app.API_URL as string).toString(), {
+            credentials: 'include',
+        }).then((res) => {
           this.user = null;
         }).catch(() => {});
       },
       async fetchUser() {
-        await $fetch('http://localhost:3000/auth/me', { credentials: 'include' }).then((res) => {
-          this.user = res;
+        const config = useRuntimeConfig();
+        await $fetch(new URL('/auth/me', config.app.API_URL).toString(), {
+            credentials: 'include',
+        }).then((res) => {
+            this.user = res as any;
         }).catch(() => {});
       }
     },

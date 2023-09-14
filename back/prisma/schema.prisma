@@ -7,10 +7,77 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int     @id 
-  username  String
-  avatar    String
-  totpKey   String?
-  twoFAEnabled Boolean @default(false)
+model Relationship {
+  id                                   Int            @id
+  senderID                             Int?
+  receiverID                           Int?
+  type                                 relation_type?
+  users_Relationship_receiverIDTousers users?         @relation("Relationship_receiverIDTousers", fields: [receiverID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_Relationship_senderIDTousers   users?         @relation("Relationship_senderIDTousers", fields: [senderID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model channel {
+  id                Int                 @id
+  name              String
+  password          String?
+  type              channel_type?
+  created_at        DateTime?           @db.Timestamp(6)
+  channelConnection channelConnection[]
+  messages          messages?
+}
+
+model channelConnection {
+  id         Int           @id
+  userId     Int?
+  channelId  Int?
+  role       channel_role?
+  muted      DateTime?     @db.Timestamp(6)
+  created_at DateTime?     @db.Timestamp(6)
+  channel    channel?      @relation(fields: [channelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users      users?        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model messages {
+  id         Int       @id
+  userID     Int?
+  body       String?
+  created_at DateTime? @db.Timestamp(6)
+  users      users     @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  channel    channel   @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "messages_id_fkey1")
+}
+
+model users {
+  id                                          Int                 @id
+  username                                    String
+  avatar                                      String
+  games                                       String
+  twoFA                                       Boolean             @default(false)
+  totpKey                                     String?
+  created_at                                  DateTime            @db.Timestamp(6)
+  Relationship_Relationship_receiverIDTousers Relationship[]      @relation("Relationship_receiverIDTousers")
+  Relationship_Relationship_senderIDTousers   Relationship[]      @relation("Relationship_senderIDTousers")
+  channelConnection                           channelConnection[]
+  messages                                    messages?
+}
+
+enum channel_role {
+  owner
+  admin
+  defaultUser
+  invited
+  banned
+}
+
+enum channel_type {
+  direct
+  protected
+  private
+  public
+}
+
+enum relation_type {
+  friends
+  invite
+  blocked
 }

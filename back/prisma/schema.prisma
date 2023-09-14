@@ -51,10 +51,9 @@ model users {
   id                                          Int                 @id
   username                                    String
   avatar                                      String
-  games                                       String
-  twoFA                                       Boolean             @default(false)
+  twoFAEnabled                                Boolean             @default(false)
   totpKey                                     String?
-  created_at                                  DateTime            @db.Timestamp(6)
+  created_at                                  DateTime            @default(now())
   Relationship_Relationship_receiverIDTousers Relationship[]      @relation("Relationship_receiverIDTousers")
   Relationship_Relationship_senderIDTousers   Relationship[]      @relation("Relationship_senderIDTousers")
   channelConnection                           channelConnection[]

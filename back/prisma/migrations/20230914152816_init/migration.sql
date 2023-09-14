@@ -55,8 +55,7 @@ CREATE TABLE "users" (
     "id" INTEGER NOT NULL,
     "username" TEXT NOT NULL,
     "avatar" TEXT NOT NULL,
-    "games" TEXT NOT NULL,
-    "twoFA" BOOLEAN NOT NULL DEFAULT false,
+    "twoFAEnabled" BOOLEAN NOT NULL DEFAULT false,
     "totpKey" TEXT,
     "created_at" TIMESTAMP(6) NOT NULL,
 

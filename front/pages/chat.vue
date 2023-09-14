@@ -29,6 +29,7 @@ export default defineNuxtComponent({
       this.socket = this.$nuxtSocket({
         name: 'chat',
         channel: 'chat',
+        withCredentials: true,
       })
 
       // Add connection listeners
@@ -36,10 +37,10 @@ export default defineNuxtComponent({
         console.log('connected');
         this.connected = true;
       });
-      this.socket.on('disconnect', () => {
-        console.log('disconnected');
+      this.socket.on('disconnect', (event: string) => {
         this.connected = false;
-        this.connect();
+        if (event !== 'io server disconnect')
+          this.connect();
       });
       // end of connection listeners
     },

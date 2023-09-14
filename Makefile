@@ -2,6 +2,10 @@ FRONT=./front/
 
 BACK=./back/
 
+THREE_SERVICES=frontend backend database
+
+THREE_IMAGES= front_image back_image postgres
+
 all: install_depencies_back install_depencies_front 
 	$(MAKE) up
 
@@ -9,10 +13,10 @@ up:
 	docker compose up -d --build
 
 stop:
-	docker compose stop
+	docker compose stop ${THREE_SERVICES}
 
 down:
-	docker compose down
+	docker compose down ${THREE_SERVICES}
 
 install_depencies_back:
 	npm install --prefix ${BACK}
@@ -20,11 +24,11 @@ install_depencies_back:
 install_depencies_front:
 	npm install --prefix ${FRONT}
 
-clean:
-	docker compose down
+clean: down
 
 fclean: clean
-	docker system prune --volumes -a -f
+	docker rmi $(THREE_IMAGES) -f
+	docker builder prune
 	docker volume rm postgres_volume
 
 clean_node_modules:

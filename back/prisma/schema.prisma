@@ -9,40 +9,40 @@ datasource db {
 
 model Relationship {
   id                                   Int            @id @default(autoincrement())
-  senderID                             Int?
-  receiverID                           Int?
+  senderID                             Int
+  receiverID                           Int
   kind                                 RelationKind?
-  users_Relationship_receiverIDTousers users?         @relation("Relationship_receiverIDTousers", fields: [receiverID], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_Relationship_senderIDTousers   users?         @relation("Relationship_senderIDTousers", fields: [senderID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usersRelationshipreceiverIDTousers User         @relation("Relationship_receiverIDTousers", fields: [receiverID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usersRelationshipsenderIDTousers   User         @relation("RelationshipSenderIDToUser", fields: [senderID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model channel {
   id                Int                 @id @default(autoincrement())
   name              String
   password          String?
-  kind              ChannelKind?
-  created_at        DateTime?           @db.Timestamp(6)
+  kind              ChannelKind
+  createdAt        DateTime           @db.Timestamp(6)
   channelConnection channelConnection[]
   messages          messages?
 }
 
 model channelConnection {
   id         Int           @id @default(autoincrement())
-  userId     Int?
-  channelId  Int?
-  role       ChannelRole?
+  userId     Int
+  channelId  Int
+  role       ChannelRole
   muted      DateTime?     @db.Timestamp(6)
-  created_at DateTime?     @db.Timestamp(6)
-  channel    channel?      @relation(fields: [channelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users      users?        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt DateTime     @db.Timestamp(6)
+  channel    Channel      @relation(fields: [channelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users      User        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model messages {
   id         Int       @id @default(autoincrement())
-  userID     Int?
-  body       String?
-  created_at DateTime? @db.Timestamp(6)
+  userID     Int
+  body       String
+  createdAt DateTime @db.Timestamp(6)
   users      users     @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   channel    channel   @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "messages_id_fkey1")
 }

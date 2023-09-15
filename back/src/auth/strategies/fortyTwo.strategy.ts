@@ -1,10 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-42';
-import { AuthService } from 'src/auth/auth.service';
-import { UserService } from 'src/user/user.service';
-import intraConfig from 'src/config/intra.config';
-import { UserDto } from "../../types/user.dto";
+import { AuthService } from '@auth/auth.service';
+import { UserService } from '@user/user.service';
+import { UserDto } from "@type/user.dto";
+import intraConfig from '@config/intra.config';
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy){

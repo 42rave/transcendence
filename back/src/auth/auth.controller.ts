@@ -1,11 +1,11 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthenticatedGuard } from './guards/authenticated.guard';
-import { User } from '@prisma/client';
 import { Response } from 'express';
-import type { Request } from '../types/request';
-import authConfig from '../config/auth.config';
+import { AuthenticatedGuard } from '@guard/authenticated.guard';
+import { AuthService } from './auth.service';
+import type { Request } from '@type/request';
+import { User } from '@prisma/client';
+import authConfig from '@config/auth.config';
 
 @Controller('auth')
 export class AuthController {

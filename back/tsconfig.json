@@ -16,6 +16,18 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/*": ["src/*"],
+      "@auth/*": ["src/auth/*"],
+      "@chat/*": ["src/chat/*"],
+      "@config/*": ["src/config/*"],
+      "@game/*": ["src/game/*"],
+      "@guard/*": ["src/auth/guards/*"],
+      "@prisma/*": ["src/prisma/*"],
+      "@strategy/*": ["src/auth/strategies/*"],
+      "@type/*": ["src/types/*"],
+      "@user/*": ["src/user/*"],
+    }
   }
 }

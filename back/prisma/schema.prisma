@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Relationship {
-  id                                   Int            @id
+  id                                   Int            @id @default(autoincrement())
   senderID                             Int?
   receiverID                           Int?
   type                                 relation_type?
@@ -17,7 +17,7 @@ model Relationship {
 }
 
 model channel {
-  id                Int                 @id
+  id                Int                 @id @default(autoincrement())
   name              String
   password          String?
   type              channel_type?
@@ -27,7 +27,7 @@ model channel {
 }
 
 model channelConnection {
-  id         Int           @id
+  id         Int           @id @default(autoincrement())
   userId     Int?
   channelId  Int?
   role       channel_role?
@@ -39,7 +39,7 @@ model channelConnection {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model messages {
-  id         Int       @id
+  id         Int       @id @default(autoincrement())
   userID     Int?
   body       String?
   created_at DateTime? @db.Timestamp(6)

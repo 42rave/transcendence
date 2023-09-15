@@ -1,5 +1,6 @@
 import {
   OnGatewayConnection,
+  OnGatewayDisconnect,
   OnGatewayInit,
   WebSocketGateway,
   WebSocketServer,
@@ -17,7 +18,7 @@ import authConfig from '../config/auth.config';
     credentials: true,
   },
 })
-export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
   constructor(private chatService: ChatService, private authService: AuthService) {

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { parse } from 'cookie';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from "../user/user.service";
-import { UserDto } from "../types/user.dto";
-import { User } from "@prisma/client";
+import { UserService } from '../user/user.service';
+import { UserDto } from '../types/user.dto';
+import { User } from '@prisma/client';
 import Socket from '../types/socket';
-import authConfig from "../config/auth.config";
+import authConfig from '../config/auth.config';
 
 @Injectable()
 export class AuthService {

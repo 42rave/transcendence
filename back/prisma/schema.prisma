@@ -16,17 +16,17 @@ model Relationship {
   usersRelationshipsenderIDTousers   User         @relation("RelationshipSenderIDToUser", fields: [senderID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model channel {
+model Channel {
   id                Int                 @id @default(autoincrement())
   name              String
   password          String?
   kind              ChannelKind
   createdAt        DateTime           @db.Timestamp(6)
-  channelConnection channelConnection[]
+  channelConnection ChannelConnection[]
   messages          messages?
 }
 
-model channelConnection {
+model ChannelConnection {
   id         Int           @id @default(autoincrement())
   userId     Int
   channelId  Int
@@ -38,13 +38,13 @@ model channelConnection {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model messages {
+model Message {
   id         Int       @id @default(autoincrement())
   userID     Int
   body       String
   createdAt DateTime @db.Timestamp(6)
-  users      users     @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  channel    channel   @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "messages_id_fkey1")
+  users      User     @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  channel    Channel   @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "messagesIdFkey1")
 }
 
 model users {
@@ -53,9 +53,9 @@ model users {
   avatar                                      String
   twoFAEnabled                                Boolean             @default(false)
   totpKey                                     String?
-  created_at                                  DateTime            @default(now())
-  Relationship_receiverIDTousers              Relationship[]      @relation("Relationship_receiverIDTousers")
-  Relationship_senderIDTousers                Relationship[]      @relation("Relationship_senderIDTousers")
+  createdAt                                  DateTime            @default(now())
+  RelationshipReceiverIDToUser              Relationship[]      @relation("RelationshipReceiverIDToUser")
+  RelationshipSenderIDToUser                Relationship[]      @relation("RelationshipSenderIDToUser")
   channelConnection                           channelConnection[]
   messages                                    messages?
 }

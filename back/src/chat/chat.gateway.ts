@@ -27,12 +27,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
     this.authService = authService;
   }
 
-  afterInit() {
+  afterInit() : void {
     this.chatService.server = this.server;
   }
 
-  async handleConnection(socket: Socket) {
+  async handleConnection(socket: Socket) : Promise<void> {
     const user = await this.authService.getWsUser(socket);
     if (!user) socket.disconnect(true);
+    else
+      this.chatService.onConnection(socket);
+  }
+
+  async handleDisconnect(socket: Socket) : Promise<void> {
+    if (socket.user)
+      this.chatService.onDisconnection(socket);
   }
 }

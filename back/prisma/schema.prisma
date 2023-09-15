@@ -12,7 +12,7 @@ model Relationship {
   senderID                             Int
   receiverID                           Int
   kind                                 RelationKind?
-  usersRelationshipreceiverIDTousers User         @relation("Relationship_receiverIDTousers", fields: [receiverID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userRelationshipreceiverIDTousers User         @relation("RelationshipReceiverIDTousers", fields: [receiverID], references: [id], onDelete: NoAction, onUpdate: NoAction)
   usersRelationshipsenderIDTousers   User         @relation("RelationshipSenderIDToUser", fields: [senderID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -47,16 +47,16 @@ model Message {
   channel    Channel   @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "messagesIdFkey1")
 }
 
-model users {
+model User {
   id                                          Int                 @id @unique
   username                                    String
   avatar                                      String
   twoFAEnabled                                Boolean             @default(false)
   totpKey                                     String?
   createdAt                                  DateTime            @default(now())
-  RelationshipReceiverIDToUser              Relationship[]      @relation("RelationshipReceiverIDToUser")
-  RelationshipSenderIDToUser                Relationship[]      @relation("RelationshipSenderIDToUser")
-  channelConnection                           channelConnection[]
+  relationshipReceiverIDToUser              Relationship[]      @relation("userRelationshipReceiverIDToUser")
+  relationshipSenderIDToUser                Relationship[]      @relation("userRelationshipSenderIDToUser")
+  channelConnection                         ChannelConnection[]
   messages                                    Message[]
 }
 

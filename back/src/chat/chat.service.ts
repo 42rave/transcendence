@@ -15,10 +15,14 @@ export class ChatService {
     }
 
     removeSocket(socket: Socket) {
-        if (this.clientMap.has(socket.user.id)) { this.clientMap.set(
-                socket.user.id,
-                this.clientMap.get(socket.user.id).filter((s: string) => s !== socket.id)
+        if (this.clientMap.has(socket.user.id)) {
+            const sockets: string[]= this.clientMap.get(socket.user.id).filter(
+                (s: string) => s !== socket.id
             );
+            if (sockets.length === 0)
+                this.clientMap.delete(socket.user.id);
+            else
+                this.clientMap.set(socket.user.id, sockets);
         }
     }
 

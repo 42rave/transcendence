@@ -23,7 +23,7 @@ model Channel {
   kind              ChannelKind
   createdAt        DateTime           @db.Timestamp(6)
   channelConnection ChannelConnection[]
-  messages          messages?
+  messages          Message[]
 }
 
 model ChannelConnection {
@@ -57,7 +57,7 @@ model users {
   RelationshipReceiverIDToUser              Relationship[]      @relation("RelationshipReceiverIDToUser")
   RelationshipSenderIDToUser                Relationship[]      @relation("RelationshipSenderIDToUser")
   channelConnection                           channelConnection[]
-  messages                                    messages?
+  messages                                    Message[]
 }
 
 enum ChannelRole {

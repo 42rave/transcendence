@@ -21,9 +21,7 @@ import authConfig from '../config/auth.config';
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
-  constructor(private chatService: ChatService, private authService: AuthService) {
-    this.authService = authService;
-  }
+  constructor(private chatService: ChatService, private authService: AuthService) {}
 
   afterInit() : void {
     this.chatService.server = this.server;

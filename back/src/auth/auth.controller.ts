@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedGuard } from './guards/authenticated.guard';
 import { User } from '@prisma/client';
+import { Response } from 'express';
+import type { Request } from '../types/request';
 import authConfig from '../config/auth.config';
 
 @Controller('auth')
@@ -14,20 +16,20 @@ export class AuthController {
   async login() {}
 
   @Get('logout')
-  async logout(@Req() req: any, @Res() res: any) {
+  async logout(@Req() req: Request, @Res() res: Response) {
     res.clearCookie('access_token', {httpOnly: true}).status(200).send();
   }
 
   @Get('callback')
   @UseGuards(AuthGuard('42'))
-  async callback(@Req() req: any, @Res() res: any) {
+  async callback(@Req() req: Request, @Res() res: Response) {
     const token: { access_token: string } = await this.authService.validateUser(req.user);
     res.cookie('access_token', token.access_token, {httpOnly: true}).redirect(authConfig.webAppURL);
   }
 
   @Get('me')
   @UseGuards(...AuthenticatedGuard)
-  async me(@Req() req: any): Promise<User> {
+  me(@Req() req: Request): User {
     return req.user;
   }
 }

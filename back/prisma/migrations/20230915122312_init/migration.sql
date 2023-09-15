@@ -1,28 +1,28 @@
 -- CreateEnum
-CREATE TYPE "channel_role" AS ENUM ('owner', 'admin', 'defaultUser', 'invited', 'banned');
+CREATE TYPE "ChannelRole" AS ENUM ('OWNER', 'ADMIN', 'DEFAULT', 'INVITED', 'BANNED');
 
 -- CreateEnum
-CREATE TYPE "channel_type" AS ENUM ('direct', 'protected', 'private', 'public');
+CREATE TYPE "ChannelKind" AS ENUM ('DIRECT', 'PROTECTED', 'PRIVATE', 'PUBLIC');
 
 -- CreateEnum
-CREATE TYPE "relation_type" AS ENUM ('friends', 'invite', 'blocked');
+CREATE TYPE "RelationKind" AS ENUM ('FRIENDS', 'INVITE', 'BLOCKED');
 
 -- CreateTable
 CREATE TABLE "Relationship" (
-    "id" INTEGER NOT NULL,
+    "id" SERIAL NOT NULL,
     "senderID" INTEGER,
     "receiverID" INTEGER,
-    "type" "relation_type",
+    "kind" "RelationKind",
 
     CONSTRAINT "Relationship_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "channel" (
-    "id" INTEGER NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "password" TEXT,
-    "type" "channel_type",
+    "kind" "ChannelKind",
     "created_at" TIMESTAMP(6),
 
     CONSTRAINT "channel_pkey" PRIMARY KEY ("id")
@@ -30,10 +30,10 @@ CREATE TABLE "channel" (
 
 -- CreateTable
 CREATE TABLE "channelConnection" (
-    "id" INTEGER NOT NULL,
+    "id" SERIAL NOT NULL,
     "userId" INTEGER,
     "channelId" INTEGER,
-    "role" "channel_role",
+    "role" "ChannelRole",
     "muted" TIMESTAMP(6),
     "created_at" TIMESTAMP(6),
 
@@ -42,7 +42,7 @@ CREATE TABLE "channelConnection" (
 
 -- CreateTable
 CREATE TABLE "messages" (
-    "id" INTEGER NOT NULL,
+    "id" SERIAL NOT NULL,
     "userID" INTEGER,
     "body" TEXT,
     "created_at" TIMESTAMP(6),
@@ -57,10 +57,13 @@ CREATE TABLE "users" (
     "avatar" TEXT NOT NULL,
     "twoFAEnabled" BOOLEAN NOT NULL DEFAULT false,
     "totpKey" TEXT,
-    "created_at" TIMESTAMP(6) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_id_key" ON "users"("id");
 
 -- AddForeignKey
 ALTER TABLE "Relationship" ADD CONSTRAINT "Relationship_receiverID_fkey" FOREIGN KEY ("receiverID") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;

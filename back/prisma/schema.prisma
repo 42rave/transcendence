@@ -54,8 +54,8 @@ model users {
   twoFAEnabled                                Boolean             @default(false)
   totpKey                                     String?
   created_at                                  DateTime            @default(now())
-  Relationship_Relationship_receiverIDTousers Relationship[]      @relation("Relationship_receiverIDTousers")
-  Relationship_Relationship_senderIDTousers   Relationship[]      @relation("Relationship_senderIDTousers")
+  Relationship_receiverIDTousers              Relationship[]      @relation("Relationship_receiverIDTousers")
+  Relationship_senderIDTousers                Relationship[]      @relation("Relationship_senderIDTousers")
   channelConnection                           channelConnection[]
   messages                                    messages?
 }

@@ -60,23 +60,23 @@ model users {
   messages                                    messages?
 }
 
-enum channel_role {
-  owner
-  admin
-  defaultUser
-  invited
-  banned
+enum ChannelRole {
+  OWNER
+  ADMIN
+  DEFAULT
+  INVITED
+  BANNED
 }
 
-enum channel_type {
-  direct
-  protected
-  private
-  public
+enum ChannelKind {
+  DIRECT
+  PROTECTED
+  PRIVATE
+  PUBLIC
 }
 
-enum relation_type {
-  friends
-  invite
-  blocked
+enum RelationKind {
+  FRIENDS
+  INVITE
+  BLOCKED
 }

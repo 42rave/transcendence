@@ -11,7 +11,7 @@ model Relationship {
   id                                   Int            @id @default(autoincrement())
   senderID                             Int?
   receiverID                           Int?
-  type                                 relation_type?
+  kind                                 RelationKind?
   users_Relationship_receiverIDTousers users?         @relation("Relationship_receiverIDTousers", fields: [receiverID], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_Relationship_senderIDTousers   users?         @relation("Relationship_senderIDTousers", fields: [senderID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -20,7 +20,7 @@ model channel {
   id                Int                 @id @default(autoincrement())
   name              String
   password          String?
-  type              channel_type?
+  kind              ChannelKind?
   created_at        DateTime?           @db.Timestamp(6)
   channelConnection channelConnection[]
   messages          messages?
@@ -30,7 +30,7 @@ model channelConnection {
   id         Int           @id @default(autoincrement())
   userId     Int?
   channelId  Int?
-  role       channel_role?
+  role       ChannelRole?
   muted      DateTime?     @db.Timestamp(6)
   created_at DateTime?     @db.Timestamp(6)
   channel    channel?      @relation(fields: [channelId], references: [id], onDelete: NoAction, onUpdate: NoAction)

@@ -48,7 +48,7 @@ model messages {
 }
 
 model users {
-  id                                          Int                 @id
+  id                                          Int                 @id @unique
   username                                    String
   avatar                                      String
   twoFAEnabled                                Boolean             @default(false)

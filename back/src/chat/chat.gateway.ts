@@ -7,8 +7,6 @@ import {
 import { Server } from 'socket.io';
 import { ChatService } from './chat.service';
 import { AuthService } from "../auth/auth.service";
-import { UseGuards } from '@nestjs/common';
-import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import Socket from '../types/socket';
 import authConfig from '../config/auth.config';
 
@@ -19,7 +17,6 @@ import authConfig from '../config/auth.config';
     credentials: true,
   },
 })
-@UseGuards(...AuthenticatedGuard)
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer() server: Server;
 

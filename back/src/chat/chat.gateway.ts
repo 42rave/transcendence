@@ -6,10 +6,10 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { AuthService } from "@auth/auth.service";
 import { ChatService } from './chat.service';
-import { AuthService } from "../auth/auth.service";
-import Socket from '../types/socket';
-import authConfig from '../config/auth.config';
+import authConfig from '@config/auth.config';
+import Socket from '@type/socket';
 
 @WebSocketGateway({
   namespace: 'chat',

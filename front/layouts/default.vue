@@ -1,5 +1,6 @@
 <script lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from "~/stores/auth.store";
+import { NuxtSocket } from "nuxt-socket-io";
 
 export default defineNuxtComponent({
   name: 'DefaultLayout',
@@ -18,6 +19,7 @@ export default defineNuxtComponent({
           icon: 'mdi-chat',
         },
       },
+      socket: null as NuxtSocket | null,
     }
   },
   head() {
@@ -29,6 +31,20 @@ export default defineNuxtComponent({
       ],
     }
   },
+  beforeMount() {
+    this.socket = this.$nuxtSocket({
+      name: 'chat',
+      channel: 'chat',
+      withCredentials: true,
+      persist: 'chatSocket',
+    });
+    this.socket.on('connect', () => {
+      this.$sockets.chatConnected = true;
+    });
+    this.socket.on('disconnect', () => {
+      this.$sockets.chatConnected = false;
+    });
+  },
 })
 </script>
 
@@ -39,7 +55,7 @@ export default defineNuxtComponent({
       <LayoutNavBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer" :routes="routes" />
       <v-main>
         <v-container fluid>
-          <slot />
+          <NuxtPage :socket="socket"/>
         </v-container>
       </v-main>
       <LayoutAlert />

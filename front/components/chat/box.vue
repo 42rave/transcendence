@@ -1,24 +1,16 @@
 <script lang="ts">
-import { NuxtSocket } from 'nuxt-socket-io';
-
 interface IMessage {
   size: number;
   message: string;
 }
 export default defineNuxtComponent({
   name: 'ChatBox',
-  props: {
-    socket: {
-      type: null as NuxtSocket | null,
-      required: true,
-    },
-  },
+  props: ['socket'],
   data: () => ({
     messageList: Array<IMessage>(),
     input: '',
-    config: null as RuntimeConfig | null,
   }),
-  mounted() {
+  beforeMount() {
     this.config = useRuntimeConfig();
     this.socket?.on('test:message', (data: { message: string }) => {
       const size = this.messageList.length;
@@ -27,15 +19,15 @@ export default defineNuxtComponent({
       console.log(this.messageList);
     });
   },
+  unmounted() {
+    this.socket?.off('test:message');
+  },
   methods: {
     sendMessage() {
       if (!this.input) return;
       $fetch(new URL('/chat/sendTest', this.config.app.API_URL).toString(), {
         credentials: 'include',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ message: this.input }),
       })
       this.input = '';
@@ -57,7 +49,3 @@ export default defineNuxtComponent({
     </div>
   </div>
 </template>
-
-<style scoped>
-
-</style>

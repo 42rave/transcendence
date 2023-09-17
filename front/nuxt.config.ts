@@ -18,9 +18,10 @@ export default defineNuxtConfig({
       'nuxt-socket-io'
   ],
   plugins: [
-      '~/plugins/vuetify.ts',
-      '~/plugins/auth.ts',
-      '~/plugins/mitt.ts'
+      '~/plugins/vuetify.plugin.ts',
+      '~/plugins/auth.plugin.ts',
+      '~/plugins/websockets.plugin.ts',
+      '~/plugins/mitt.plugin.ts'
   ],
   ssr: false,
   io: {

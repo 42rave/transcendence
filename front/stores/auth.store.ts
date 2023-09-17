@@ -8,7 +8,7 @@ export const useAuthStore = defineStore('auth', {
       isAuthenticated: (state) => !!state.user,
     },
     actions: {
-      login(data: any) {
+      login() {
         const config = useRuntimeConfig();
         window.location.href = new URL('/auth/login', config.app.API_URL as string).toString();
       },
@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
         const config = useRuntimeConfig();
         await $fetch(new URL('/auth/logout', config.app.API_URL as string).toString(), {
             credentials: 'include',
-        }).then((res) => {
+        }).then(() => {
           this.user = null;
         }).catch(() => {});
       },

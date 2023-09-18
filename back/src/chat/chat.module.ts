@@ -7,9 +7,8 @@ import { AuthModule } from "@auth/auth.module";
 import { ChannelModule } from './channel/channel.module';
 
 @Module({
-  imports: [AuthModule],
   controllers: [ChatController],
   providers: [ChatService, ChatGateway],
-  imports: [ChannelModule, PrismaModule],
+  imports: [AuthModule, ChannelModule, PrismaModule],
 })
 export class ChatModule {}

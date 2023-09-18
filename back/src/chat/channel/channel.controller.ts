@@ -8,9 +8,9 @@ import { Controller,
 	UsePipes,
 } from '@nestjs/common';
 
-import { ChannelDto } from '../../types/channel.dto';
-import type { Request } from '../../types/request';
-import { AuthenticatedGuard } from '../../guards/authenticated.gard';
+import { ChannelDto } from '@type/channel.dto';
+import type { Request } from '@type/request';
+import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { ChannelService } from './channel.service';
 
 @Controller('chat/channel')

@@ -15,8 +15,8 @@ import {
 	ChannelRole
 } from '@prisma/client';
 
-import { ChannelDto } from '../../types/channel.dto';
-import { PrismaService } from '../../prisma/prisma.service';
+import { ChannelDto } from '@type/channel.dto';
+import { PrismaService } from '@prisma/prisma.service';
 
 @Injectable()
 export class ChannelService {

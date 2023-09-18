@@ -57,8 +57,7 @@ export class ChannelService {
 				await this.joinChannel(user, channel);
 		}
 		else {
-			// -> create an entity in table "channel"
-				// -> create an entity in tabel "channelConnection" where owner is user
+			await this.createChannel(user, data);
 		}
 }
 	isChannelProtected(channel: Channel) : boolean {
@@ -117,7 +116,7 @@ export class ChannelService {
 		return channel;	
 	}
 
-	async joinChannel(user: User, channel : Channel) : ChannelConnection {
+	async joinChannel(user: User, channel: Channel) : ChannelConnection {
 		const channelConnection = await this.prisma.channelConnection.create({
 			data: {
 				userId: user.id,

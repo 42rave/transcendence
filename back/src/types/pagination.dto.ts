@@ -4,10 +4,6 @@ export class CursorPaginationDto {
     @IsNumber()
     @IsOptional()
     id: number;
-
-    @IsNumber()
-    @IsOptional()
-    createdAt: number;
 }
 
 export class PaginationDto {

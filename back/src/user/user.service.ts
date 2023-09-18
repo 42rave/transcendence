@@ -12,7 +12,7 @@ export class UserService {
   }
 
   async getAll(pagination: PaginationDto) {
-    return await this.prisma.user.findMany({...pagination} as Object);
+    return await this.prisma.user.findMany(pagination as Object);
   }
 
   async getById(id: number) {

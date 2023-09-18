@@ -1,82 +1,83 @@
 generator client {
-	provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-	provider = "postgresql"
-	url			= env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Relationship {
-	id									Int				@id	@default(autoincrement())
-	senderID							Int
-	receiverID							Int
-	kind								RelationKind?
-	userRelationshipReceiverIdToUser	User			@relation("relationshipReceiverIdToUser", fields: [receiverID], references: [id], onDelete: NoAction, onUpdate: NoAction)
-	userRelationshipSenderIdToUser		User			@relation("relationshipSenderIdToUser", fields: [senderID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id         Int           @id @default(autoincrement())
+  sender     User          @relation("senderRelation", fields: [senderId], references: [id])
+  receiver   User          @relation("receiverRelation", fields: [receiverId], references: [id])
+  senderId   Int
+  receiverId Int
+  kind       RelationKind?
 }
 
 model Channel {
-	id					Int					@id	@default(autoincrement())
-	name				String
-	password			String?
-	kind				ChannelKind
-	createdAt			DateTime			@db.Timestamp(6)
-	channelConnection	ChannelConnection[]
-	messages			Message[]
+  id                Int                 @id @default(autoincrement())
+  name              String
+  password          String?
+  kind              ChannelKind
+  createdAt         DateTime            @db.Timestamp(6)
+  channelConnection ChannelConnection[] @relation
+  messages          Message[]           @relation
 }
 
 model ChannelConnection {
-	id			Int				@id	@default(autoincrement())
-	userId		Int
-	channelId	Int
-	role		ChannelRole
-	muted		DateTime?		@db.Timestamp(6)
-	createdAt	DateTime		@db.Timestamp(6)
-	channel		Channel			@relation(fields: [channelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-	users		User			@relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id        Int         @id @default(autoincrement())
+  user      User        @relation(fields: [userId], references: [id])
+  channel   Channel     @relation(fields: [channelId], references: [id])
+  userId    Int
+  channelId Int
+  role      ChannelRole
+  muted     DateTime?   @db.Timestamp(6)
+  createdAt DateTime    @db.Timestamp(6)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Message {
-	id			Int			@id	@default(autoincrement())
-	userID		Int
-	body		String
-	createdAt	DateTime	@db.Timestamp(6)
-	users		User		@relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-	channel		Channel		@relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "messagesIdFkey1")
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  body      String
+  channel   Channel  @relation(fields: [channelId], references: [id])
+  channelId Int
+  createdAt DateTime @db.Timestamp(6)
 }
 
 model User {
-	id									Int						@id	@unique
-	username							String
-	avatar								String
-	twoFAEnabled						Boolean					@default(false)
-	totpKey								String?
-	createdAt							DateTime				@default(now())
-	relationshipReceiverIdToUser		Relationship[]			@relation("userRelationshipReceiverIdToUser")
-	relationshipSenderIdToUser			Relationship[]			@relation("userRelationshipSenderIdToUser")
-	channelConnection					ChannelConnection[]
-	messages							Message[]
+  id                Int                 @id @unique
+  username          String				@unique
+  avatar            String
+  twoFAEnabled      Boolean             @default(false)
+  totpKey           String?
+  createdAt         DateTime            @default(now())
+  channelConnection ChannelConnection[] @relation
+  invites           Relationship[]      @relation("senderRelation")
+  invited           Relationship[]      @relation("receiverRelation")
+  messages          Message[]			@relation
 }
 
 enum ChannelRole {
-	OWNER
-	ADMIN
-	DEFAULT
-	INVITED
-	BANNED
+  OWNER
+  ADMIN
+  DEFAULT
+  INVITED
+  BANNED
 }
 
 enum ChannelKind {
-	DIRECT
-	PROTECTED
-	PRIVATE
-	PUBLIC
+  DIRECT
+  PROTECTED
+  PRIVATE
+  PUBLIC
 }
 
 enum RelationKind {
-	FRIENDS
-	INVITE
-	BLOCKED
+  FRIENDS
+  INVITE
+  BLOCKED
 }

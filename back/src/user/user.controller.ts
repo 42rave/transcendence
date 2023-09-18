@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,19 +8,26 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Req,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from "@type/user.dto";
+import type { Request } from '@type/request';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getAllUsers() {
-    return await this.userService.getAll();
+  async getAllUsers(@Req() req: Request) {
+    try {
+      return await this.userService.getAll(req.pagination);
+    }
+    catch {
+        throw new BadRequestException();
+    }
   }
 
   @Get(':id')
@@ -28,7 +36,7 @@ export class UserController {
   }
 
   /*
-  ** TODO: Add a 'developement' Guard for these routes, so that they can only be accessed in development mode.
+  ** TODO: Add a 'development' Guard for these routes, so that they can only be accessed in development mode.
   */
   @Post()
   @HttpCode(200)

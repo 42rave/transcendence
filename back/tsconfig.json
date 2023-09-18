@@ -24,6 +24,7 @@
       "@config/*": ["src/config/*"],
       "@game/*": ["src/game/*"],
       "@guard/*": ["src/auth/guards/*"],
+      "@middleware/*": ["src/middleware/*"],
       "@prisma/*": ["src/prisma/*"],
       "@strategy/*": ["src/auth/strategies/*"],
       "@type/*": ["src/types/*"],

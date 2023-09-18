@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
-import { UserDto } from "@type/user.dto";
+import { UserDto } from '@type/user.dto';
+import { PaginationDto } from '@type/pagination.dto';
 
 @Injectable()
 export class UserService {
@@ -10,8 +11,8 @@ export class UserService {
     return await this.prisma.user.create({ data });
   }
 
-  async getAll() {
-    return await this.prisma.user.findMany();
+  async getAll(pagination: PaginationDto) {
+    return await this.prisma.user.findMany({...pagination} as Object);
   }
 
   async getById(id: number) {

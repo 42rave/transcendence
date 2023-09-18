@@ -19,9 +19,16 @@ export class ChannelController {
 
 	@Get()
 	@UseGuards(...AuthenticatedGuard)
-	testIsASuccess() {
-		return 'This is a success!'
+	async getAll() {
+		return await this.channelService.getAll()
 	}
+
+	@Get('connection')
+	@UseGuards(...AuthenticatedGuard)
+	async getAllChannelConnections() {
+		return await this.channelService.getAllChannelConnections()
+	}
+
 	@Post('join')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(new ValidationPipe())

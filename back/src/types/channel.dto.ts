@@ -1,20 +1,34 @@
-import { IsNumber, IsString, IsBoolean, IsNotEmpty, IsOptional } from "class-validator";
+import {
+	IsNumber,
+	IsString,
+	IsBoolean,
+	IsNotEmpty,
+	IsOptional,
+	IsEnum,
+	IsDate
+} from "class-validator";
+
+import { ChannelKind } from '@prisma/client';
 
 export class ChannelDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
+	@IsString()
+	@IsNotEmpty()
+	name: string;
 
-  @IsString()
-  @IsOptional()
-  password: string;
+	@IsString()
+	@IsOptional()
+	password: string;
 
-	//THERE IS AN ISSUE HERE THIS SHOULD BE AN ENUM NOT A STRING
-	//we need to check for class-validator for enums
-  @IsString()
-  @IsNotEmpty()
-  kind: string;
+	@IsEnum(ChannelKind)
+	@IsNotEmpty()
+	kind: ChannelKind;
 
-  @IsNumber()
-  createdAt: number;
+	@IsNumber()
+	@IsOptional()
+	id:	number = 0;
+
+	@IsDate()
+	@IsOptional()
+	createdAt: Date;
+
 }

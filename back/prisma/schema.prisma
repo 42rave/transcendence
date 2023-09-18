@@ -21,7 +21,7 @@ model Channel {
   name              String
   password          String?
   kind              ChannelKind
-  createdAt         DateTime            @db.Timestamp(6)
+  createdAt         DateTime            @default(now())
   channelConnection ChannelConnection[] @relation
   messages          Message[]           @relation
 }
@@ -33,11 +33,10 @@ model ChannelConnection {
   userId    Int
   channelId Int
   role      ChannelRole
-  muted     DateTime?   @db.Timestamp(6)
-  createdAt DateTime    @db.Timestamp(6)
+  muted     DateTime? 
+  createdAt DateTime    @default(now())
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Message {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
@@ -45,7 +44,7 @@ model Message {
   body      String
   channel   Channel  @relation(fields: [channelId], references: [id])
   channelId Int
-  createdAt DateTime @db.Timestamp(6)
+  createdAt DateTime @default(now())
 }
 
 model User {

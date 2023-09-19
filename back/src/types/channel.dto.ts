@@ -6,6 +6,10 @@ export class ChannelDto {
   @IsString()
   @IsOptional()
   password: string;
+
+  @IsString()
+  @IsOptional()
+  socketId: string;
 }
 
 export class ChannelCreationDto {

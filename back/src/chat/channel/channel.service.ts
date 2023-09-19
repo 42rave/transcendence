@@ -11,10 +11,14 @@ import {
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
 import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
+import { ChatService } from '@chat/chat.service';
 
 @Injectable()
 export class ChannelService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly chatService: ChatService,
+  ) {}
 
   async getAll(pagination: PaginationDto): Promise<Channel[]> {
     return await this.prisma.channel.findMany(pagination);
@@ -86,7 +90,12 @@ export class ChannelService {
 
     // if the channel connection does not exist, create it
     if (!channelConnection)
-      return await this.joinChannel(user, channel, data.password);
+      return await this.joinChannel(
+        user,
+        channel,
+        data.password,
+        data.socketId,
+      );
 
     switch (channelConnection.role) {
       case ChannelRole.BANNED:
@@ -100,7 +109,8 @@ export class ChannelService {
         );
     }
 
-    // TODO: Join the socket.id, if specified, to the socket.io room
+    if (channelConnection && data.socketId)
+      this.chatService.joinRoom(data.socketId, channel.id.toString());
     return channelConnection;
   }
 
@@ -141,6 +151,7 @@ export class ChannelService {
     user: User,
     channel: Channel,
     password?: string,
+    socketId?: string,
   ): Promise<ChannelConnection> {
     // Perform some checks to make sure the user can join the channel
     switch (channel.kind) {
@@ -155,7 +166,7 @@ export class ChannelService {
             description: 'Incorrect password',
           });
     }
-    return await this.prisma.channelConnection.create({
+    const channelConnection = await this.prisma.channelConnection.create({
       data: {
         userId: user.id,
         channelId: channel.id,
@@ -163,5 +174,8 @@ export class ChannelService {
       },
       include: { channel: true },
     });
+    if (channelConnection && socketId)
+      this.chatService.joinRoom(socketId, channel.id.toString());
+    return channelConnection;
   }
 }

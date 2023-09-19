@@ -10,10 +10,10 @@ import {
   Post,
   Req,
   UsePipes,
-  ValidationPipe
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserDto } from "@type/user.dto";
+import { UserDto } from '@type/user.dto';
 import type { Request } from '@type/request';
 
 @Controller('user')
@@ -24,9 +24,8 @@ export class UserController {
   async getAllUsers(@Req() req: Request) {
     try {
       return await this.userService.getAll(req.pagination);
-    }
-    catch {
-        throw new BadRequestException();
+    } catch {
+      throw new BadRequestException();
     }
   }
 
@@ -36,8 +35,8 @@ export class UserController {
   }
 
   /*
-  ** TODO: Add a 'development' Guard for these routes, so that they can only be accessed in development mode.
-  */
+   ** TODO: Add a 'development' Guard for these routes, so that they can only be accessed in development mode.
+   */
   @Post()
   @HttpCode(200)
   @UsePipes(new ValidationPipe())

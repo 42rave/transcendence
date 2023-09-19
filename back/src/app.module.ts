@@ -12,7 +12,7 @@ import { PaginationMiddleware } from '@middleware/pagination.middleware';
   providers: [],
 })
 export class AppModule {
-    configure(consumer: MiddlewareConsumer) {
-        consumer.apply(PaginationMiddleware).forRoutes('*');
-    }
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(PaginationMiddleware).forRoutes('*');
+  }
 }

@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import dbConfig from "@config/db.config";
+import dbConfig from '@config/db.config';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
@@ -9,8 +9,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
       datasources: {
         db: {
           url: `postgresql://${dbConfig.user}:${dbConfig.password}@database:${dbConfig.port}/${dbConfig.db_name}`,
-        }
-      }
+        },
+      },
     });
   }
   async onModuleInit() {

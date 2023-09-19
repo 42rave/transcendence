@@ -17,14 +17,18 @@ export class AuthController {
 
   @Get('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
-    res.clearCookie('access_token', {httpOnly: true}).status(200).send();
+    res.clearCookie('access_token', { httpOnly: true }).status(200).send();
   }
 
   @Get('callback')
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req: Request, @Res() res: Response) {
-    const token: { access_token: string } = await this.authService.validateUser(req.user);
-    res.cookie('access_token', token.access_token, {httpOnly: true}).redirect(authConfig.webAppURL);
+    const token: { access_token: string } = await this.authService.validateUser(
+      req.user,
+    );
+    res
+      .cookie('access_token', token.access_token, { httpOnly: true })
+      .redirect(authConfig.webAppURL);
   }
 
   @Get('me')

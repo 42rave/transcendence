@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthenticatedGuard } from "@guard/authenticated.guard";
+import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { ChatService } from './chat.service';
-import { Request } from "@type/request";
+import { Request } from '@type/request';
 
 @Controller('chat')
 @UseGuards(...AuthenticatedGuard)

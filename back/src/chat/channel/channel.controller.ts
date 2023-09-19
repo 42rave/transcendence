@@ -24,22 +24,28 @@ export class ChannelController {
 
   @Get()
   @UseGuards(...AuthenticatedGuard)
-  async getAll(): Promise<Channel[]> {
-    return await this.channelService.getAll();
+  async getAll(@Req() req: Request): Promise<Channel[]> {
+    return await this.channelService.getAll(req.pagination);
   }
 
   @Get('connection')
   @UseGuards(...AuthenticatedGuard)
-  async getAllChannelConnections(): Promise<ChannelConnection[]> {
-    return await this.channelService.getAllChannelConnections();
+  async getAllChannelConnections(
+    @Req() req: Request,
+  ): Promise<ChannelConnection[]> {
+    return await this.channelService.getAllChannelConnections(req.pagination);
   }
 
   @Get(':id/connection')
   @UseGuards(...AuthenticatedGuard, IsInChannelGuard)
   async getChannelConnection(
     @Param('id', ParseIntPipe) channelId: number,
+    @Req() req: Request,
   ): Promise<ChannelConnection[]> {
-    return await this.channelService.getChannelConnections(channelId);
+    return await this.channelService.getChannelConnections(
+      channelId,
+      req.pagination,
+    );
   }
 
   @Post('join')

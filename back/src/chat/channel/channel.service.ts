@@ -10,17 +10,20 @@ import {
 
 import { ChannelDto } from '@type/channel.dto';
 import { PrismaService } from '@prisma/prisma.service';
+import { PaginationDto } from '@type/pagination.dto';
 
 @Injectable()
 export class ChannelService {
   constructor(private prisma: PrismaService) {}
 
-  async getAll() {
-    return await this.prisma.channel.findMany();
+  async getAll(pagination: PaginationDto): Promise<Channel[]> {
+    return await this.prisma.channel.findMany(pagination);
   }
 
-  async getAllChannelConnections() {
-    return await this.prisma.channelConnection.findMany();
+  async getAllChannelConnections(
+    pagination: PaginationDto,
+  ): Promise<ChannelConnection[]> {
+    return await this.prisma.channelConnection.findMany(pagination);
   }
 
   async getChannelConnection(
@@ -36,9 +39,13 @@ export class ChannelService {
     )[0];
   }
 
-  async getChannelConnections(channelId: number): Promise<ChannelConnection[]> {
+  async getChannelConnections(
+    channelId: number,
+    pagination: PaginationDto,
+  ): Promise<ChannelConnection[]> {
     return await this.prisma.channelConnection.findMany({
       where: { channelId },
+      ...pagination,
     });
   }
 
@@ -68,7 +75,8 @@ export class ChannelService {
     let channelConnection = channel.channelConnection[0];
 
     // if the channel connection does not exist, create it
-    if (!channelConnection) return await this.joinChannel(user, channel, data);
+    if (!channelConnection)
+      return await this.joinChannel(user, channel, data.password);
 
     switch (channelConnection.role) {
       case ChannelRole.BANNED:
@@ -121,7 +129,7 @@ export class ChannelService {
   async joinChannel(
     user: User,
     channel: Channel,
-    data: ChannelDto,
+    password?: string,
   ): Promise<ChannelConnection> {
     // Perform some checks to make sure the user can join the channel
     switch (channel.kind) {
@@ -131,7 +139,7 @@ export class ChannelService {
         });
       case ChannelKind.PROTECTED:
         //TODO: Make this a real function please
-        if (!this.checkPassword(channel, data.password))
+        if (!this.checkPassword(channel, password))
           throw new ForbiddenException('Cannot join channel', {
             description: 'Incorrect password',
           });

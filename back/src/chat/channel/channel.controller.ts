@@ -7,12 +7,16 @@ import {
   ValidationPipe,
   UseGuards,
   UsePipes,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 
 import { ChannelDto } from '@type/channel.dto';
 import type { Request } from '@type/request';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { ChannelService } from './channel.service';
+import { Channel, ChannelConnection } from '@prisma/client';
+import { IsInChannelGuard } from '@guard/isInChannel.guard';
 
 @Controller('chat/channel')
 export class ChannelController {
@@ -20,14 +24,22 @@ export class ChannelController {
 
   @Get()
   @UseGuards(...AuthenticatedGuard)
-  async getAll() {
+  async getAll(): Promise<Channel[]> {
     return await this.channelService.getAll();
   }
 
   @Get('connection')
   @UseGuards(...AuthenticatedGuard)
-  async getAllChannelConnections() {
+  async getAllChannelConnections(): Promise<ChannelConnection[]> {
     return await this.channelService.getAllChannelConnections();
+  }
+
+  @Get(':id/connection')
+  @UseGuards(...AuthenticatedGuard, IsInChannelGuard)
+  async getChannelConnection(
+    @Param('id', ParseIntPipe) channelId: number,
+  ): Promise<ChannelConnection[]> {
+    return await this.channelService.getChannelConnections(channelId);
   }
 
   @Post('join')

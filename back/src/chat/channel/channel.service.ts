@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 
 import {
   Channel,
@@ -18,6 +14,7 @@ import { PrismaService } from '@prisma/prisma.service';
 @Injectable()
 export class ChannelService {
   constructor(private prisma: PrismaService) {}
+
   async getAll() {
     return await this.prisma.channel.findMany();
   }
@@ -39,130 +36,112 @@ export class ChannelService {
     )[0];
   }
 
+  async getChannelConnections(channelId: number): Promise<ChannelConnection[]> {
+    return await this.prisma.channelConnection.findMany({
+      where: { channelId },
+    });
+  }
+
   async isUserInChannel(userId: number, channelId: number): Promise<boolean> {
     return !!(await this.getChannelConnection(userId, channelId));
   }
 
-  async join(user: User, data: ChannelDto) {
-    const channel: Channel = await this.prisma.channel.findUnique({
+  async join(user: User, data: ChannelDto): Promise<ChannelConnection> {
+    // Get channel if it exists with the user connection
+    const channel = await this.prisma.channel.findUnique({
       where: { id: data.id },
+      include: {
+        channelConnection: {
+          where: { AND: [{ userId: user.id }, { channelId: data.id }] },
+        },
+      },
     });
-    if (channel) {
-      console.log('1: Channel already exists.');
-      const channelConnection = await this.getChannelConnection(
-        user.id,
-        data.id,
-      );
-      if (channelConnection) {
-        if (this.isUserBanned(channelConnection)) {
-          console.log('5: User is banned');
-          throw new ForbiddenException('Cannot join channel', {
-            cause: new Error(),
-            description: 'User is banned',
-          });
-        }
-        if (channelConnection.role !== ChannelRole.INVITED) {
-          throw new BadRequestException('Cannot join channel', {
-            cause: new Error(),
-            description: 'User already in channel',
-          });
-        }
-        console.log('4: User is invited');
-        await this.joinChannel(user, channel);
-      } else {
-        if (this.isChannelProtected(channel)) {
-          console.log('6: Channel is protected');
-          //TODO: Make this a real function please
-          if (this.isPasswordOk(channel, data)) {
-            console.log('7: Password is ok');
-            await this.joinChannel(user, channel);
-          } else {
-            console.log('7: Wrong password.');
-            throw new ForbiddenException('Cannot join channel', {
-              cause: new Error(),
-              description: 'Incorrect password',
-            });
-          }
-        }
-        if (this.isChannelPrivate(channel)) {
-          console.log('8: Channel is private');
-          throw new ForbiddenException('Cannot join channel', {
-            cause: new Error(),
-            description: 'User not on invite list',
-          });
-        } else {
-          console.log('9: Default joining channel');
-          await this.joinChannel(user, channel);
-        }
-      }
-    } else {
-      console.log('10: Channel does not exist, creating it');
-      await this.createChannel(user, data);
+
+    // If channel does not exist, create it and return the user connection
+    if (!channel) {
+      const channel = await this.createChannel(user, data);
+      // TODO: Join the socket.id, if specified, to the socket.io room
+      // return the user connection
+      return channel.channelConnection[0];
     }
-  }
 
-  isChannelProtected(channel: Channel): boolean {
-    if (channel.kind === ChannelKind.PROTECTED) return true;
-    return false;
-  }
+    let channelConnection = channel.channelConnection[0];
 
-  isChannelPrivate(channel: Channel): boolean {
-    if (channel.kind === ChannelKind.PRIVATE) return true;
-    return false;
+    // if the channel connection does not exist, create it
+    if (!channelConnection) return await this.joinChannel(user, channel, data);
+
+    switch (channelConnection.role) {
+      case ChannelRole.BANNED:
+        throw new ForbiddenException('Cannot join channel', {
+          description: 'User is banned',
+        });
+      case ChannelRole.INVITED:
+        channelConnection = await this.updateChannelRole(
+          ChannelRole.DEFAULT,
+          channelConnection,
+        );
+    }
+
+    // TODO: Join the socket.id, if specified, to the socket.io room
+    return channelConnection;
   }
 
   //TODO: Fix this garbage function
-  isPasswordOk(channel: Channel, data: ChannelDto): boolean {
-    if (channel.password === data.password) return true;
-    return false;
-  }
-
-  userAlreadyInChannel(channelConnection: ChannelConnection): boolean {
-    if (channelConnection.role < 'invited') return true;
-    return false;
-  }
-
-  isUserInvited(channelConnection: ChannelConnection): boolean {
-    if (channelConnection.role === ChannelRole.INVITED) return true;
-    return false;
-  }
-  isUserBanned(channelConnection: ChannelConnection): boolean {
-    if (channelConnection.role === ChannelRole.BANNED) return true;
-    return false;
+  checkPassword(channel: Channel, password: string): boolean {
+    return channel.password === password;
   }
 
   async updateChannelRole(
     role: ChannelRole,
     channelConnection: ChannelConnection,
   ): Promise<ChannelConnection> {
-    channelConnection = await this.prisma.channelConnection.update({
+    return await this.prisma.channelConnection.update({
       where: { id: channelConnection.id },
       data: { role: role },
     });
-    return channelConnection;
   }
 
-  async createChannel(user: User, data: ChannelDto): Promise<Channel> {
-    const channel = await this.prisma.channel.create({
+  async createChannel(user: User, data: ChannelDto) {
+    return await this.prisma.channel.create({
       data: {
         name: data.name,
         password: data.password,
         kind: data.kind,
+        channelConnection: {
+          create: {
+            userId: user.id,
+            role: ChannelRole.OWNER,
+          },
+        },
       },
+      include: { channelConnection: true },
     });
-    const channelConnection = await this.joinChannel(user, channel);
-    await this.updateChannelRole(ChannelRole.OWNER, channelConnection);
-    return channel;
   }
 
-  async joinChannel(user: User, channel: Channel): Promise<ChannelConnection> {
-    const channelConnection = await this.prisma.channelConnection.create({
+  async joinChannel(
+    user: User,
+    channel: Channel,
+    data: ChannelDto,
+  ): Promise<ChannelConnection> {
+    // Perform some checks to make sure the user can join the channel
+    switch (channel.kind) {
+      case ChannelKind.PRIVATE:
+        throw new ForbiddenException('Cannot join channel', {
+          description: 'This channel is private',
+        });
+      case ChannelKind.PROTECTED:
+        //TODO: Make this a real function please
+        if (!this.checkPassword(channel, data.password))
+          throw new ForbiddenException('Cannot join channel', {
+            description: 'Incorrect password',
+          });
+    }
+    return await this.prisma.channelConnection.create({
       data: {
         userId: user.id,
         channelId: channel.id,
         role: ChannelRole.DEFAULT,
       },
     });
-    return channelConnection;
   }
 }

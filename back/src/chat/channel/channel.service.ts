@@ -26,19 +26,33 @@ export class ChannelService {
     return await this.prisma.channelConnection.findMany();
   }
 
+  async getChannelConnection(
+    userId: number,
+    channelId: number,
+  ): Promise<ChannelConnection> {
+    return (
+      await this.prisma.channelConnection.findMany({
+        where: {
+          AND: [{ userId }, { channelId }],
+        },
+      })
+    )[0];
+  }
+
+  async isUserInChannel(userId: number, channelId: number): Promise<boolean> {
+    return !!(await this.getChannelConnection(userId, channelId));
+  }
+
   async join(user: User, data: ChannelDto) {
     const channel: Channel = await this.prisma.channel.findUnique({
       where: { id: data.id },
     });
     if (channel) {
       console.log('1: Channel already exists.');
-      const channelConnectionList: ChannelConnection[] =
-        await this.prisma.channelConnection.findMany({
-          where: {
-            AND: [{ userId: user.id }, { channelId: channel.id }],
-          },
-        });
-      const channelConnection: ChannelConnection = channelConnectionList[0];
+      const channelConnection = await this.getChannelConnection(
+        user.id,
+        data.id,
+      );
       if (channelConnection) {
         if (this.isUserBanned(channelConnection)) {
           console.log('5: User is banned');

@@ -31,7 +31,7 @@ export class ChannelController {
 
 	@Post('join')
 	@UseGuards(...AuthenticatedGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(new ValidationPipe({ transform: true }))
 	async join(@Req() req: Request, @Body() data: ChannelDto) {
 		return await this.channelService.join(req.user, data);
 	}

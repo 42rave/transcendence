@@ -28,61 +28,53 @@ export class ChannelService {
 	async getAllChannelConnections() {
 		return await this.prisma.channelConnection.findMany();
 	}
+
 	async join(user: User, data: ChannelDto) {
 		const channel : Channel = await this.prisma.channel.findUnique({
 			where: { id: data.id }
 		});
 		if (channel) {
-			console.log(1);
-		const channelConnection: ChannelConnection = await this.prisma.channelConnection.findMany({
+		const channelConnectionList: ChannelConnection[] = await this.prisma.channelConnection.findMany({
 			where: {
 				AND: [
-					{userId: user.id},
-					{channelId: channel.id}
+					{ userId: user.id },
+					{ channelId: channel.id }
 				]}
-		})[0];
-			console.log(2);
+		});
+		const channelConnection: ChannelConnection = channelConnectionList[0];
 		if (channelConnection) {
 			if (channelConnection.role < ChannelRole.INVITED) {
-			console.log(3);
 			throw new BadRequestException('Cannot join channel', {
 			cause: new Error(), description: 'User already in channel' })
 		}	
 			if (this.isUserInvited(channelConnection)) {
-				console.log(4);
 				await this.joinChannel(user, channel);
 			}
 			if (this.isUserBanned(channelConnection)) {
-				console.log(5);
 				throw new ForbiddenException('Cannot join channel', {
 					cause: new Error(), description: 'User is banned' })
 			}
 		}
 		else {
 			if (this.isChannelProtected(channel)) {
-				console.log(6);
 				//TODO: Make this a real function please
 				if (this.isPasswordOk(channel, data))
 					await this.joinChannel(user, channel);
 				else {
-					console.log(7);
 					throw new ForbiddenException('Cannot join channel', {
 					cause: new Error(), description: 'Incorrect password' })
 				}
 			}
 			if (this.isChannelPrivate(channel)) {
-				console.log(8);
 				throw new ForbiddenException('Cannot join channel', {
 				cause: new Error(), description: 'User not on invite list' })
 			}
 			else {
-				console.log(9);
 				await this.joinChannel(user, channel);
 			}
 		}
 		}
 		else {
-			console.log(10);
 			await this.createChannel(user, data);
 		}
 }

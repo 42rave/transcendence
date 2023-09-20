@@ -23,7 +23,7 @@
       "@chat/*": ["src/chat/*"],
       "@config/*": ["src/config/*"],
       "@game/*": ["src/game/*"],
-      "@guard/*": ["src/auth/guards/*"],
+      "@guard/*": ["src/guards/*"],
       "@middleware/*": ["src/middleware/*"],
       "@prisma/*": ["src/prisma/*"],
       "@strategy/*": ["src/auth/strategies/*"],

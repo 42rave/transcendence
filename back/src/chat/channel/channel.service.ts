@@ -50,7 +50,12 @@ export class ChannelService {
   }
 
   async isUserInChannel(userId: number, channelId: number): Promise<boolean> {
-    return !!(await this.getChannelConnection(userId, channelId));
+    const channelConnection = await this.getChannelConection(userId, channelId);
+    return !(
+      !channelConnection ||
+      channelConnection.role === channelRole.INVITED ||
+      channelConnection.role === channelRole.BANNED
+    );
   }
 
   async join(

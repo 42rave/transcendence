@@ -51,14 +51,26 @@ export class ChannelController {
 		return await this.channelService.join(req.user, channelId, data);
 	}
 
-	@Post()
-	@UseGuards(...AuthenticatedGuard)
-	@UsePipes(new ValidationPipe())
-	async create(@Req() req: Request, @Body() data: ChannelCreationDto) {
-		try {
-			return await this.channelService.createChannel(req.user, data);
-		} catch (e) {
-			throw new ForbiddenException('Cannot create channel', { description: e });
-		}
-	}
+  @Post(':id/quit')
+  @UseGuards(...AuthenticatedGuard)
+  @UsePipes(new ValidationPipe())
+  async quit(
+    @Param('id', ParseIntPipe) channelId: number,
+    @Req() req: Request,
+    @Body() data: ChannelDto,
+  ) {
+    return await this.channelService.quit(req.user, channelId, data);
+  }
+
+
+  @Post()
+  @UseGuards(...AuthenticatedGuard)
+  @UsePipes(new ValidationPipe())
+  async create(@Req() req: Request, @Body() data: ChannelCreationDto) {
+    try {
+      return await this.channelService.createChannel(req.user, data);
+    } catch (e) {
+      throw new ForbiddenException('Cannot create channel', { description: e });
+    }
+  }
 }

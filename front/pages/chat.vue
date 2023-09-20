@@ -47,7 +47,11 @@ export default defineNuxtComponent({
         <v-window-item value="channels">
           <v-card flat>
             <v-card-text>
-              <p>liste des channels dispo</p>
+              <v-list>
+                <li v-for="channel in channelList" :key="channel.id">
+                  {{channel.name}}
+                </li>
+               </v-list>
             </v-card-text>
           </v-card>
         </v-window-item>
@@ -66,13 +70,6 @@ export default defineNuxtComponent({
   </div>
 </template>
 
-    <!-- <v-navigation-drawer>
-      <v-list>
-        <li v-for="channel in channelList" :key="channel.id">
-        {{channel.name}}
-        </li>
-      </v-list>
-    </v-navigation-drawer> -->
 
 <style>
 .drawer__icon {

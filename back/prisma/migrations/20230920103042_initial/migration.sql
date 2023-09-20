@@ -23,7 +23,7 @@ CREATE TABLE "Channel" (
     "name" TEXT NOT NULL,
     "password" TEXT,
     "kind" "ChannelKind" NOT NULL,
-    "createdAt" TIMESTAMP(6) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Channel_pkey" PRIMARY KEY ("id")
 );
@@ -34,8 +34,8 @@ CREATE TABLE "ChannelConnection" (
     "userId" INTEGER NOT NULL,
     "channelId" INTEGER NOT NULL,
     "role" "ChannelRole" NOT NULL,
-    "muted" TIMESTAMP(6),
-    "createdAt" TIMESTAMP(6) NOT NULL,
+    "muted" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ChannelConnection_pkey" PRIMARY KEY ("id")
 );
@@ -46,7 +46,7 @@ CREATE TABLE "Message" (
     "userId" INTEGER NOT NULL,
     "body" TEXT NOT NULL,
     "channelId" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP(6) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
@@ -62,6 +62,9 @@ CREATE TABLE "User" (
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Channel_name_key" ON "Channel"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_id_key" ON "User"("id");

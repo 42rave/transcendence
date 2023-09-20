@@ -1,15 +1,14 @@
-import {
-  IsNumber,
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEnum,
-  IsDate,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 
 import { ChannelKind } from '@prisma/client';
 
 export class ChannelDto {
+  @IsString()
+  @IsOptional()
+  password: string;
+}
+
+export class ChannelCreationDto {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -21,12 +20,4 @@ export class ChannelDto {
   @IsEnum(ChannelKind)
   @IsNotEmpty()
   kind: ChannelKind;
-
-  @IsNumber()
-  @IsOptional()
-  id: number = 0;
-
-  @IsDate()
-  @IsOptional()
-  createdAt: Date;
 }

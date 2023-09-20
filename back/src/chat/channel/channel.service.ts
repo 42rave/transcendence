@@ -8,9 +8,9 @@ import {
   ChannelRole,
 } from '@prisma/client';
 
-import { ChannelDto } from '@type/channel.dto';
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
+import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
 
 @Injectable()
 export class ChannelService {
@@ -53,24 +53,26 @@ export class ChannelService {
     return !!(await this.getChannelConnection(userId, channelId));
   }
 
-  async join(user: User, data: ChannelDto): Promise<ChannelConnection> {
+  async join(
+    user: User,
+    id: number,
+    data: ChannelDto,
+  ): Promise<ChannelConnection> {
     // Get channel if it exists with the user connection
     const channel = await this.prisma.channel.findUnique({
-      where: { id: data.id },
+      where: { id },
       include: {
         channelConnection: {
-          where: { AND: [{ userId: user.id }, { channelId: data.id }] },
+          where: { AND: [{ userId: user.id }, { channelId: id }] },
+          include: { channel: true },
         },
       },
     });
 
-    // If channel does not exist, create it and return the user connection
-    if (!channel) {
-      const channel = await this.createChannel(user, data);
-      // TODO: Join the socket.id, if specified, to the socket.io room
-      // return the user connection
-      return channel.channelConnection[0];
-    }
+    if (!channel)
+      throw new ForbiddenException('Cannot join channel', {
+        description: 'Channel does not exist',
+      });
 
     let channelConnection = channel.channelConnection[0];
 
@@ -102,14 +104,15 @@ export class ChannelService {
   async updateChannelRole(
     role: ChannelRole,
     channelConnection: ChannelConnection,
-  ): Promise<ChannelConnection> {
+  ) {
     return await this.prisma.channelConnection.update({
       where: { id: channelConnection.id },
       data: { role: role },
+      include: { channel: true },
     });
   }
 
-  async createChannel(user: User, data: ChannelDto) {
+  async createChannel(user: User, data: ChannelCreationDto) {
     return await this.prisma.channel.create({
       data: {
         name: data.name,
@@ -150,6 +153,7 @@ export class ChannelService {
         channelId: channel.id,
         role: ChannelRole.DEFAULT,
       },
+      include: { channel: true },
     });
   }
 }

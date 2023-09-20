@@ -4,14 +4,15 @@ import {
   Post,
   Req,
   Body,
-  ValidationPipe,
   UseGuards,
-  UsePipes,
   Param,
   ParseIntPipe,
+  ValidationPipe,
+  UsePipes,
+  ForbiddenException,
 } from '@nestjs/common';
 
-import { ChannelDto } from '@type/channel.dto';
+import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
 import type { Request } from '@type/request';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { ChannelService } from './channel.service';
@@ -48,10 +49,25 @@ export class ChannelController {
     );
   }
 
-  @Post('join')
+  @Post(':id/join')
   @UseGuards(...AuthenticatedGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async join(@Req() req: Request, @Body() data: ChannelDto) {
-    return await this.channelService.join(req.user, data);
+  @UsePipes(new ValidationPipe())
+  async join(
+    @Param('id', ParseIntPipe) channelId: number,
+    @Req() req: Request,
+    @Body() data: ChannelDto,
+  ) {
+    return await this.channelService.join(req.user, channelId, data);
+  }
+
+  @Post()
+  @UseGuards(...AuthenticatedGuard)
+  @UsePipes(new ValidationPipe())
+  async create(@Req() req: Request, @Body() data: ChannelCreationDto) {
+    try {
+      return await this.channelService.createChannel(req.user, data);
+    } catch (e) {
+      throw new ForbiddenException('Cannot create channel', { description: e });
+    }
   }
 }

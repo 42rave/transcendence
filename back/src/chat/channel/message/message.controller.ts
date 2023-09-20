@@ -7,6 +7,8 @@ import {
   Post,
   Req,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Message } from '@prisma/client';
 import { MessageService } from '@chat/channel/message/message.service';
@@ -29,6 +31,7 @@ export class MessageController {
   }
 
   @Post()
+  @UsePipes(ValidationPipe)
   async sendMessage(
     @Req() req: Request,
     @Param('id', ParseIntPipe) channelId: number,

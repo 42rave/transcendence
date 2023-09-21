@@ -6,16 +6,15 @@ import authConfig from '@config/auth.config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private userService: UserService) {
-    super({
-      jwtFromRequest: (req: any) =>
-        req && req.cookies ? req.cookies['access_token'] : null,
-      ignoreExpiration: false,
-      secretOrKey: authConfig.secret,
-    });
-  }
+	constructor(private userService: UserService) {
+		super({
+			jwtFromRequest: (req: any) => (req && req.cookies ? req.cookies['access_token'] : null),
+			ignoreExpiration: false,
+			secretOrKey: authConfig.secret
+		});
+	}
 
-  async validate(payload: any) {
-    return await this.userService.getById(payload.sub.id);
-  }
+	async validate(payload: any) {
+		return await this.userService.getById(payload.sub.id);
+	}
 }

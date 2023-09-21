@@ -4,16 +4,16 @@ import dbConfig from '@config/db.config';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-  constructor() {
-    super({
-      datasources: {
-        db: {
-          url: `postgresql://${dbConfig.user}:${dbConfig.password}@database:${dbConfig.port}/${dbConfig.db_name}`,
-        },
-      },
-    });
-  }
-  async onModuleInit() {
-    await this.$connect();
-  }
+	constructor() {
+		super({
+			datasources: {
+				db: {
+					url: `postgresql://${dbConfig.user}:${dbConfig.password}@database:${dbConfig.port}/${dbConfig.db_name}`
+				}
+			}
+		});
+	}
+	async onModuleInit() {
+		await this.$connect();
+	}
 }

@@ -10,8 +10,8 @@ import { ChannelService } from '@chat/channel/channel.service';
 import { MessageService } from '@chat/channel/message/message.service';
 
 @Module({
-  imports: [AuthModule, PrismaModule],
-  controllers: [ChatController, ChannelController, MessageController],
-  providers: [ChatGateway, ChatService, ChannelService, MessageService],
+	imports: [AuthModule, PrismaModule],
+	controllers: [ChatController, ChannelController, MessageController],
+	providers: [ChatGateway, ChatService, ChannelService, MessageService]
 })
 export class ChatModule {}

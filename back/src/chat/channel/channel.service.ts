@@ -1,6 +1,13 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 
-import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@prisma/client';
+import {
+  Channel,
+  User,
+  ChannelConnection,
+  ChannelKind,
+  ChannelRole,
+  Relationship,
+} from '@prisma/client';
 
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
@@ -28,12 +35,10 @@ export class ChannelService {
     channelId: number,
   ): Promise<ChannelConnection> {
     return (
-      await this.prisma.channelConnection.findMany({
-        where: {
-          AND: [{ userId }, { channelId }],
-        },
+      await this.prisma.channelConnection.findUnique({
+		  where: { connectionId: { userId: userId, channelId } }
       })
-    )[0];
+    );
   }
 
   async getChannelConnections(
@@ -219,4 +224,4 @@ export class ChannelService {
       }
 		}
 	}
-}
+};

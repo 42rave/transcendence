@@ -31,17 +31,16 @@ export class ChannelController {
 
 	@Get('connection')
 	@UseGuards(...AuthenticatedGuard)
-	async getAllChannelConnections(@Req() req: Request): Promise<ChannelConnection[]> {
-		return await this.channelService.getAllChannelConnections(req.pagination);
+	async getAllChannelConnections(): Promise<ChannelConnection[]> {
+		return await this.channelService.getAllChannelConnections();
 	}
 
 	@Get(':id/connection')
 	@UseGuards(...AuthenticatedGuard, IsInChannelGuard)
 	async getChannelConnection(
 		@Param('id', ParseIntPipe) channelId: number,
-		@Req() req: Request
 	): Promise<ChannelConnection[]> {
-		return await this.channelService.getChannelConnections(channelId, req.pagination);
+		return await this.channelService.getChannelConnections(channelId);
 	}
 
 	@Post(':id/join')

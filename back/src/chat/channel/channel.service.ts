@@ -19,9 +19,8 @@ export class ChannelService {
   }
 
   async getAllChannelConnections(
-    pagination: PaginationDto,
   ): Promise<ChannelConnection[]> {
-    return await this.prisma.channelConnection.findMany(pagination);
+    return await this.prisma.channelConnection.findMany();
   }
 
   async getChannelConnection(
@@ -39,11 +38,9 @@ export class ChannelService {
 
   async getChannelConnections(
     channelId: number,
-    pagination: PaginationDto,
   ): Promise<ChannelConnection[]> {
     return await this.prisma.channelConnection.findMany({
       where: { channelId },
-      ...pagination,
     });
   }
 
@@ -104,16 +101,18 @@ export class ChannelService {
     return channel.password === password;
   }
 
-  async updateChannelRole(
-    role: ChannelRole,
-    channelConnection: ChannelConnection,
-  ) {
-    return await this.prisma.channelConnection.update({
-      where: { id: channelConnection.id },
-      data: { role: role },
-      include: { channel: true },
-    });
-  }
+	async updateChannelRole(role: ChannelRole, channelCo: ChannelConnection) {  
+		return await this.prisma.channelConnection.update({                     
+			where: {                                                            
+				connectionId: {                                                 
+					userId: channelCo.userId,                                   
+					channelId: channelCo.channelId                              
+				}                                                               
+			},                                                                  
+			data: { role: role },                                               
+			include: { channel: true }                                          
+		});                                                                     
+	}
 
   async createChannel(user: User, data: ChannelCreationDto) {
     return await this.prisma.channel.create({
@@ -136,6 +135,7 @@ export class ChannelService {
     user: User,
     channel: Channel,
     password?: string,
+		socketId?: string,
   ): Promise<ChannelConnection> {
     // Perform some checks to make sure the user can join the channel
     switch (channel.kind) {
@@ -167,7 +167,7 @@ export class ChannelService {
     id: number,
     data: ChannelDto,
  ) {
-    const channel : Channel = await this.prisma.channel.findFirst({
+    const channel = await this.prisma.channel.findFirst({
       where: {
         AND: [
           { id: id },
@@ -202,27 +202,21 @@ export class ChannelService {
       console.log("3: Found Channel.");
       await this.prisma.channelConnection.deleteMany({
         where: {
-		AND: [
+					AND: [
             { userId: user.id },
             { channelId: channel.id },
           ],
-	      NOT: [
-		  {
-			  OR: [
-			    { role: ChannelRole.BANNED },
-			    { role: ChannelRole.INVITED },
-			  ]
-		  },
-		  ]
+	      	NOT: [
+		  			{ OR: [ { role: ChannelRole.BANNED }, { role: ChannelRole.INVITED }, ] },
+		  		]
         },
       });
-	  //TODO: Fix this condition and add deletion of empty channel.
-/*      if (channel.channelConnection.length === 0) {
+      if (channel.channelConnection.length === 1) {
         console.log("4: Channel is now empty, deleting it.");
-        await this.prisma.channel.delete(
-			{ where: { id: id } }
-        );
-      } */
+        await this.prisma.channel.delete({
+					where: { id: id }
+				});
+      }
 		}
 	}
 }

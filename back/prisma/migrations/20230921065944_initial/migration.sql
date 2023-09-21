@@ -64,7 +64,13 @@ CREATE TABLE "User" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Relationship_senderId_receiverId_key" ON "Relationship"("senderId", "receiverId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Channel_name_key" ON "Channel"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ChannelConnection_userId_channelId_key" ON "ChannelConnection"("userId", "channelId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_id_key" ON "User"("id");

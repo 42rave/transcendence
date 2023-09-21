@@ -14,6 +14,7 @@ model Relationship {
   senderId   Int
   receiverId Int
   kind       RelationKind?
+  @@unique([senderId, receiverId])
 }
 
 model Channel {
@@ -35,6 +36,7 @@ model ChannelConnection {
   role      ChannelRole
   muted     DateTime? 
   createdAt DateTime    @default(now())
+  @@unique([userId, channelId])
 }
 
 model Message {

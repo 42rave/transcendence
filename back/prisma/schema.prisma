@@ -8,13 +8,12 @@ datasource db {
 }
 
 model Relationship {
-  id         Int           @id @default(autoincrement())
   sender     User          @relation("senderRelation", fields: [senderId], references: [id])
   receiver   User          @relation("receiverRelation", fields: [receiverId], references: [id])
   senderId   Int
   receiverId Int
   kind       RelationKind?
-  @@unique([senderId, receiverId])
+  @@id([senderId, receiverId], name: "relationshipId")
 }
 
 model Channel {
@@ -28,7 +27,6 @@ model Channel {
 }
 
 model ChannelConnection {
-  id        Int         @id @default(autoincrement())
   user      User        @relation(fields: [userId], references: [id])
   channel   Channel     @relation(fields: [channelId], references: [id])
   userId    Int
@@ -36,7 +34,7 @@ model ChannelConnection {
   role      ChannelRole
   muted     DateTime? 
   createdAt DateTime    @default(now())
-  @@unique([userId, channelId])
+  @@id([userId, channelId], name: "connectionId")
 }
 
 model Message {

@@ -46,6 +46,10 @@ export class ChannelService {
   ): Promise<ChannelConnection[]> {
     return await this.prisma.channelConnection.findMany({
       where: { channelId },
+<<<<<<< HEAD
+=======
+      //...pagination,
+>>>>>>> 4748a26 (FIX UNIQUE IDS CHANNELCO && RELATION (CHAT):)
     });
   }
 
@@ -106,6 +110,7 @@ export class ChannelService {
     return channel.password === password;
   }
 
+<<<<<<< HEAD
 	async updateChannelRole(role: ChannelRole, channelCo: ChannelConnection) {  
 		return await this.prisma.channelConnection.update({                     
 			where: {                                                            
@@ -118,6 +123,23 @@ export class ChannelService {
 			include: { channel: true }                                          
 		});                                                                     
 	}
+=======
+  async updateChannelRole(
+    role: ChannelRole,
+    channelCo: ChannelConnection,
+  ) {
+    return await this.prisma.channelConnection.update({
+		where: {
+			connectionId: {
+				userId: channelCo.userId,
+				channelId: channelCo.channelId
+			}
+		},
+      data: { role: role },
+      include: { channel: true },
+    });
+  }
+>>>>>>> 4748a26 (FIX UNIQUE IDS CHANNELCO && RELATION (CHAT):)
 
   async createChannel(user: User, data: ChannelCreationDto) {
     return await this.prisma.channel.create({
@@ -169,13 +191,13 @@ export class ChannelService {
 
   async quit(
 	user: User,
-    id: number,
+    targetChannelId: number,
     data: ChannelDto,
  ) {
     const channel = await this.prisma.channel.findFirst({
       where: {
         AND: [
-          { id: id },
+          { id: targetChannelId },
 		  {
             NOT : [
               { kind: ChannelKind.DIRECT }
@@ -206,6 +228,7 @@ export class ChannelService {
     else {
       console.log("3: Found Channel.");
       await this.prisma.channelConnection.deleteMany({
+<<<<<<< HEAD
         where: {
 					AND: [
             { userId: user.id },
@@ -221,6 +244,30 @@ export class ChannelService {
         await this.prisma.channel.delete({
 					where: { id: id }
 				});
+=======
+		  where: { 
+            AND: [
+		  	  { userId: user.id },
+			  { channelId: targetChannelId },
+			  {
+                NOT: [
+			     {
+                   OR: [
+                    { role: ChannelRole.INVITED },
+                    { role: ChannelRole.BANNED },
+                   ]
+			     }
+               ]
+              },
+			]
+		  }
+      });
+      if (channel.channelConnection.length === 1) {
+        console.log("4: Channel is now empty, deleting it.");
+        await this.prisma.channel.delete(
+			{ where: { id: targetChannelId } }
+        );
+>>>>>>> 4748a26 (FIX UNIQUE IDS CHANNELCO && RELATION (CHAT):)
       }
 		}
 	}

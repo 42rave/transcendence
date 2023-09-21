@@ -37,35 +37,7 @@ export default defineNuxtComponent({
       <v-progress-circular class="ma-auto" indeterminate size="64" color="purple" />
         Connecting
     </div>
-    <v-navigation-drawer  location="right" fixed app>
-    <div class="d-flex flex-row">
-      <v-tabs v-model="tab" direction="vertical">
-        <v-tab prepend-icon="mdi-forum" value="channels"></v-tab>
-        <v-tab prepend-icon="mdi-chat" value="private_messages"></v-tab>
-      </v-tabs>
-      <v-window v-model="tab">
-        <v-window-item value="channels">
-          <v-card flat>
-            <v-card-text>
-              <v-list>
-                <li v-for="channel in channelList" :key="channel.id">
-                  {{channel.name}}
-                </li>
-               </v-list>
-            </v-card-text>
-          </v-card>
-        </v-window-item>
-        <v-window-item value="private_messages">
-          <v-card flat>
-            <v-card-text>
-              <p>liste des conversations privées</p>
-            </v-card-text>
-          </v-card>
-        </v-window-item>
-      </v-window>
 
-    </div>
-    </v-navigation-drawer>
 
   </div>
 </template>

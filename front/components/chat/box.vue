@@ -36,15 +36,24 @@ export default defineNuxtComponent({
 </script>
 
 <template>
-  <div>
+  <div class="chatBox">
+    <div v-for="message in messageList" :key="message.id">
+      ({{message.size}}) {{message.message}}
+    </div>
     <v-text-field
       v-model="input"
       label="Message"
       @keyup.enter="sendMessage"
+      append-inner-icon="mdi-rocket"
       hide-details
     />
-    <div v-for="message in messageList" :key="message.id">
-      ({{message.size}}) {{message.message}}
-    </div>
   </div>
 </template>
+
+<style scoped>
+
+.chatBox {
+  width: 100%;
+}
+
+</style>

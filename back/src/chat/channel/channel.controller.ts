@@ -61,7 +61,41 @@ export class ChannelController {
     return await this.channelService.quit(req.user, channelId, data);
   }
 
+  @Post(':id/invite/:userid')
+  @UseGuards(...AuthenticatedGuard)
+  @UsePipes(new ValidationPipe())
+  async invite(
+    @Param('id', ParseIntPipe) channelId: number,
+    @Req() req: Request,
+    @Body() data: ChannelDto,
+    @Param('userid', ParseIntPipe) userId: number,
+  ) {
+    return await this.channelService.invite(req.user, channelId, data, userId);
+  }
 
+  @Post(':id/kick/:userid')
+  @UseGuards(...AuthenticatedGuard)
+  @UsePipes(new ValidationPipe())
+  async kick(
+    @Param('id', ParseIntPipe) channelId: number,
+    @Req() req: Request,
+    @Body() data: ChannelDto,
+    @Param('userid', ParseIntPipe) userId: number,
+  ) {
+    return await this.channelService.kick(req.user, channelId, data, userId);
+  }
+
+  @Post(':id/ban/:userid')
+  @UseGuards(...AuthenticatedGuard)
+  @UsePipes(new ValidationPipe())
+  async ban(
+    @Param('id', ParseIntPipe) channelId: number,
+    @Req() req: Request,
+    @Body() data: ChannelDto,
+    @Param('userid', ParseIntPipe) userId: number,
+  ) {
+    return await this.channelService.ban(req.user, channelId, data, userId);
+  }
   @Post()
   @UseGuards(...AuthenticatedGuard)
   @UsePipes(new ValidationPipe())

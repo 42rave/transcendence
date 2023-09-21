@@ -46,10 +46,6 @@ export class ChannelService {
   ): Promise<ChannelConnection[]> {
     return await this.prisma.channelConnection.findMany({
       where: { channelId },
-<<<<<<< HEAD
-=======
-      //...pagination,
->>>>>>> 4748a26 (FIX UNIQUE IDS CHANNELCO && RELATION (CHAT):)
     });
   }
 
@@ -60,6 +56,55 @@ export class ChannelService {
       channelConnection.role === ChannelRole.INVITED ||
       channelConnection.role === ChannelRole.BANNED
     );
+  }
+
+  isUserOwner(userId: number, channelConnectionList: ChannelConnection[] ): boolean {
+
+	  var res: boolean = false;
+	  channelConnectionList.forEach( (channelConnection) => {
+		  if (channelConnection.userId === userId
+		    && channelConnection.role === ChannelRole.OWNER)
+			  res = true;
+	  })
+	  return res;
+  }
+
+  isUserAdmin(userId: number, channelConnectionList: ChannelConnection[] ): boolean {
+
+	  var res: boolean = false;
+	  channelConnectionList.forEach( (channelConnection) => {
+		  if (channelConnection.userId === userId
+			  && (channelConnection.role === ChannelRole.ADMIN
+				  || channelConnection.role === ChannelRole.OWNER)) {
+			  res = true;
+		  }
+	  })
+	  return res;
+  }
+
+  isUserConnected(userId: number, channelConnectionList: ChannelConnection[] ): boolean {
+
+	  var res: boolean = false;
+	  channelConnectionList.forEach( (channelConnection) => {
+		  if (channelConnection.userId === userId
+			  && (channelConnection.role === ChannelRole.ADMIN
+				  || channelConnection.role === ChannelRole.OWNER
+			      || channelConnection.role === ChannelRole.DEFAULT)) {
+			  res = true;
+		  }
+	  })
+	  return res;
+  }
+
+  userHasExistingConnection(userId: number, targetChannel : number, channelConnectionList: ChannelConnection[] ):boolean {
+	var res: boolean = false;
+	  channelConnectionList.forEach( (channelConnection) => {
+		  if (channelConnection.userId === userId
+			  && channelConnection.channelId === targetChannel)
+			  res = true;
+		  }
+	  )
+	  return res;
   }
 
   async join(
@@ -110,7 +155,6 @@ export class ChannelService {
     return channel.password === password;
   }
 
-<<<<<<< HEAD
 	async updateChannelRole(role: ChannelRole, channelCo: ChannelConnection) {  
 		return await this.prisma.channelConnection.update({                     
 			where: {                                                            
@@ -123,23 +167,6 @@ export class ChannelService {
 			include: { channel: true }                                          
 		});                                                                     
 	}
-=======
-  async updateChannelRole(
-    role: ChannelRole,
-    channelCo: ChannelConnection,
-  ) {
-    return await this.prisma.channelConnection.update({
-		where: {
-			connectionId: {
-				userId: channelCo.userId,
-				channelId: channelCo.channelId
-			}
-		},
-      data: { role: role },
-      include: { channel: true },
-    });
-  }
->>>>>>> 4748a26 (FIX UNIQUE IDS CHANNELCO && RELATION (CHAT):)
 
   async createChannel(user: User, data: ChannelCreationDto) {
     return await this.prisma.channel.create({
@@ -228,7 +255,6 @@ export class ChannelService {
     else {
       console.log("3: Found Channel.");
       await this.prisma.channelConnection.deleteMany({
-<<<<<<< HEAD
         where: {
 					AND: [
             { userId: user.id },
@@ -242,33 +268,91 @@ export class ChannelService {
       if (channel.channelConnection.length === 1) {
         console.log("4: Channel is now empty, deleting it.");
         await this.prisma.channel.delete({
-					where: { id: id }
+					where: { id: targetChannelId }
 				});
-=======
-		  where: { 
-            AND: [
-		  	  { userId: user.id },
-			  { channelId: targetChannelId },
-			  {
-                NOT: [
-			     {
-                   OR: [
-                    { role: ChannelRole.INVITED },
-                    { role: ChannelRole.BANNED },
-                   ]
-			     }
-               ]
-              },
-			]
-		  }
-      });
-      if (channel.channelConnection.length === 1) {
-        console.log("4: Channel is now empty, deleting it.");
-        await this.prisma.channel.delete(
-			{ where: { id: targetChannelId } }
-        );
->>>>>>> 4748a26 (FIX UNIQUE IDS CHANNELCO && RELATION (CHAT):)
       }
 		}
 	}
+
+
+  async invite(
+	user: User,
+    targetChannelId: number,
+    data: ChannelDto,
+	targetId: number,
+ ): Promise<ChannelConnection> {
+	const channel = await this.prisma.channel.findUnique({
+	  where: { id: targetChannelId },
+	  include: { channelConnection: true },
+	 });
+	if (!channel)
+	  return undefined;
+    if (this.isUserAdmin(user.id, channel.channelConnection)) {
+      if (this.userHasExistingConnection(targetId, targetChannelId, channel.channelConnection)) {
+		  console.log("update");
+			return await this.prisma.channelConnection.update({
+			  where: { connectionId: { userId: user.id, channelId: targetId } },
+			  data: { role: ChannelRole.INVITED },
+		     });
+		 }
+		 else if (!this.isUserOwner(targetId, channel.channelConnection)
+			 && !this.isUserConnected(targetId, channel.channelConnection)) {
+		  	console.log("create");
+			 return await this.prisma.channelConnection.create(
+				 {
+					 data:
+					 {
+						 role: ChannelRole.INVITED,
+						 user:
+						 {
+							 connectOrCreate:
+							 {
+								 where:
+								 {
+									 id: targetId,
+								 },
+								 create:
+								 {
+									 id: targetId,
+									 username: 'offline',
+									 avatar: 'offline.jpg',
+								 },
+							 },
+						 },
+						 channel:
+						 {
+							 connect:
+							 {
+								 id: targetChannelId,
+							 }
+						 },
+					 },
+				 });
+  		}
+     }
+	return null;
+  }
+
+  async kick(
+	user: User,
+    channelId: number,
+    data: ChannelDto,
+	targetId: number,
+ ): Promise<Relationship> {
+
+	 return null;
+
+  }
+
+	async ban(
+	user: User,
+    id: number,
+    data: ChannelDto,
+	targetId: number,
+ ): Promise<Relationship> {
+
+	 return null;
+
+  }
+
 };

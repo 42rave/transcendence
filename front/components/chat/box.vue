@@ -7,42 +7,29 @@ export default defineNuxtComponent({
   name: 'ChatBox',
   props: ['socket'],
   data: () => ({
+     input: '',
+    config: useRuntimeConfig(),
     messageList: Array<IMessage>(),
-    input: '',
   }),
-  beforeMount() {
-    this.socket?.on('test:message', (data: { message: string }) => {
-      const size = this.messageList.length;
-      const message = data.message;
-      this.messageList.push({ size, message });
-      console.log(this.messageList);
-    });
-  },
-  unmounted() {
-    this.socket?.off('test:message');
-  },
+
   methods: {
-    sendMessage() {
-      if (!this.input) return;
-      this.$api.post('/chat/sendTest', {
-        body: { message: this.input }
-      })
-      this.input = '';
-    },
+
   }
 })
 </script>
 
 <template>
-  <div>
-    <v-text-field
-      v-model="input"
-      label="Message"
-      @keyup.enter="sendMessage"
-      hide-details
-    />
-    <div v-for="message in messageList" :key="message.id">
-      ({{message.size}}) {{message.message}}
-    </div>
+  <div class="chatBox">
+    <ChatConvDisplay :socket="socket" :messageList="messageList"/>
+    <ChatMessageInput :socket="socket" :messageList="messageList"/>
   </div>
 </template>
+
+<style scoped>
+
+.chatBox {
+  width: 100%;
+  height: 100%;
+}
+
+</style>

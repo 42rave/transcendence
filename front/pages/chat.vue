@@ -31,7 +31,7 @@ export default defineNuxtComponent({
 </script>
 
 <template>
-  <div class="parent">
+  <div class="chatPage">
     <ChatBox v-if="$sockets.isChatConnected" :socket="socket" />
     <div class="ma-auto d-flex flex-column" v-else>
       <v-progress-circular class="ma-auto" indeterminate size="64" color="purple" />
@@ -44,9 +44,17 @@ export default defineNuxtComponent({
 
 
 <style>
-.drawer__icon {
-  align-item: end;
-  width: 50px;
-
+.chatPage {
+  width: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 0;
+  margin: 0;
+}
+.v-input__details
+{
+  
 }
 </style>

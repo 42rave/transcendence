@@ -291,14 +291,15 @@ export class ChannelService {
 				description: 'You cannot kick the owner of a channel'
 			});
 		}
-		await this.prisma.channelConnection.delete({
-			where: { connectionId: { userId: targetId, channelId: targetChannelId } }
-		})
-		.catch(() => {
-			throw new BadRequestException('Cannot kick user', {
-				description: 'user does not exist'
+		await this.prisma.channelConnection
+			.delete({
+				where: { connectionId: { userId: targetId, channelId: targetChannelId } }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot kick user', {
+					description: 'user does not exist'
+				});
 			});
-		});
 		this.chatService.emitToUser(targetId, 'chat:kick', channel);
 		return null;
 	}

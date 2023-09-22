@@ -1,27 +1,21 @@
-import {
-  IsNumber,
-  IsString,
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-} from 'class-validator';
+import { IsNumber, IsString, IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UserDto {
-  @IsNumber()
-  id: number;
+	@IsNumber()
+	id: number;
 
-  @IsString()
-  @IsNotEmpty()
-  username: string;
+	@IsString()
+	@IsNotEmpty()
+	username: string;
 
-  @IsString()
-  @IsNotEmpty()
-  avatar: string;
+	@IsString()
+	@IsNotEmpty()
+	avatar: string;
 
-  @IsString()
-  @IsOptional()
-  totpKey: string;
+	@IsString()
+	@IsOptional()
+	totpKey: string;
 
-  @IsBoolean()
-  twoFAEnabled: boolean;
+	@IsBoolean()
+	twoFAEnabled: boolean;
 }

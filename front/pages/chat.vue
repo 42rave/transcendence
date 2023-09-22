@@ -31,6 +31,7 @@ export default defineNuxtComponent({
 </script>
 
 <template>
+  <LayoutChatBar/>
   <div class="chatPage">
     <ChatBox v-if="$sockets.isChatConnected" :socket="socket" />
     <div class="ma-auto d-flex flex-column" v-else>
@@ -50,11 +51,6 @@ export default defineNuxtComponent({
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  padding: 0;
-  margin: 0;
 }
-.v-input__details
-{
-  
-}
+
 </style>

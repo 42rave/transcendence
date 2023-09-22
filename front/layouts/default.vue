@@ -53,7 +53,6 @@ export default defineNuxtComponent({
     <div v-if="$auth.isAuthenticated && (!$auth.user.twoFAEnabled || $auth.user.twoFALogged)" class="w-100 h-100">
       <LayoutAppBar @drawer:click="drawer = !drawer" :socket="socket" />
       <LayoutNavBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer" :routes="routes" />
-      <LayoutChatBar/>
       <v-main>
         <v-container fluid>
           <NuxtPage :socket="socket"/>

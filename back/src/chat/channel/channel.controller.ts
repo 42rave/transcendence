@@ -65,7 +65,11 @@ export class ChannelController {
 		@Req() req: Request,
 		@Param('userid', ParseIntPipe) userId: number
 	) {
+		try {
 		return await this.channelService.invite(req.user, channelId, userId);
+		} catch (e) {
+			throw new ForbiddenException('Cannot invite user', { description: e });
+		}
 	}
 
 	@Post(':id/kick/:userid')

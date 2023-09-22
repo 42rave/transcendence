@@ -240,20 +240,28 @@ export class ChannelService {
 			where: { id: targetChannelId },
 			include: { channelConnection: true }
 		});
-		if (!channel) return undefined;
-		if (this.isUserAdmin(user.id, channel.channelConnection)) {
-			if (this.userHasExistingConnection(targetId, targetChannelId, channel.channelConnection)) {
-				console.log('update');
+		if (!channel) {
+			throw new ForbiddenException('Cannot invite user', {
+	  description: "The channel does not exist"
+			});
+		}
+		if (!this.isUserAdmin(user.id, channel.channelConnection)) {
+			throw new ForbiddenException('Cannot invite user', {
+	  description: "You don't have the necessary rights to invite on this channel"
+			});
+		}
+		if (this.userHasExistingConnection(targetId, targetChannelId, channel.channelConnection)) {
+				if (this.isUserConnected(targetId, channel.channelConnection)) {
+					throw new ForbiddenException('Cannot invite user', {
+	  		description: "User is already connected to the channel"
+			});
 				return await this.prisma.channelConnection.update({
 					where: { connectionId: { userId: user.id, channelId: targetId } },
 					data: { role: ChannelRole.INVITED }
 				});
-			} else if (
-				!this.isUserOwner(targetId, channel.channelConnection) &&
-				!this.isUserConnected(targetId, channel.channelConnection)
-			) {
-				console.log('create');
-				return await this.prisma.channelConnection.create({
+			}
+		}
+			return await this.prisma.channelConnection.create({
 					data: {
 						role: ChannelRole.INVITED,
 						user: {
@@ -269,9 +277,6 @@ export class ChannelService {
 						channel: { connect: { id: targetChannelId } }
 					}
 				});
-			}
-		}
-		return null;
 	}
 
 	async kick(user: User, channelId: number, targetId: number): Promise<Relationship> {

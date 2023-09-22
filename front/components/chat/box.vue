@@ -40,12 +40,15 @@ export default defineNuxtComponent({
     <div v-for="message in messageList" :key="message.id">
       ({{message.size}}) {{message.message}}
     </div>
-    <v-text-field
+    <v-textarea
       v-model="input"
       label="Message"
       @keyup.enter="sendMessage"
       append-inner-icon="mdi-rocket"
       hide-details
+      auto-grow
+      rows="1"
+      max-rows="5"
     />
   </div>
 </template>

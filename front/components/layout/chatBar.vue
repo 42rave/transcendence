@@ -9,22 +9,18 @@ export default defineNuxtComponent({
     rail: true,
     tab: "channels",
     channelList: Array<IChannel>(),
-     config: useRuntimeConfig(),
+    config: useRuntimeConfig(),
   }),
   mounted () {
     this.displayChannels();
   },
   methods: {
     async displayChannels() {
-      console.log("bouh");
-      
       const channels = await $fetch(new URL('/chat/channel', this.config.app.API_URL).toString(), {
         credentials: 'include',
         method: 'GET',
       }).catch();
       this.channelList = channels;
-      console.log(channels);
-      
     }
   }
 })

@@ -1,6 +1,6 @@
 import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 
-import { Channel, User, ChannelConnection, ChannelKind, ChannelRole, Relationship } from '@prisma/client';
+import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@prisma/client';
 
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
@@ -14,9 +14,9 @@ export class ChannelService {
 		private readonly chatService: ChatService
 	) {}
 
-  async getAll(pagination: PaginationDto): Promise<Channel[]> {
-    return await this.prisma.channel.findMany(pagination);
-  }
+	async getAll(pagination: PaginationDto): Promise<Channel[]> {
+		return await this.prisma.channel.findMany(pagination);
+	}
 
 	async getAllChannelConnections(): Promise<ChannelConnection[]> {
 		return await this.prisma.channelConnection.findMany();
@@ -28,9 +28,7 @@ export class ChannelService {
 		});
 	}
 
-	async getChannelConnections(
-		channelId: number
-	): Promise<ChannelConnection[]> {
+	async getChannelConnections(channelId: number): Promise<ChannelConnection[]> {
 		return await this.prisma.channelConnection.findMany({
 			where: { channelId }
 		});
@@ -88,9 +86,8 @@ export class ChannelService {
 	): boolean {
 		let res: boolean = false;
 		channelConnectionList.forEach((channelConnection) => {
-			if (channelConnection.userId === userId
-					&& channelConnection.channelId === targetChannel) {
-						res = true;
+			if (channelConnection.userId === userId && channelConnection.channelId === targetChannel) {
+				res = true;
 			}
 		});
 		return res;
@@ -193,17 +190,12 @@ export class ChannelService {
 	async quit(user: User, targetChannelId: number) {
 		const channel = await this.prisma.channel.findFirst({
 			where: {
-				AND: [
-					{ id: targetChannelId },
-					{ NOT: [{ kind: ChannelKind.DIRECT }] }
-				]
+				AND: [{ id: targetChannelId }, { NOT: [{ kind: ChannelKind.DIRECT }] }]
 			},
 			include: {
 				channelConnection: {
 					where: {
-						NOT: [
-							{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }
-						]
+						NOT: [{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }]
 					}
 				}
 			}
@@ -222,10 +214,8 @@ export class ChannelService {
 						{ userId: user.id },
 						{ channelId: targetChannelId },
 						{
-							NOT: [
-								{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }
-							]
-						},
+							NOT: [{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }]
+						}
 					]
 				}
 			});
@@ -243,47 +233,42 @@ export class ChannelService {
 		});
 		if (!channel) {
 			throw new ForbiddenException('Cannot invite user', {
-	  description: "The channel does not exist"
+				description: 'The channel does not exist'
 			});
 		}
 		if (!this.isUserAdmin(user.id, channel.channelConnection)) {
 			throw new ForbiddenException('Cannot invite user', {
-	  description: "You don't have the necessary rights to invite on this channel"
+				description: "You don't have the necessary rights to invite on this channel"
 			});
 		}
 		if (this.userHasExistingConnection(targetId, targetChannelId, channel.channelConnection)) {
-				if (this.isUserConnected(targetId, channel.channelConnection)) {
-					throw new ForbiddenException('Cannot invite user', {
-	  		description: "User is already connected to the channel"
+			if (this.isUserConnected(targetId, channel.channelConnection)) {
+				throw new ForbiddenException('Cannot invite user', {
+					description: 'User is already connected to the channel'
+				});
+			}
+			const invite: ChannelConnection = await this.prisma.channelConnection.update({
+				where: { connectionId: { userId: targetId, channelId: targetChannelId } },
+				data: { role: ChannelRole.INVITED }
 			});
-				}
-				console.log("update");
-				 const invite: ChannelConnection = await this.prisma.channelConnection.update({
-					where: { connectionId: { userId: targetId, channelId: targetChannelId } },
-					data: { role: ChannelRole.INVITED }
-				});
-				this.chatService.emitToUser(targetId, "chat:invite", invite);
-				return (invite);
+			this.chatService.emitToUser(targetId, 'chat:invite', invite);
+			return invite;
 		}
-						console.log("create");
-			const invite = await this.prisma.channelConnection.create({
-					data: {
-						role: ChannelRole.INVITED,
-						user: {
-							connectOrCreate: {
-								where: { id: targetId },
-								create: {
-									id: targetId,
-									username: 'offline',
-									avatar: 'offline.jpg'
-								}
-							}
-						},
-						channel: { connect: { id: targetChannelId } }
-					}
+		const invite = await this.prisma.channelConnection
+			.create({
+				data: {
+					role: ChannelRole.INVITED,
+					userId: targetId,
+					channelId: targetChannelId
+				}
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot invite user', {
+					description: 'user does not exist'
 				});
-				this.chatService.emitToUser(targetId, "chat:invite", invite);
-				return (invite);
+			});
+		this.chatService.emitToUser(targetId, 'chat:invite', invite);
+		return invite;
 	}
 
 	async kick(user: User, targetChannelId: number, targetId: number) {
@@ -293,24 +278,29 @@ export class ChannelService {
 		});
 		if (!channel) {
 			throw new ForbiddenException('Cannot kick user', {
-	  description: "The channel does not exist"
+				description: 'The channel does not exist'
 			});
 		}
 		if (!this.isUserAdmin(user.id, channel.channelConnection)) {
 			throw new ForbiddenException('Cannot kick user', {
-	  description: "You don't have the necessary rights to kick on this channel"
+				description: "You don't have the necessary rights to kick on this channel"
 			});
 		}
 		if (this.isUserOwner(targetId, channel.channelConnection)) {
 			throw new ForbiddenException('Cannot kick user', {
-	  	description: "You cannot kick the owner of a channel"
+				description: 'You cannot kick the owner of a channel'
 			});
 		}
-			await this.prisma.channelConnection.delete({
-					where: { connectionId: { userId: targetId, channelId: targetChannelId } }
+		await this.prisma.channelConnection.delete({
+			where: { connectionId: { userId: targetId, channelId: targetChannelId } }
+		})
+		.catch(() => {
+			throw new BadRequestException('Cannot kick user', {
+				description: 'user does not exist'
 			});
-			this.chatService.emitToUser(targetId, "chat:kick", channel);
-			return null;
+		});
+		this.chatService.emitToUser(targetId, 'chat:kick', channel);
+		return null;
 	}
 
 	async ban(user: User, targetChannelId: number, targetId: number): Promise<ChannelConnection> {
@@ -320,33 +310,35 @@ export class ChannelService {
 		});
 		if (!channel) {
 			throw new ForbiddenException('Cannot ban user', {
-	  	description: "The channel does not exist"
+				description: 'The channel does not exist'
 			});
 		}
 		if (!this.isUserAdmin(user.id, channel.channelConnection)) {
 			throw new ForbiddenException('Cannot ban user', {
-	  	description: "You don't have the necessary rights to ban on this channel"
+				description: "You don't have the necessary rights to ban on this channel"
 			});
 		}
 		if (this.isUserOwner(targetId, channel.channelConnection)) {
 			throw new ForbiddenException('Cannot ban user', {
-	  	description: "Have you lost your mind trying to ban the owner?"
+				description: 'Have you lost your mind trying to ban the owner?'
 			});
 		}
-		const banned = await this.prisma.channelConnection.upsert({
+		const banned = await this.prisma.channelConnection
+			.upsert({
 				where: { connectionId: { channelId: targetChannelId, userId: targetId } },
-        create: {
+				create: {
 					channelId: targetChannelId,
-          userId: targetId,
-          role: ChannelRole.BANNED
-        },
+					userId: targetId,
+					role: ChannelRole.BANNED
+				},
 				update: { role: ChannelRole.BANNED }
-    })
-    .catch((description) => {
-      throw new BadRequestException('Cannot ban user', {
-			description: "user does not exist" });
-    });
-		this.chatService.emitToUser(targetId, "chat:ban", banned);
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot ban user', {
+					description: 'user does not exist'
+				});
+			});
+		this.chatService.emitToUser(targetId, 'chat:ban', banned);
 		return banned;
 	}
 }

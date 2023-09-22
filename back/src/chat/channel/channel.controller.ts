@@ -8,8 +8,7 @@ import {
 	Param,
 	ParseIntPipe,
 	ValidationPipe,
-	UsePipes,
-	ForbiddenException
+	UsePipes
 } from '@nestjs/common';
 
 import { ChannelCreationDto } from '@type/channel.dto';
@@ -37,9 +36,7 @@ export class ChannelController {
 
 	@Get(':id/connection')
 	@UseGuards(...AuthenticatedGuard, IsInChannelGuard)
-	async getChannelConnection(
-		@Param('id', ParseIntPipe) channelId: number,
-	): Promise<ChannelConnection[]> {
+	async getChannelConnection(@Param('id', ParseIntPipe) channelId: number): Promise<ChannelConnection[]> {
 		return await this.channelService.getChannelConnections(channelId);
 	}
 
@@ -65,11 +62,7 @@ export class ChannelController {
 		@Req() req: Request,
 		@Param('userid', ParseIntPipe) userId: number
 	) {
-		try {
 		return await this.channelService.invite(req.user, channelId, userId);
-		} catch (e) {
-			throw new ForbiddenException('Cannot invite user', { description: e });
-		}
 	}
 
 	@Post(':id/kick/:userid')
@@ -98,10 +91,6 @@ export class ChannelController {
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(new ValidationPipe())
 	async create(@Req() req: Request, @Body() data: ChannelCreationDto) {
-		try {
-			return await this.channelService.createChannel(req.user, data);
-		} catch (e) {
-			throw new ForbiddenException('Cannot create channel', { description: e });
-		}
+		return await this.channelService.createChannel(req.user, data);
 	}
 }

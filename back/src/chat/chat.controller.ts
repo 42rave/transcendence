@@ -11,6 +11,6 @@ export class ChatController {
   @Post('sendTest')
   async send(@Req() req: Request, @Body() body: { message: string }) {
     console.log(`${req.user.username} sent:`, body);
-    this.chatService.send(body as { message: string });
+    this.chatService.emit('test:message', body as { message: string });
   }
 }

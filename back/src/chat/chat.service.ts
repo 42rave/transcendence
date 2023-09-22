@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import Socket from '@type/socket';
 
@@ -39,12 +39,29 @@ export class ChatService {
     );
   }
 
-  sendToUser(userId: number, data: any): void {
+  emitToUser(userId: number, event: string, data: any): void {
     if (this.clientMap.has(userId))
-      this.server.to(this.clientMap.get(userId)).emit('test:message', data);
+      this.server.to(this.clientMap.get(userId)).emit(event, data);
   }
 
-  send(data: { message: string }) {
-    this.server.emit('test:message', data);
+  emit(event: string, data: any, rooms?: string | string[]) {
+    if (rooms) this.server.to(rooms).emit(event, data);
+    else this.server.emit(event, data);
+  }
+
+  joinRoom(socket_id: string, room: string) {
+    const socket: Socket = (
+      this.server.sockets as any as Map<string, Socket>
+    ).get(socket_id);
+
+    if (!socket)
+      throw new BadRequestException(`Socket ${socket_id} not found.`);
+
+    for (const room of socket.rooms) {
+      if (room === socket.id) continue;
+      socket.leave(room);
+    }
+
+    socket.join(room);
   }
 }

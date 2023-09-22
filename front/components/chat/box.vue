@@ -27,7 +27,7 @@ export default defineNuxtComponent({
       $fetch(`${this.$config.app.API_URL}/chat/sendTest`, {
         credentials: 'include',
         method: 'POST',
-        body: JSON.stringify({ message: this.input }),
+        body: JSON.stringify({ message: this.input.trim() }),
       })
       this.input = '';
     },
@@ -43,12 +43,14 @@ export default defineNuxtComponent({
     <v-textarea
       v-model="input"
       label="Message"
-      @keyup.enter="sendMessage"
-      append-inner-icon="mdi-rocket"
+      append-inner-icon="mdi-rocket-launch"
       hide-details
       auto-grow
       rows="1"
       max-rows="5"
+      @keydown.enter.prevent="sendMessage"
+      @keydown.enter.shift="input += '\n'"
+      @click:append-inner="sendMessage"
     />
   </div>
 </template>

@@ -37,6 +37,7 @@ export default defineNuxtComponent({
       	<v-tab prepend-icon="mdi-forum" value="channels"></v-tab>
         <v-tab prepend-icon="mdi-chat" value="private_messages"></v-tab>
       </v-tabs>
+      <v-divider :thickness="2" inset vertical></v-divider>
       <v-window v-model="tab">
       	<v-window-item value="channels">
           <v-card flat>

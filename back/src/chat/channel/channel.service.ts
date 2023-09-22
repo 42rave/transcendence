@@ -88,7 +88,10 @@ export class ChannelService {
 	): boolean {
 		let res: boolean = false;
 		channelConnectionList.forEach((channelConnection) => {
-			if (channelConnection.userId === userId && channelConnection.channelId === targetChannel) res = true;
+			if (channelConnection.userId === userId
+					&& channelConnection.channelId === targetChannel) {
+						res = true;
+			}
 		});
 		return res;
 	}
@@ -253,14 +256,16 @@ export class ChannelService {
 					throw new ForbiddenException('Cannot invite user', {
 	  		description: "User is already connected to the channel"
 			});
+				}
+				console.log("update");
 				 const invite: ChannelConnection = await this.prisma.channelConnection.update({
-					where: { connectionId: { userId: user.id, channelId: targetId } },
+					where: { connectionId: { userId: targetId, channelId: targetChannelId } },
 					data: { role: ChannelRole.INVITED }
 				});
 				this.chatService.emitToUser(targetId, "chat:invite", invite);
 				return (invite);
-			}
 		}
+						console.log("create");
 			const invite = await this.prisma.channelConnection.create({
 					data: {
 						role: ChannelRole.INVITED,

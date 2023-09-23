@@ -20,7 +20,6 @@ export default defineNuxtComponent({
 </script>
 
 <template>
-
     <div class="chatBox">
       <ChatConvDisplay :socket="socket" :messageList="messageList"/>
         <div class="chatFooter">

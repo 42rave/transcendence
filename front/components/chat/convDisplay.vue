@@ -29,9 +29,8 @@ export default defineNuxtComponent({
 
 <template>
 	<div class="display__messages">
-		The messages will be displayed here
 		<div v-for="message in this.messageList" :key="message.id">
-      		({{message.size}}) {{message.message}}
+      {{message.message}}
    		</div>
 	</div>
 </template>

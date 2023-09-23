@@ -2,7 +2,7 @@
 
 export default defineNuxtComponent({
   name: 'ChatMessageInput',
-  props: ['socket', 'messageList'],
+  props: ['socket'],
   data: () => ({
 	config: useRuntimeConfig(),
     input: '',

@@ -4,9 +4,9 @@ interface IChannel {
   owner: string;
 }
 export default defineNuxtComponent({
-  props: ['socket'],
+  props: ['socket', 'drawer'],
   data: () => ({
-    rail: true,
+    _drawer: true,
     tab: "channels",
     channelList: Array<IChannel>(),
     config: useRuntimeConfig(),
@@ -22,12 +22,26 @@ export default defineNuxtComponent({
       }).catch();
       this.channelList = channels;
     }
+  },
+    watch: {
+    drawer: {
+      immediate: true,
+      handler(val) {
+        this._drawer = val;
+      },
+    },
+    _drawer: {
+      immediate: true,
+      handler(val) {
+        this.$emit('drawer:update', val);
+      },
+    }
   }
 })
 </script>
 
 <template>
-  <v-navigation-drawer  location="right">
+  <v-navigation-drawer v-model=_drawer location="right">
     <div class="d-flex flex-row">
       <v-tabs v-model="tab" direction="vertical">
       	<v-tab prepend-icon="mdi-forum" value="channels"></v-tab>

@@ -16,10 +16,10 @@ export class AuthService {
 		private jwtService: JwtService
 	) {}
 
-	async validateUser(user: User, twoFaLogged = false): Promise<{ access_token: string }> {
+	async validateUser(user: User, twoFALogged = false): Promise<{ access_token: string }> {
 		// generate a signed json web token with the contents of user object and return it
 		const payload = { sub: { id: user.id } };
-		if (user.twoFAEnabled) payload['sub']['twoFaLogged'] = twoFaLogged;
+		if (user.twoFAEnabled) payload['sub']['twoFALogged'] = twoFALogged;
 
 		return {
 			access_token: this.jwtService.sign(payload, {
@@ -30,15 +30,15 @@ export class AuthService {
 
 	async getWsUser(socket: Socket): Promise<User | undefined> {
 		try {
-			const token = parse(socket.handshake.headers.cookie)['access_token'];
+			const token = parse(socket.handshake.headers.cookie || '')['access_token'];
 			const payload = this.jwtService.verify(token, {
 				secret: authConfig.secret
 			});
 			const user = await this.userService.getById(payload.sub.id);
-			if (user.twoFAEnabled && !payload.sub.twoFaLogged) return undefined;
+			if (user.twoFAEnabled && !payload.sub.twoFALogged) return undefined;
 			socket.user = user;
 			return socket.user;
-		} catch {
+		} catch (err) {
 			return undefined;
 		}
 	}

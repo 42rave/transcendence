@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column align-center my-12">
-    <v-card class="login-box mt-12" :class="{ 'error-shake': error }">
+    <v-card class="totp-box mt-12" :class="{ 'error-shake': error }">
       <div class="d-flex flex-column align-center text-center my-4">
         <h2 class="pb-4">TOTP</h2>
         <p>Entre ton code!</p>
@@ -27,6 +27,25 @@ export default defineNuxtComponent({
     config: useRuntimeConfig(),
     error: false,
   }),
+  mounted() {
+    /*
+    ** This part center the label and the input.
+    ** It's necessary to do it on the mounted hook, because if the style is scoped, it will not work.
+    ** If it's not scoped, it will apply to all the labels and inputs of the page, and we don't want that.
+    */
+    const labels = document.querySelectorAll('.v-label.v-field-label');
+    labels.forEach((label) => {
+      label.style.textAlign = 'center';
+      label.style.position = 'fixed';
+      label.style.margin = 'auto';
+      label.style.display = 'block';
+      label.style.width = '100%';
+      label.style.maxWidth = '100%';
+      label.style.transformOrigin = 'center';
+    });
+    const textField = document.querySelector('.v-field__input');
+    if (textField) textField.style.textAlign = 'center';
+  },
   methods: {
     async submit() {
       const ret = await this.$auth.verifyTotp(this.code);
@@ -46,7 +65,7 @@ export default defineNuxtComponent({
 </script>
 
 <style scoped>
-.login-box {
+.totp-box {
   width: min(300px, 100%);
   transition-duration: 0.25s;
 }

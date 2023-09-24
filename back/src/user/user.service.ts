@@ -38,19 +38,19 @@ export class UserService {
 		}
 	}
 
-	async setSecret(userId: number, secret: string): Promise<Otp> {
-		secret = encrypt(secret);
+	async setSecret(userId: number, secret: string, iv: string): Promise<Otp> {
+		secret = encrypt(secret, iv);
 		return this.prisma.otp.upsert({
 			where: { userId },
-			create: { secret, userId },
-			update: { secret }
+			create: { secret, userId, iv },
+			update: { secret, iv }
 		});
 	}
 
 	async getSecret(userId: number): Promise<Otp> {
 		const otp = await this.prisma.otp.findUnique({ where: { userId } });
 		if (!otp) return undefined;
-		otp.secret = decrypt(otp.secret);
+		otp.secret = decrypt(otp.secret, otp.iv);
 		return otp;
 	}
 

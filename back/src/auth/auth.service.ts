@@ -47,10 +47,12 @@ export class AuthService {
 		if (user.twoFAEnabled)
 			throw new ForbiddenException('Cannot generate secret', { description: 'You already have a secret' });
 		const secret = randomBytes(32).toString('hex');
-		await this.userService.setSecret(user.id, secret);
+		const iv = randomBytes(16).toString('hex');
+		await this.userService.setSecret(user.id, secret, iv);
 		const otpauth = `otpauth://totp/Transcendence:${user.username}?secret=${encode(secret)}&issuer=Transcendence`;
 		return {
 			secret,
+			iv,
 			qr_code: await qrcode.toDataURL(otpauth),
 			otpauth
 		};

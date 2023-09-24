@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { parse } from 'cookie';
 import { UserService } from '@user/user.service';
-import { UserDto } from '@type/user.dto';
 import { User } from '@prisma/client';
+import { randomBytes } from 'crypto';
+import { encode } from 'hi-base32';
+import * as qrcode from 'qrcode';
 import authConfig from '@config/auth.config';
 import Socket from '@type/socket';
 
@@ -14,9 +16,11 @@ export class AuthService {
 		private jwtService: JwtService
 	) {}
 
-	async validateUser(user: UserDto) {
+	async validateUser(user: User, twoFaLogged = false): Promise<{ access_token: string }> {
 		// generate a signed json web token with the contents of user object and return it
 		const payload = { sub: { id: user.id } };
+		if (user.twoFAEnabled) payload['sub']['twoFaLogged'] = twoFaLogged;
+
 		return {
 			access_token: this.jwtService.sign(payload, {
 				secret: authConfig.secret
@@ -30,10 +34,25 @@ export class AuthService {
 			const payload = this.jwtService.verify(token, {
 				secret: authConfig.secret
 			});
-			socket.user = await this.userService.getById(payload.sub.id);
+			const user = await this.userService.getById(payload.sub.id);
+			if (user.twoFAEnabled && !payload.sub.twoFaLogged) return undefined;
+			socket.user = user;
 			return socket.user;
 		} catch {
 			return undefined;
 		}
+	}
+
+	async generateTotp(user: User) {
+		if (user.twoFAEnabled)
+			throw new ForbiddenException('Cannot generate secret', { description: 'You already have a secret' });
+		const secret = randomBytes(32).toString('hex');
+		await this.userService.setSecret(user.id, secret);
+		const otpauth = `otpauth://totp/Transcendence:${user.username}?secret=${encode(secret)}&issuer=Transcendence`;
+		return {
+			secret,
+			qr_code: await qrcode.toDataURL(otpauth),
+			otpauth
+		};
 	}
 }

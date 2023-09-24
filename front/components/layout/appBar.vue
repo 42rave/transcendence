@@ -2,7 +2,6 @@
   <v-app-bar app>
     <v-app-bar-nav-icon @click.stop="$emit('drawer:click')"></v-app-bar-nav-icon>
     <v-toolbar-title>Application</v-toolbar-title>
-
     {{ $auth.user.username }}
     <v-avatar id="menu-activator" class="avatar mx-4" size="40px" color="grey" dark>
       <v-img v-if="$auth.user.avatar" :src="$auth.user.avatar"></v-img>
@@ -25,8 +24,9 @@
   </v-app-bar>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+export default defineNuxtComponent({
+  props: ['socket'],
   data() {
     return {
       menu: [
@@ -44,10 +44,11 @@ export default {
       this.$router.push('/settings');
     },
     logout() {
+      this.socket?.disconnect();
       this.$auth.logout();
     },
   },
-};
+});
 </script>
 
 <style scoped>

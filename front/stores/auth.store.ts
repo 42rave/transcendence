@@ -41,6 +41,19 @@ export const useAuthStore = defineStore('auth', {
       }).catch(() => {
         return false;
       });
+    },
+    async disableTotp(code: string) {
+      const config = useRuntimeConfig();
+
+      return await $fetch(new URL(`/auth/totp?code=${code}`, config.app.API_URL).toString(), {
+        method: 'DELETE',
+        credentials: 'include',
+      }).then((res) => {
+        this.user = res as User;
+        return true;
+      }).catch(() => {
+        return false;
+      });
     }
   },
 });

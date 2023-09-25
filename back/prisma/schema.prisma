@@ -76,7 +76,6 @@ enum ChannelKind {
 }
 
 enum RelationKind {
-  FRIENDS
-  INVITE
+  FRIEND
   BLOCKED
 }

@@ -5,7 +5,7 @@ CREATE TYPE "ChannelRole" AS ENUM ('OWNER', 'ADMIN', 'DEFAULT', 'INVITED', 'BANN
 CREATE TYPE "ChannelKind" AS ENUM ('DIRECT', 'PROTECTED', 'PRIVATE', 'PUBLIC');
 
 -- CreateEnum
-CREATE TYPE "RelationKind" AS ENUM ('FRIENDS', 'INVITE', 'BLOCKED');
+CREATE TYPE "RelationKind" AS ENUM ('FRIEND', 'BLOCKED');
 
 -- CreateTable
 CREATE TABLE "Relationship" (

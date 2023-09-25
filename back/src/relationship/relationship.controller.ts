@@ -1,14 +1,14 @@
-import { Controller,
+import {
+	Controller,
 	Get,
 	Post,
+	Delete,
 	Req,
-	Body,
 	UseGuards,
 	Param,
 	ParseIntPipe,
 	ValidationPipe,
-	UsePipes,
-	ForbiddenException
+	UsePipes
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { RelationshipService } from './relationship.service';
@@ -19,7 +19,7 @@ import { Relationship } from '@prisma/client';
 @UseGuards(...AuthenticatedGuard)
 export class RelationshipController {
 	constructor(private readonly relationshipService: RelationshipService) {}
-	
+
 	@Get()
 	async getAll(@Req() req: Request): Promise<Relationship[]> {
 		return await this.relationshipService.getAll(req.user.id);
@@ -36,7 +36,8 @@ export class RelationshipController {
 	}
 
 	@Get(':id')
-	async getRelationShip(@Req() req: Request,
+	async getRelationShip(
+		@Req() req: Request,
 		@Param('id', ParseIntPipe) targetId: number
 		//@Req() req: Request,
 	): Promise<Relationship> {
@@ -56,10 +57,9 @@ export class RelationshipController {
 		return await this.relationshipService.block(req.user.id, targetId);
 	}
 
-	@Post(':id/remove')
+	@Delete(':id')
 	@UseGuards(...AuthenticatedGuard)
 	async remove(@Req() req: Request, @Param('id', ParseIntPipe) targetId: number) {
 		return await this.relationshipService.remove(req.user.id, targetId);
 	}
 }
-

@@ -6,7 +6,7 @@ import { RelationshipService } from './relationship.service';
 
 @Module({
 	imports: [AuthModule, PrismaModule],
-  controllers: [RelationshipController],
-  providers: [RelationshipService]
+	controllers: [RelationshipController],
+	providers: [RelationshipService]
 })
 export class RelationshipModule {}

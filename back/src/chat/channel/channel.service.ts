@@ -4,7 +4,7 @@ import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@pri
 
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
-import { ChannelCreationDto } from '@type/channel.dto';
+import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
 import { ChatService } from '@chat/chat.service';
 
 @Injectable()
@@ -147,26 +147,31 @@ export class ChannelService {
 	}
 
 	async createChannel(user: User, data: ChannelCreationDto) {
-		return await this.prisma.channel.create({
-			data: {
-				name: data.name,
-				password: data.password,
-				kind: data.kind,
-				channelConnection: {
-					create: {
-						userId: user.id,
-						role: ChannelRole.OWNER
-					}
-				}
-			},
-			include: { channelConnection: true }
-		})
-		.catch(() => {
-			throw new BadRequestException('Cannot create channel', {
-				description: 'Channel already exists'
+		if (data.kind === ChannelKind.PROTECTED && data.password === undefined) {
+			throw new ForbiddenException('Cannot create channel', {
+				description: 'A protected channel needs a password'
 			});
-		});
-
+		}
+		return await this.prisma.channel
+			.create({
+				data: {
+					name: data.name,
+					password: data.password,
+					kind: data.kind,
+					channelConnection: {
+						create: {
+							userId: user.id,
+							role: ChannelRole.OWNER
+						}
+					}
+				},
+				include: { channelConnection: true }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot create channel', {
+					description: 'Channel already exists'
+				});
+			});
 	}
 
 	async joinChannel(user: User, channel: Channel, password?: string): Promise<ChannelConnection> {
@@ -194,7 +199,7 @@ export class ChannelService {
 	}
 
 	async quit(user: User, targetChannelId: number) {
-		const channel = await this.prisma.channel.findFirst({
+		const foundChannel = await this.prisma.channel.findFirst({
 			where: {
 				AND: [{ id: targetChannelId }, { NOT: [{ kind: ChannelKind.DIRECT }] }]
 			},
@@ -206,11 +211,39 @@ export class ChannelService {
 				}
 			}
 		});
-		if (!channel) {
+		if (!foundChannel) {
 			console.log('1: Channel not found.');
 			throw new ForbiddenException('Cannot quit channel', {
 				cause: new Error(),
 				description: 'Channel does not exist'
+			});
+		}
+		if (this.isUserOwner(user.id, foundChannel.channelConnection)) {
+			let newOwner = await this.prisma.channelConnection.findFirst({
+				where: {
+					AND: [{ channelId: targetChannelId }, { role: ChannelRole.ADMIN }]
+				}
+			});
+			if (!newOwner) {
+				newOwner = await this.prisma.channelConnection.findFirst({
+					where: {
+						AND: [{ channelId: targetChannelId }, { role: ChannelRole.DEFAULT }]
+					}
+				});
+			}
+			if (!newOwner) {
+				await this.prisma.channelConnection.deleteMany({
+					where: { channelId: targetChannelId }
+				});
+				await this.prisma.channel.delete({ where: { id: targetChannelId } });
+				return;
+			}
+			await this.prisma.channelConnection.update({
+				where: { connectionId: { userId: newOwner.userId, channelId: newOwner.channelId } },
+				data: { role: ChannelRole.OWNER }
+			});
+			await this.prisma.channelConnection.delete({
+				where: { connectionId: { userId: user.id, channelId: targetChannelId } }
 			});
 		} else {
 			console.log('3: Found Channel.');
@@ -225,7 +258,7 @@ export class ChannelService {
 					]
 				}
 			});
-			if (channel.channelConnection.length === 1) {
+			if (foundChannel.channelConnection.length === 1) {
 				console.log('4: Channel is now empty, deleting it.');
 				await this.prisma.channel.delete({ where: { id: targetChannelId } });
 			}
@@ -347,5 +380,41 @@ export class ChannelService {
 			});
 		this.chatService.emitToUser(targetId, 'chat:ban', banned);
 		return banned;
+	}
+
+	async updateChannel(userId: number, targetChannelId: number, data: ChannelDto): Promise<Channel> {
+		const foundChannel = await this.prisma.channel.findUnique({
+			where: { id: targetChannelId },
+			include: { channelConnection: true }
+		});
+		if (!foundChannel) {
+			throw new ForbiddenException('Cannot update channel', {
+				description: 'Channel does not exist'
+			});
+		}
+		if (!this.isUserOwner(userId, foundChannel.channelConnection)) {
+			throw new ForbiddenException('Cannot update channel', {
+				description: 'Only the owner can update the channel'
+			});
+		}
+		if (data.kind === ChannelKind.PROTECTED && data.password === undefined) {
+			throw new ForbiddenException('Cannot update channel', {
+				description: 'A protected channel needs a password'
+			});
+		}
+		return this.prisma.channel
+			.update({
+				where: { id: targetChannelId },
+				data: {
+					name: data.name,
+					kind: data.kind,
+					password: data.password
+				}
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot update channel', {
+					description: 'Something went horribly wrong'
+				});
+			});
 	}
 }

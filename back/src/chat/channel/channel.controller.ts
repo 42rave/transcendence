@@ -2,6 +2,7 @@ import {
 	Controller,
 	Get,
 	Post,
+	Patch,
 	Req,
 	Body,
 	UseGuards,
@@ -11,7 +12,7 @@ import {
 	UsePipes
 } from '@nestjs/common';
 
-import { ChannelCreationDto } from '@type/channel.dto';
+import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
 import type { Request } from '@type/request';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { ChannelService } from './channel.service';
@@ -34,55 +35,66 @@ export class ChannelController {
 		return await this.channelService.getAllChannelConnections();
 	}
 
-	@Get(':id/connection')
+	@Patch(':channelId')
+	@UseGuards(...AuthenticatedGuard)
+	@UsePipes(new ValidationPipe())
+	async updateChannel(
+		@Req() req: Request,
+		@Param('channelId', ParseIntPipe) channelId: number,
+		@Body() data: ChannelDto
+	): Promise<Channel> {
+		return await this.channelService.updateChannel(req.user.id, channelId, data);
+	}
+
+	@Get(':channelId/connection')
 	@UseGuards(...AuthenticatedGuard, IsInChannelGuard)
-	async getChannelConnection(@Param('id', ParseIntPipe) channelId: number): Promise<ChannelConnection[]> {
+	async getChannelConnection(@Param('channelId', ParseIntPipe) channelId: number): Promise<ChannelConnection[]> {
 		return await this.channelService.getChannelConnections(channelId);
 	}
 
-	@Post(':id/join')
+	@Post(':channelId/join')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(new ValidationPipe())
-	async join(@Param('id', ParseIntPipe) channelId: number, @Req() req: Request, password: string) {
+	async join(@Param('channelId', ParseIntPipe) channelId: number, @Req() req: Request, password: string) {
 		return await this.channelService.join(req.user, channelId, password);
 	}
 
-	@Post(':id/quit')
+	@Post(':channelId/quit')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(new ValidationPipe())
-	async quit(@Param('id', ParseIntPipe) channelId: number, @Req() req: Request) {
+	async quit(@Param('channelId', ParseIntPipe) channelId: number, @Req() req: Request) {
 		return await this.channelService.quit(req.user, channelId);
 	}
 
-	@Post(':id/invite/:userid')
+	@Post(':channelId/invite/:userId')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(new ValidationPipe())
 	async invite(
-		@Param('id', ParseIntPipe) channelId: number,
+		@Param('channelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userid', ParseIntPipe) userId: number
+		@Param('userId', ParseIntPipe) userId: number
 	) {
 		return await this.channelService.invite(req.user, channelId, userId);
 	}
 
-	@Post(':id/kick/:userid')
+	@Post(':channelId/kick/:userId')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(new ValidationPipe())
 	async kick(
-		@Param('id', ParseIntPipe) channelId: number,
+		@Param('channelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userid', ParseIntPipe) userId: number
+		@Param('userId', ParseIntPipe) userId: number
 	) {
 		return await this.channelService.kick(req.user, channelId, userId);
 	}
 
-	@Post(':id/ban/:userid')
+	@Post(':channelId/ban/:userId')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(new ValidationPipe())
 	async ban(
-		@Param('id', ParseIntPipe) channelId: number,
+		@Param('channelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userid', ParseIntPipe) userId: number
+		@Param('userId', ParseIntPipe) userId: number
 	) {
 		return await this.channelService.ban(req.user, channelId, userId);
 	}

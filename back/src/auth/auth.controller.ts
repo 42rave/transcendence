@@ -37,6 +37,12 @@ export class AuthController {
 		return { ...req.user, twoFALogged: req.twoFALogged };
 	}
 
+	@Get('totp')
+	@UseGuards(JwtGuard)
+	async createOrGetTotp(@Req() req: Request) {
+		return this.authService.generateOrGetTotp(req.user);
+	}
+
 	@Post('totp')
 	@UseGuards(JwtGuard)
 	async generateTotp(@Req() req: Request) {
@@ -46,11 +52,12 @@ export class AuthController {
 	@Post('totp/verify')
 	@UseGuards(JwtGuard, AuthGuard('totp'))
 	async verifyTotp(@Req() req: Request, @Res() res: Response) {
-		const token: { access_token: string } = await this.authService.validateUser(req.user, true);
+		const user = await this.userService.enableTotp(req.user.id);
+		const token: { access_token: string } = await this.authService.validateUser(user, true);
 		res
 			.cookie('access_token', token.access_token, { httpOnly: true })
 			.status(200)
-			.json({ ...(await this.userService.enableTotp(req.user.id)), twoFALogged: true });
+			.json({ ...user, twoFALogged: true });
 	}
 
 	@Delete('totp')

@@ -57,4 +57,22 @@ export class AuthService {
 			otpauth
 		};
 	}
+
+	async generateOrGetTotp(user: User) {
+		if (user.twoFAEnabled)
+			throw new ForbiddenException('Cannot get the secret', {
+				description: "You can't get the secret since 2fa is enabled"
+			});
+		const secret = await this.userService.getSecret(user.id);
+		if (!secret) return this.generateTotp(user);
+		const otpauth = `otpauth://totp/Transcendence:${user.username}?secret=${encode(
+			secret.secret
+		)}&issuer=Transcendence`;
+		return {
+			secret: secret.secret,
+			iv: secret.iv,
+			qr_code: await qrcode.toDataURL(otpauth),
+			otpauth
+		};
+	}
 }

@@ -9,12 +9,11 @@ CREATE TYPE "RelationKind" AS ENUM ('FRIENDS', 'INVITE', 'BLOCKED');
 
 -- CreateTable
 CREATE TABLE "Relationship" (
-    "id" SERIAL NOT NULL,
     "senderId" INTEGER NOT NULL,
     "receiverId" INTEGER NOT NULL,
     "kind" "RelationKind",
 
-    CONSTRAINT "Relationship_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Relationship_pkey" PRIMARY KEY ("senderId","receiverId")
 );
 
 -- CreateTable
@@ -30,14 +29,13 @@ CREATE TABLE "Channel" (
 
 -- CreateTable
 CREATE TABLE "ChannelConnection" (
-    "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "channelId" INTEGER NOT NULL,
     "role" "ChannelRole" NOT NULL,
     "muted" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "ChannelConnection_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ChannelConnection_pkey" PRIMARY KEY ("userId","channelId")
 );
 
 -- CreateTable

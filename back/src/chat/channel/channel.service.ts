@@ -160,7 +160,13 @@ export class ChannelService {
 				}
 			},
 			include: { channelConnection: true }
+		})
+		.catch(() => {
+			throw new BadRequestException('Cannot create channel', {
+				description: 'Channel already exists'
+			});
 		});
+
 	}
 
 	async joinChannel(user: User, channel: Channel, password?: string): Promise<ChannelConnection> {

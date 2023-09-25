@@ -89,10 +89,9 @@ export default defineNuxtComponent({
           </div>
         </div>
       </div>
-      <div v-else-if="show === TotpDrawer.QR" class="mt-2 mb-4">
+      <div v-else-if="show === TotpDrawer.QR" class="totp-enable mt-2 mb-4 d-flex flex-column">
         <v-divider class="my-3 w-100" thickness="3"></v-divider>
-        <!-- TODO: Implement the QR code here -->
-        Wonderful QR code
+        <WidgetTotpEnable @totp:hide="() => {onTotpHide(); totp = true}"/>
       </div>
     </div>
   </div>
@@ -102,6 +101,9 @@ export default defineNuxtComponent({
 .totp-box {
   background-color: #212121;
   border-radius: 0.5rem;
+}
+.totp-enable {
+  gap: 1rem;
 }
 .description {
   width: 40%;

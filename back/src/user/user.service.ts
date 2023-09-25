@@ -59,6 +59,7 @@ export class UserService {
 	}
 
 	async disableTotp(userId: number): Promise<User> {
+		await this.prisma.otp.delete({ where: { userId } }).catch(() => {});
 		return this.prisma.user.update({ where: { id: userId }, data: { twoFAEnabled: false } });
 	}
 }

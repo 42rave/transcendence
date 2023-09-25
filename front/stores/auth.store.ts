@@ -36,6 +36,7 @@ export const useAuthStore = defineStore('auth', {
         method: 'POST',
         credentials: 'include',
       }).then((res) => {
+        console.log(res);
         this.user = res as User;
         return true;
       }).catch(() => {

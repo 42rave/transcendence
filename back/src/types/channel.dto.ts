@@ -5,7 +5,7 @@ import { ChannelKind } from '@prisma/client';
 export class DirectChannelDto {
 	@IsNotEmpty()
 	@IsNumber()
-	firstId: number; 
+	firstId: number;
 
 	@IsNotEmpty()
 	@IsNumber()
@@ -14,8 +14,8 @@ export class DirectChannelDto {
 	@IsEnum(ChannelKind)
 	@IsNotEmpty()
 	@Equals(ChannelKind[ChannelKind.DIRECT])
-	kind: ChannelKind;	@IsString()
-
+	kind: ChannelKind;
+	@IsString()
 	@IsString()
 	@IsOptional()
 	socketId: string;
@@ -24,21 +24,21 @@ export class DirectChannelDto {
 export class ChannelDto {
 	@IsNumber()
 	@IsNotEmpty()
-	id: number; 
+	id: number;
 
 	@IsString()
 	@IsNotEmpty()
 	name: string;
 
-	@ValidateIf(o => o.kind === ChannelKind.PROTECTED)
+	@ValidateIf((o) => o.kind === ChannelKind.PROTECTED)
 	@IsNotEmpty()
 	password: string;
 
 	@IsEnum(ChannelKind)
 	@IsNotEmpty()
 	@NotEquals(ChannelKind[ChannelKind.DIRECT])
-	kind: ChannelKind;	@IsString()
-
+	kind: ChannelKind;
+	@IsString()
 	@IsString()
 	@IsOptional()
 	socketId: string;
@@ -49,7 +49,7 @@ export class ChannelCreationDto {
 	@IsNotEmpty()
 	name: string;
 
-	@ValidateIf(o => o.kind === ChannelKind.PROTECTED)
+	@ValidateIf((o) => o.kind === ChannelKind.PROTECTED)
 	@IsNotEmpty()
 	password: string;
 

@@ -4,10 +4,13 @@ import { ArgumentMetadata, CanActivate, ExecutionContext, Injectable, ParseIntPi
 @Injectable()
 export class IsAdminGuard implements CanActivate {
 	constructor(private readonly channelService: ChannelService) {}
-	
+
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
-		const targetChannelId: number = await new ParseIntPipe().transform(request.params.targetChannelId, {} as ArgumentMetadata);
+		const targetChannelId: number = await new ParseIntPipe().transform(
+			request.params.targetChannelId,
+			{} as ArgumentMetadata
+		);
 		const targetUserId = request.user.id;
 		return await this.channelService.isUserAdminInChannel(targetUserId, targetChannelId);
 	}

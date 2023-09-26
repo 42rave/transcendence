@@ -46,34 +46,25 @@ export class ChannelService {
 	async isUserOwnerInChannel(targetUserId: number, targetChannelId: number): Promise<boolean> {
 		const channelConnection = await this.prisma.channelConnection.findFirst({
 			where: {
-				AND:
-				[
-					{ userId: targetUserId },
-					{ channelId: targetChannelId },
-					{ role: ChannelRole.OWNER },
-				]
+				AND: [{ userId: targetUserId }, { channelId: targetChannelId }, { role: ChannelRole.OWNER }]
 			}
 		});
-		return !!(channelConnection)
+		return !!channelConnection;
 	}
 
 	async isUserAdminInChannel(targetUserId: number, targetChannelId: number): Promise<boolean> {
 		const channelConnection = await this.prisma.channelConnection.findFirst({
 			where: {
-				AND:
-				[
+				AND: [
 					{ userId: targetUserId },
 					{ channelId: targetChannelId },
 					{
-						OR: [
-							{ role: ChannelRole.OWNER },
-							{ role: ChannelRole.ADMIN },
-						]
+						OR: [{ role: ChannelRole.OWNER }, { role: ChannelRole.ADMIN }]
 					}
 				]
 			}
 		});
-		return !!(channelConnection);
+		return !!channelConnection;
 	}
 
 	isUserOwner(userId: number, channelConnectionList: ChannelConnection[]): boolean {
@@ -166,26 +157,23 @@ export class ChannelService {
 		return channel.password === password;
 	}
 
-	async updateChannelRole(
-		role: ChannelRole,
-		targetChannelId: number,
-		targetUserId: number
-	) {
-		return await this.prisma.channelConnection.update({
-			where: {
-				connectionId: {
-					userId: targetUserId,
-					channelId: targetChannelId
-				}
-			},
-			data: { role: role },
-			include: { channel: true }
-		})
-		.catch(() => {
-			throw new BadRequestException('Cannot update user status', {
-				description: 'Something went wrong, channel or user do no exist'
+	async updateChannelRole(role: ChannelRole, targetChannelId: number, targetUserId: number) {
+		return await this.prisma.channelConnection
+			.update({
+				where: {
+					connectionId: {
+						userId: targetUserId,
+						channelId: targetChannelId
+					}
+				},
+				data: { role: role },
+				include: { channel: true }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot update user status', {
+					description: 'Something went wrong, channel or user do no exist'
+				});
 			});
-		});
 	}
 
 	async createChannel(user: User, data: ChannelCreationDto) {
@@ -456,7 +444,7 @@ export class ChannelService {
 	}
 
 	async transfer(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
-		this.updateChannelRole(ChannelRole.ADMIN, user.id, targetUserId)
+		this.updateChannelRole(ChannelRole.ADMIN, user.id, targetUserId);
 		return await this.updateChannelRole(ChannelRole.OWNER, targetChannelId, targetUserId);
 	}
 
@@ -475,7 +463,7 @@ export class ChannelService {
 				description: 'Cannot demote the owner'
 			});
 		}
-	return await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, targetUserId);
+		return await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, targetUserId);
 	}
 
 	async mute(user: User, targetChannelId: number, targetUserId: number, time: Date): Promise<ChannelConnection> {

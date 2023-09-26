@@ -11,7 +11,6 @@ export default defineNuxtComponent({
     input: '',
   }),
   beforeMount() {
-    this.config = useRuntimeConfig();
     this.socket?.on('test:message', (data: { message: string }) => {
       const size = this.messageList.length;
       const message = data.message;
@@ -25,7 +24,7 @@ export default defineNuxtComponent({
   methods: {
     sendMessage() {
       if (!this.input) return;
-      $fetch(new URL('/chat/sendTest', this.config.app.API_URL).toString(), {
+      $fetch(`${this.$config.app.API_URL}/chat/sendTest`, {
         credentials: 'include',
         method: 'POST',
         body: JSON.stringify({ message: this.input }),

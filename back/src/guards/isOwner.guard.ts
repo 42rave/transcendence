@@ -7,8 +7,8 @@ export class IsOwnerGuard implements CanActivate {
 	
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
-		const channelId: number = await new ParseIntPipe().transform(request.params.id, {} as ArgumentMetadata);
-		const userId = request.user.id;
-		return await this.channelService.isUserOwnerInChannel(userId, channelId);
+		const targetChannelId: number = await new ParseIntPipe().transform(request.params.targetChannelId, {} as ArgumentMetadata);
+		const targetUserId = request.user.id;
+		return await this.channelService.isUserOwnerInChannel(targetUserId, targetChannelId);
 	}
 }

@@ -37,113 +37,113 @@ export class ChannelController {
 		return await this.channelService.getAllChannelConnections();
 	}
 
-	@Patch(':channelId')
+	@Patch(':targetChannelId')
 	@UseGuards(...AuthenticatedGuard, IsOwnerGuard)
 	@UsePipes(ValidationPipe)
 	async updateChannel(
 		@Req() req: Request,
-		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Body() data: ChannelDto
 	): Promise<Channel> {
 		return await this.channelService.updateChannel(req.user.id, channelId, data);
 	}
 
-	@Get(':channelId/connection')
+	@Get(':targetChannelId/connection')
 	@UseGuards(...AuthenticatedGuard, IsInChannelGuard)
-	async getChannelConnection(@Param('channelId', ParseIntPipe) channelId: number): Promise<ChannelConnection[]> {
+	async getChannelConnection(@Param('targetChannelId', ParseIntPipe) channelId: number): Promise<ChannelConnection[]> {
 		return await this.channelService.getChannelConnections(channelId);
 	}
 
-	@Post(':channelId/join')
+	@Post(':targetChannelId/join')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(ValidationPipe)
-	async join(@Param('channelId', ParseIntPipe) channelId: number, @Req() req: Request, password: string) {
+	async join(@Param('targetChannelId', ParseIntPipe) channelId: number, @Req() req: Request, password: string) {
 		return await this.channelService.join(req.user, channelId, password);
 	}
 
-	@Post(':channelId/quit')
+	@Post(':targetChannelId/quit')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(ValidationPipe)
-	async quit(@Param('channelId', ParseIntPipe) channelId: number, @Req() req: Request) {
+	async quit(@Param('targetChannelId', ParseIntPipe) channelId: number, @Req() req: Request) {
 		return await this.channelService.quit(req.user, channelId);
 	}
 
-	@Post(':channelId/invite/:userId')
+	@Post(':targetChannelId/invite/:targetUserId')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(ValidationPipe)
 	async invite(
-		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userId', ParseIntPipe) userId: number
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
 	) {
-		return await this.channelService.invite(req.user, channelId, userId);
+		return await this.channelService.invite(req.user, channelId, targetUserId);
 	}
 
-	@Post(':channelId/kick/:userId')
+	@Post(':targetChannelId/kick/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(ValidationPipe)
 	async kick(
-		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userId', ParseIntPipe) userId: number
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
 	) {
-		return await this.channelService.kick(req.user, channelId, userId);
+		return await this.channelService.kick(req.user, channelId, targetUserId);
 	}
 
-	@Post(':channelId/ban/:userId')
+	@Post(':targetChannelId/ban/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(ValidationPipe)
 	async ban(
-		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userId', ParseIntPipe) userId: number
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
 	) {
-		return await this.channelService.ban(req.user, channelId, userId);
+		return await this.channelService.ban(req.user, channelId, targetUserId);
 	}
 
-	@Post(':channelId/transfer/:userId')
+	@Post(':targetChannelId/transfer/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsOwnerGuard)
 	@UsePipes(ValidationPipe)
 	async transfer(
-		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userId', ParseIntPipe) userId: number
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
 	) {
-		return await this.channelService.transfer(req.user, channelId, userId);
+		return await this.channelService.transfer(req.user, channelId, targetUserId);
 	}
 
-	@Post(':channelId/promote/:userId')
+	@Post(':targetChannelId/promote/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(ValidationPipe)
 	async promote(
-		@Param('channelId', ParseIntPipe) targetChannelId: number,
+		@Param('targetChannelId', ParseIntPipe) targetChannelId: number,
 		@Req() req: Request,
-		@Param('userId', ParseIntPipe) userId: number
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
 	) {
-		return await this.channelService.promote(req.user, targetChannelId, userId);
+		return await this.channelService.promote(req.user, targetChannelId, targetUserId);
 	}
 
-	@Post(':channelId/demote/:userId')
+	@Post(':targetChannelId/demote/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(ValidationPipe)
 	async demote(
-		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userId', ParseIntPipe) userId: number
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
 	) {
-		return await this.channelService.demote(req.user, channelId, userId);
+		return await this.channelService.demote(req.user, channelId, targetUserId);
 	}
 
-	@Post(':channelId/mute/:userId')
+	@Post(':targetChannelId/mute/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(ValidationPipe)
 	async mute(
-		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('userId', ParseIntPipe) userId: number,
+		@Param('targetUserId', ParseIntPipe) targetUserId: number,
 		@Body() muteTime: Date
 	) {
-		return await this.channelService.mute(req.user, channelId, userId, muteTime);
+		return await this.channelService.mute(req.user, channelId, targetUserId, muteTime);
 	}
 
 	@Post()

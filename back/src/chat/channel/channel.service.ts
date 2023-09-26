@@ -477,4 +477,18 @@ export class ChannelService {
 		}
 	return await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, targetUserId);
 	}
+
+	async mute(user: User, targetChannelId: number, targetUserId: number, time: Date): Promise<ChannelConnection> {
+		if (await this.isUserOwnerInChannel(targetUserId, targetChannelId)) {
+			throw new ForbiddenException('Cannot mute user', {
+				description: 'Cannot mute the owner'
+			});
+		}
+		return await this.prisma.channelConnection.update({
+			where: {
+				connectionId: { userId: targetUserId, channelId: targetChannelId }
+			},
+			data: { muted: time }
+		});
+	}
 }

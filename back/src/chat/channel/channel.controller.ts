@@ -39,7 +39,7 @@ export class ChannelController {
 
 	@Patch(':channelId')
 	@UseGuards(...AuthenticatedGuard, IsOwnerGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async updateChannel(
 		@Req() req: Request,
 		@Param('channelId', ParseIntPipe) channelId: number,
@@ -56,21 +56,21 @@ export class ChannelController {
 
 	@Post(':channelId/join')
 	@UseGuards(...AuthenticatedGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async join(@Param('channelId', ParseIntPipe) channelId: number, @Req() req: Request, password: string) {
 		return await this.channelService.join(req.user, channelId, password);
 	}
 
 	@Post(':channelId/quit')
 	@UseGuards(...AuthenticatedGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async quit(@Param('channelId', ParseIntPipe) channelId: number, @Req() req: Request) {
 		return await this.channelService.quit(req.user, channelId);
 	}
 
 	@Post(':channelId/invite/:userId')
 	@UseGuards(...AuthenticatedGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async invite(
 		@Param('channelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
@@ -81,7 +81,7 @@ export class ChannelController {
 
 	@Post(':channelId/kick/:userId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async kick(
 		@Param('channelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
@@ -92,7 +92,7 @@ export class ChannelController {
 
 	@Post(':channelId/ban/:userId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async ban(
 		@Param('channelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
@@ -103,7 +103,7 @@ export class ChannelController {
 
 	@Post(':channelId/transfer/:userId')
 	@UseGuards(...AuthenticatedGuard, IsOwnerGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async transfer(
 		@Param('channelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
@@ -114,7 +114,7 @@ export class ChannelController {
 
 	@Post(':channelId/promote/:userId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async promote(
 		@Param('channelId', ParseIntPipe) targetChannelId: number,
 		@Req() req: Request,
@@ -122,9 +122,10 @@ export class ChannelController {
 	) {
 		return await this.channelService.promote(req.user, targetChannelId, userId);
 	}
+
 	@Post(':channelId/demote/:userId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async demote(
 		@Param('channelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
@@ -133,9 +134,21 @@ export class ChannelController {
 		return await this.channelService.demote(req.user, channelId, userId);
 	}
 
+	@Post(':channelId/mute/:userId')
+	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
+	@UsePipes(ValidationPipe)
+	async mute(
+		@Param('channelId', ParseIntPipe) channelId: number,
+		@Req() req: Request,
+		@Param('userId', ParseIntPipe) userId: number,
+		@Body() muteTime: Date
+	) {
+		return await this.channelService.mute(req.user, channelId, userId, muteTime);
+	}
+
 	@Post()
 	@UseGuards(...AuthenticatedGuard)
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	async create(@Req() req: Request, @Body() data: ChannelCreationDto) {
 		return await this.channelService.createChannel(req.user, data);
 	}

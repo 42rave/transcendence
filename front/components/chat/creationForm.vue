@@ -3,10 +3,17 @@
 export default defineNuxtComponent({
   props: ['socket'],
   data: () => ({
+    valid: false,
     config: useRuntimeConfig(),
     channelName: '',
-    channelKind: '',
+    channelKind: 'PUBLIC',
     protectedPassword: '',
+    nameRule: [
+      input => { 
+        if (!input)
+          return 'Channel must have a name';
+        return true;
+      }],
   }),
 
   methods: {
@@ -20,20 +27,35 @@ export default defineNuxtComponent({
           kind: this.channelKind,
           password: this.protectedPassword,
         }
-      }).catch((err) => {console.log('test', err.message)});
+      }).catch((err) => {
+        if (err.statusCode == 500)
+        {
+          this.$event('alert:show', {title: 'Channel already exists', message: 'choose another name'});
+          return;
+        }
+        
+        this.$event('alert:show', {title: 'Invalid input', message: 'try again'})
+      });
         if (res) {
-          console.log(res);
-          
        		this.$emit("channelList:update", res);
+          this.$event('alert:show', {title: 'Channel successfully created', message: 'chat away'})
+          this.$refs.form.reset();
         }
     },
+
+    async validate() {
+      const { valid } = await this.$refs.form.validate();
+      console.log(valid);
+      if (valid)
+        this.createChannel();
+    }
 
   }
 })
 </script>
 
 <template>
-          <v-form @submit.prevent="createChannel">
+          <v-form v-model="valid" fast-fail @submit.prevent ref="form">
              <v-container>
                 <v-row>
                   <v-col cols="12">
@@ -41,7 +63,7 @@ export default defineNuxtComponent({
                     v-model="channelName"
                     label="Name of your channel"
                     required
-                    hide-details
+                    :rules="nameRule"
 
                     ></v-text-field>
                   </v-col>
@@ -62,8 +84,11 @@ export default defineNuxtComponent({
                       required
                     ></v-text-field>
                   </v-col>
+
                   <v-col cols="12">
-                    <v-btn type="submit" block>Create Channel</v-btn>
+                    <v-btn type="submit" 
+                    @click="validate"
+                    block>Create Channel</v-btn>
                   </v-col>
                 </v-row>
     </v-container>

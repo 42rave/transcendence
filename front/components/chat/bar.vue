@@ -28,6 +28,17 @@ export default defineNuxtComponent({
 
     addNewChannel(newChannel) {
       this.channelList.push(newChannel);
+    },
+
+    async joinChannel(id) {
+      const res = await $fetch(`http://localhost:3000/chat/channel/${id}/join`, {
+        credentials: 'include',
+        method: 'POST',
+      }).catch((err) => {
+          console.log("oopsie");
+      }) ;
+        if (res)
+          console.log(res);
     }
   },
     watch: {
@@ -48,7 +59,7 @@ export default defineNuxtComponent({
 </script>
 
 <template>
-  <v-navigation-drawer v-model=_drawer location="right" width="350">
+  <v-navigation-drawer v-model=_drawer location="right" width="320">
     <div class="d-flex flex-row">
       <v-tabs v-model="tab" direction="vertical">
       	<v-tab prepend-icon="mdi-forum" value="channels"></v-tab>
@@ -58,13 +69,20 @@ export default defineNuxtComponent({
       <v-divider :thickness="2" inset vertical></v-divider>
       <v-window v-model="tab">
       	<v-window-item value="channels">
-          <v-card flat>
+          <v-card flat width="230">
             <v-card-text>
-              <v-list>
-                <li v-for="channel in channelList" :key="channel.id">
-                  {{channel.name}}
-                  <v-divider></v-divider>
-                </li>
+              <v-list lines="two">
+                <v-list-item 
+                  v-for="channel in channelList" :key="channel.id">
+                    {{channel.name}}
+                  <template v-slot:append>
+                    <v-btn
+                      flat
+                      icon="mdi-location-enter"
+                      @click="joinChannel(channel.id)"
+                    ></v-btn>
+                  </template>
+                </v-list-item>
                </v-list>
             </v-card-text>
           </v-card>

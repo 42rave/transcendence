@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   runtimeConfig: {
       app: {
-          API_URL: process.env.API_URL || 'http://localhost:3000'
+          API_URL: process.env.API_URL || 'http://localhost/api'
       },
   },
   css: [
@@ -27,7 +27,7 @@ export default defineNuxtConfig({
   io: {
     sockets: [{
       name: 'chat',
-      url: process.env.API_URL || 'http://localhost:3000',
+      url: process.env.WS_BASE_URL || 'ws://localhost/',
     }]
   }
 })

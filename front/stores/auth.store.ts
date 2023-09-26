@@ -9,30 +9,30 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => !!state.user,
   },
   actions: {
-    login() {
+    async login() {
       const config = useRuntimeConfig();
-      window.location.href = new URL('/auth/login', config.app.API_URL as string).toString();
+      window.location.href = `${config.app.API_URL}/auth/login`;
     },
     async logout() {
       const config = useRuntimeConfig();
-      await $fetch(new URL('/auth/logout', config.app.API_URL as string).toString(), {
-        credentials: 'include',
+      await $fetch(`${config.app.API_URL}/auth/logout`, {
+          credentials: 'include',
       }).then(() => {
         this.user = null;
       }).catch(() => {});
     },
     async fetchUser() {
       const config = useRuntimeConfig();
-      await $fetch(new URL('/auth/me', config.app.API_URL).toString(), {
-        credentials: 'include',
+      await $fetch(`${config.app.API_URL}/auth/me`, {
+          credentials: 'include',
       }).then((res) => {
-        this.user = res as User;
+          this.user = res as User;
       }).catch(() => {});
     },
     async verifyTotp(code: string) {
       const config = useRuntimeConfig();
 
-      return await $fetch(new URL(`/auth/totp/verify?code=${code}`, config.app.API_URL).toString(), {
+      return await $fetch(`${config.app.API_URL}/auth/totp/verify?code=${code}`, {
         method: 'POST',
         credentials: 'include',
       }).then((res) => {
@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', {
     async disableTotp(code: string) {
       const config = useRuntimeConfig();
 
-      return await $fetch(new URL(`/auth/totp?code=${code}`, config.app.API_URL).toString(), {
+      return await $fetch(`${config.app.API_URL}/auth/totp?code=${code}`, {
         method: 'DELETE',
         credentials: 'include',
       }).then((res) => {

@@ -18,6 +18,8 @@ import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { ChannelService } from './channel.service';
 import { Channel, ChannelConnection } from '@prisma/client';
 import { IsInChannelGuard } from '@guard/isInChannel.guard';
+import { IsOwnerGuard } from '@guard/isOwner.guard';
+import { IsAdminGuard } from '@guard/isAdmin.guard';
 
 @Controller('chat/channel')
 export class ChannelController {
@@ -36,7 +38,7 @@ export class ChannelController {
 	}
 
 	@Patch(':channelId')
-	@UseGuards(...AuthenticatedGuard)
+	@UseGuards(...AuthenticatedGuard, IsOwnerGuard)
 	@UsePipes(new ValidationPipe())
 	async updateChannel(
 		@Req() req: Request,
@@ -78,7 +80,7 @@ export class ChannelController {
 	}
 
 	@Post(':channelId/kick/:userId')
-	@UseGuards(...AuthenticatedGuard)
+	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(new ValidationPipe())
 	async kick(
 		@Param('channelId', ParseIntPipe) channelId: number,
@@ -89,7 +91,7 @@ export class ChannelController {
 	}
 
 	@Post(':channelId/ban/:userId')
-	@UseGuards(...AuthenticatedGuard)
+	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(new ValidationPipe())
 	async ban(
 		@Param('channelId', ParseIntPipe) channelId: number,
@@ -97,6 +99,38 @@ export class ChannelController {
 		@Param('userId', ParseIntPipe) userId: number
 	) {
 		return await this.channelService.ban(req.user, channelId, userId);
+	}
+
+	@Post(':channelId/transfer/:userId')
+	@UseGuards(...AuthenticatedGuard, IsOwnerGuard)
+	@UsePipes(new ValidationPipe())
+	async transfer(
+		@Param('channelId', ParseIntPipe) channelId: number,
+		@Req() req: Request,
+		@Param('userId', ParseIntPipe) userId: number
+	) {
+		return await this.channelService.transfer(req.user, channelId, userId);
+	}
+
+	@Post(':channelId/promote/:userId')
+	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
+	@UsePipes(new ValidationPipe())
+	async promote(
+		@Param('channelId', ParseIntPipe) targetChannelId: number,
+		@Req() req: Request,
+		@Param('userId', ParseIntPipe) userId: number
+	) {
+		return await this.channelService.promote(req.user, targetChannelId, userId);
+	}
+	@Post(':channelId/demote/:userId')
+	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
+	@UsePipes(new ValidationPipe())
+	async demote(
+		@Param('channelId', ParseIntPipe) channelId: number,
+		@Req() req: Request,
+		@Param('userId', ParseIntPipe) userId: number
+	) {
+		return await this.channelService.demote(req.user, channelId, userId);
 	}
 
 	@Post()

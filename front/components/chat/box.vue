@@ -11,6 +11,7 @@ export default defineNuxtComponent({
     input: '',
     config: useRuntimeConfig(),
     messageList: Array<IMessage>(),
+    
   }),
 
   methods: {

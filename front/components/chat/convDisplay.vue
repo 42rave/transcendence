@@ -38,7 +38,8 @@ export default defineNuxtComponent({
 <style>
 
 .display__messages {
-	height: 95%;
+	height: 94%;
+  background: grey;
 }
 </style>
 

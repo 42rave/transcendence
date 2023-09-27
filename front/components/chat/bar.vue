@@ -39,7 +39,24 @@ export default defineNuxtComponent({
       }) ;
         if (res)
           console.log(res);
-    }
+    },
+
+    async joinProtectedChannel(id) {
+      console.log(id, ' ', this.protectedPassword);
+      
+      const res = await $fetch(`http://localhost:3000/chat/channel/${id}/join`, {
+        credentials: 'include',
+        method: 'POST',
+        body: {
+          password: '`{this.protectedPassword}`'
+        }
+      }).catch((err) => {
+          console.log("oopsie");
+      }) ;
+        if (res)
+          console.log(res);
+    },
+
   },
     watch: {
     drawer: {
@@ -66,35 +83,38 @@ export default defineNuxtComponent({
         <v-tab prepend-icon="mdi-chat" value="private_messages"></v-tab>
         <v-tab prepend-icon="mdi-plus" value="create_channel"></v-tab>
       </v-tabs>
+
       <v-divider :thickness="2" inset vertical></v-divider>
+
       <v-window v-model="tab">
       	<v-window-item value="channels">
           <v-card flat width="230">
             <v-card-text>
               <v-list lines="two">
-                <v-list-item 
-                  v-for="channel in channelList" :key="channel.id">
+                <v-list-item v-for="channel in channelList" :key="channel.id">
+                  {{channel.name}}
                   <template v-slot:append>
-                    <v-btn v-if="channel.kind === 'PUBLIC'"
-                      flat
-                      icon="mdi-location-enter"
-                      @click="joinChannel(channel.id)"
-                    ></v-btn>
-                    <v-btn v-if="channel.kind === 'PROTECTED'"
-                      flat
-                      icon="mdi-key-chain-variant"
-                      @click="joinProtectedChannel(channel.id)"
-                    ></v-btn>
-                    <v-btn v-if="channel.kind === 'PRIVATE'"
-                      flat
-                      icon="mdi-lock"
-                    ></v-btn>
+                    <v-btn v-if="channel.kind === 'PUBLIC'" flat icon="mdi-location-enter" @click="joinChannel(channel.id)"></v-btn>
+
+                    <v-menu v-if="channel.kind === 'PROTECTED'">
+                      <template v-slot:activator="{ props }">
+                        <v-btn flat icon="mdi-key-chain-variant" v-bind="props"></v-btn>
+                      </template>
+                        <v-form @submit.prevent>
+                          <v-text-field required hide-details v-model="protectedPassword"></v-text-field>
+                          <v-btn type="submit" block @click="joinProtectedChannel(channel.id)">Join Channel</v-btn>
+                        </v-form>
+                    </v-menu>
+
+                    <v-btn v-if="channel.kind === 'PRIVATE'" flat icon="mdi-lock"></v-btn>
+
                   </template>
                 </v-list-item>
-               </v-list>
+              </v-list>
             </v-card-text>
           </v-card>
         </v-window-item>
+
         <v-window-item value="private_messages">
           <v-card flat>
             <v-card-text>
@@ -102,6 +122,7 @@ export default defineNuxtComponent({
             </v-card-text>
           </v-card>
         </v-window-item>
+
       	<v-window-item value="create_channel">
           <ChatCreationForm @channelList:update="addNewChannel" />
         </v-window-item>

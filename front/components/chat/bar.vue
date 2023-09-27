@@ -74,12 +74,20 @@ export default defineNuxtComponent({
               <v-list lines="two">
                 <v-list-item 
                   v-for="channel in channelList" :key="channel.id">
-                    {{channel.name}}
                   <template v-slot:append>
-                    <v-btn
+                    <v-btn v-if="channel.kind === 'PUBLIC'"
                       flat
                       icon="mdi-location-enter"
                       @click="joinChannel(channel.id)"
+                    ></v-btn>
+                    <v-btn v-if="channel.kind === 'PROTECTED'"
+                      flat
+                      icon="mdi-key-chain-variant"
+                      @click="joinProtectedChannel(channel.id)"
+                    ></v-btn>
+                    <v-btn v-if="channel.kind === 'PRIVATE'"
+                      flat
+                      icon="mdi-lock"
                     ></v-btn>
                   </template>
                 </v-list-item>

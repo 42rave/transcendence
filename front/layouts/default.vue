@@ -50,8 +50,8 @@ export default defineNuxtComponent({
 
 <template>
   <v-app dark>
-    <div v-if="$auth.isAuthenticated" class="w-100 h-100">
-      <LayoutAppBar @drawer:click="drawer = !drawer" />
+    <div v-if="$auth.isAuthenticated && (!$auth.user.twoFAEnabled || $auth.user.twoFALogged)" class="w-100 h-100">
+      <LayoutAppBar @drawer:click="drawer = !drawer" :socket="socket" />
       <LayoutNavBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer" :routes="routes" />
       <v-main>
         <v-container fluid>
@@ -59,6 +59,9 @@ export default defineNuxtComponent({
         </v-container>
       </v-main>
       <LayoutAlert />
+    </div>
+    <div v-else-if="$auth.isAuthenticated && $auth.user.twoFAEnabled && !$auth.user.twoFALogged">
+      <WidgetTotpLogin :socket="socket" />
     </div>
     <div v-else>
       <WidgetLogin />

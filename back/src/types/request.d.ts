@@ -5,4 +5,5 @@ import { PaginationDto } from '@type/pagination.dto';
 export declare type Request = express.Request & {
 	user: User;
 	pagination: PaginationDto;
+	twoFALogged?: boolean;
 };

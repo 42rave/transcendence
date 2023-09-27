@@ -1,4 +1,5 @@
-import { AuthGuard, IAuthGuard } from '@nestjs/passport';
-import { Type } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { TOTPGuard } from '@guard/totp.guard';
 
-export const AuthenticatedGuard: Type<IAuthGuard>[] = [AuthGuard('jwt')];
+export const AuthenticatedGuard = [AuthGuard('jwt'), TOTPGuard];
+export const JwtGuard = AuthGuard('jwt');

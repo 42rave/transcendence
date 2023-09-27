@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNumber, IsString, IsNotEmpty } from 'class-validator';
 
 export class UserDto {
 	@IsNumber()
@@ -11,11 +11,4 @@ export class UserDto {
 	@IsString()
 	@IsNotEmpty()
 	avatar: string;
-
-	@IsString()
-	@IsOptional()
-	totpKey: string;
-
-	@IsBoolean()
-	twoFAEnabled: boolean;
 }

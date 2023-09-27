@@ -177,11 +177,6 @@ export class ChannelService {
 	}
 
 	async createChannel(user: User, data: ChannelCreationDto) {
-		if (data.kind === ChannelKind.PROTECTED && data.password === undefined) {
-			throw new ForbiddenException('Cannot create channel', {
-				description: 'A protected channel needs a password'
-			});
-		}
 		return await this.prisma.channel
 			.create({
 				data: {

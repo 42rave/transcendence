@@ -59,12 +59,10 @@ export default defineNuxtComponent({
              <v-container>
                 <v-row>
                   <v-col cols="12">
-                    <v-text-field
-                    v-model="channelName"
+                    <v-text-field v-model="channelName"
                     label="Name of your channel"
                     required
                     :rules="nameRule"
-
                     ></v-text-field>
                   </v-col>
 
@@ -77,8 +75,7 @@ export default defineNuxtComponent({
                   </v-col>
 
                   <v-col cols="12" >
-                    <v-text-field
-                      v-model="protectedPassword"
+                    <v-text-field v-model="protectedPassword"
                       label="Password (optional)"
                       hide-details
                       required
@@ -86,9 +83,7 @@ export default defineNuxtComponent({
                   </v-col>
 
                   <v-col cols="12">
-                    <v-btn type="submit" 
-                    @click="validate"
-                    block>Create Channel</v-btn>
+                    <v-btn type="submit" @click="validate" block>Create Channel</v-btn>
                   </v-col>
                 </v-row>
     </v-container>

@@ -49,7 +49,12 @@ export class ChannelService {
 				AND: [{ userId: targetUserId }, { channelId: targetChannelId }, { role: ChannelRole.OWNER }]
 			}
 		});
-		return !!channelConnection;
+		if (!channelConnection) {
+			throw new ForbiddenException('Cannot do that', {
+				description: 'User is not the channel owner'
+			});
+		}
+		return true;
 	}
 
 	async isUserAdminInChannel(targetUserId: number, targetChannelId: number): Promise<boolean> {
@@ -64,13 +69,23 @@ export class ChannelService {
 				]
 			}
 		});
-		return !!channelConnection;
+		if (!channelConnection) {
+			throw new ForbiddenException('Cannot do that', {
+				description: 'User is not an administrator of this channel'
+			});
+		}
+		return true;
 	}
 
 	async isExistingChannel(targetChannelId: number): Promise<boolean> {
 		const channel = await this.prisma.channel.findUnique({
 			where: { id: targetChannelId }
 		});
+		if (!channel) {
+			throw new ForbiddenException('Cannot find channel', {
+				description: 'Channel does not exist'
+			});
+		}
 		return !!channel
 	}
 

@@ -1,5 +1,6 @@
 import { ChannelService } from '@chat/channel/channel.service';
 import { ArgumentMetadata, CanActivate, ExecutionContext, Injectable, ParseIntPipe } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class IsChannelGuard implements CanActivate {

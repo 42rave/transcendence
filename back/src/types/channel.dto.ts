@@ -61,5 +61,5 @@ export class ChannelCreationDto {
 
 export class ChannelPasswordDto {
 	@IsString()
-	password: string
+	password: string;
 }

@@ -86,7 +86,7 @@ export class ChannelService {
 				description: 'Channel does not exist'
 			});
 		}
-		return !!channel
+		return !!channel;
 	}
 
 	isUserOwner(userId: number, channelConnectionList: ChannelConnection[]): boolean {
@@ -150,10 +150,8 @@ export class ChannelService {
 			}
 		});
 
-
 		let channelConnection = foundChannel.channelConnection[0];
-		if (!channelConnection)
-			return await this.joinChannel(user, foundChannel, password);
+		if (!channelConnection) return await this.joinChannel(user, foundChannel, password);
 
 		switch (channelConnection.role) {
 			case ChannelRole.BANNED:
@@ -229,19 +227,20 @@ export class ChannelService {
 						description: 'Incorrect password'
 					});
 		}
-		return await this.prisma.channelConnection.create({
-			data: {
-				userId: user.id,
-				channelId: channel.id,
-				role: ChannelRole.DEFAULT
-			},
-			include: { channel: true }
-		})
-		.catch(() => {
-			throw new BadRequestException('Cannot join channel', {
+		return await this.prisma.channelConnection
+			.create({
+				data: {
+					userId: user.id,
+					channelId: channel.id,
+					role: ChannelRole.DEFAULT
+				},
+				include: { channel: true }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot join channel', {
 					description: 'Something went terribly wrong.'
 				});
-		});
+			});
 	}
 
 	async quit(user: User, targetChannelId: number) {

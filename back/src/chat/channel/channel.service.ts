@@ -67,6 +67,13 @@ export class ChannelService {
 		return !!channelConnection;
 	}
 
+	async isExistingChannel(targetChannelId: number): Promise<boolean> {
+		const channel = await this.prisma.channel.findUnique({
+			where: { id: targetChannelId }
+		});
+		return !!channel
+	}
+
 	isUserOwner(userId: number, channelConnectionList: ChannelConnection[]): boolean {
 		let res: boolean = false;
 		channelConnectionList.forEach((channelConnection) => {

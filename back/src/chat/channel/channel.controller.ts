@@ -20,6 +20,7 @@ import { Channel, ChannelConnection } from '@prisma/client';
 import { IsInChannelGuard } from '@guard/isInChannel.guard';
 import { IsOwnerGuard } from '@guard/isOwner.guard';
 import { IsAdminGuard } from '@guard/isAdmin.guard';
+import { IsChannelGuard } from '@guard/isChannel.guard';
 
 @Controller('chat/channel')
 export class ChannelController {
@@ -69,7 +70,7 @@ export class ChannelController {
 	}
 
 	@Post(':targetChannelId/invite/:targetUserId')
-	@UseGuards(...AuthenticatedGuard)
+	@UseGuards(...AuthenticatedGuard, IsChannelGuard, IsAdminGuard)
 	@UsePipes(ValidationPipe)
 	async invite(
 		@Param('targetChannelId', ParseIntPipe) channelId: number,

@@ -140,8 +140,7 @@ export class ChannelService {
 	}
 
 	async join(user: User, targetChannelId: number, password?: string): Promise<ChannelConnection> {
-		// Get channel if it exists with the user connection
-		const channel = await this.prisma.channel.findUnique({
+		const foundChannel = await this.prisma.channel.findUnique({
 			where: { id: targetChannelId },
 			include: {
 				channelConnection: {
@@ -151,15 +150,10 @@ export class ChannelService {
 			}
 		});
 
-		if (!channel)
-			throw new ForbiddenException('Cannot join channel', {
-				description: 'Channel does not exist'
-			});
 
-		let channelConnection = channel.channelConnection[0];
-
-		// if the channel connection does not exist, create it
-		if (!channelConnection) return await this.joinChannel(user, channel, password);
+		let channelConnection = foundChannel.channelConnection[0];
+		if (!channelConnection)
+			return await this.joinChannel(user, foundChannel, password);
 
 		switch (channelConnection.role) {
 			case ChannelRole.BANNED:
@@ -242,6 +236,11 @@ export class ChannelService {
 				role: ChannelRole.DEFAULT
 			},
 			include: { channel: true }
+		})
+		.catch(() => {
+			throw new BadRequestException('Cannot join channel', {
+					description: 'Something went terribly wrong.'
+				});
 		});
 	}
 

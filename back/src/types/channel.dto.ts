@@ -58,3 +58,8 @@ export class ChannelCreationDto {
 	@NotEquals(ChannelKind[ChannelKind.DIRECT])
 	kind: ChannelKind;
 }
+
+export class ChannelPasswordDto {
+	@IsString()
+	password: string
+}

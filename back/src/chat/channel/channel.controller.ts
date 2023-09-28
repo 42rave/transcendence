@@ -12,7 +12,7 @@ import {
 	UsePipes
 } from '@nestjs/common';
 
-import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
+import { ChannelCreationDto, ChannelDto, ChannelPasswordDto } from '@type/channel.dto';
 import type { Request } from '@type/request';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { ChannelService } from './channel.service';
@@ -58,8 +58,8 @@ export class ChannelController {
 	@Post(':targetChannelId/join')
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(ValidationPipe)
-	async join(@Param('targetChannelId', ParseIntPipe) channelId: number, @Req() req: Request, password: string) {
-		return await this.channelService.join(req.user, channelId, password);
+	async join(@Param('targetChannelId', ParseIntPipe) channelId: number, @Req() req: Request, @Body() data: ChannelPasswordDto) {
+		return await this.channelService.join(req.user, channelId, data.password);
 	}
 
 	@Post(':targetChannelId/quit')

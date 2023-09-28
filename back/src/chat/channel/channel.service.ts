@@ -316,16 +316,6 @@ export class ChannelService {
 			where: { id: targetChannelId },
 			include: { channelConnection: true }
 		});
-		if (!channel) {
-			throw new ForbiddenException('Cannot invite user', {
-				description: 'The channel does not exist'
-			});
-		}
-		if (!this.isUserAdmin(user.id, channel.channelConnection)) {
-			throw new ForbiddenException('Cannot invite user', {
-				description: "You don't have the necessary rights to invite on this channel"
-			});
-		}
 		if (this.userHasExistingConnection(targetId, targetChannelId, channel.channelConnection)) {
 			if (this.isUserConnected(targetId, channel.channelConnection)) {
 				throw new ForbiddenException('Cannot invite user', {

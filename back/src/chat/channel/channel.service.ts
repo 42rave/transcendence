@@ -439,7 +439,7 @@ export class ChannelService {
 	}
 
 	async transfer(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
-		this.updateChannelRole(ChannelRole.ADMIN, user.id, targetUserId);
+		this.updateChannelRole(ChannelRole.ADMIN, targetChannelId, user.id);
 		return await this.updateChannelRole(ChannelRole.OWNER, targetChannelId, targetUserId);
 	}
 

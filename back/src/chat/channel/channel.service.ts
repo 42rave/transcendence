@@ -4,7 +4,7 @@ import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@pri
 
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
-import { ChannelCreationDto } from '@type/channel.dto';
+import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
 import { ChatService } from '@chat/chat.service';
 
 @Injectable()
@@ -41,6 +41,42 @@ export class ChannelService {
 			channelConnection.role === ChannelRole.INVITED ||
 			channelConnection.role === ChannelRole.BANNED
 		);
+	}
+
+	async isUserOwnerInChannel(targetUserId: number, targetChannelId: number): Promise<boolean> {
+		const channelConnection = await this.prisma.channelConnection.findFirst({
+			where: {
+				AND: [{ userId: targetUserId }, { channelId: targetChannelId }, { role: ChannelRole.OWNER }]
+			}
+		});
+		return !!channelConnection;
+	}
+
+	async isUserAdminInChannel(targetUserId: number, targetChannelId: number): Promise<boolean> {
+		const channelConnection = await this.prisma.channelConnection.findFirst({
+			where: {
+				AND: [
+					{ userId: targetUserId },
+					{ channelId: targetChannelId },
+					{
+						OR: [{ role: ChannelRole.OWNER }, { role: ChannelRole.ADMIN }]
+					}
+				]
+			}
+		});
+		return !!channelConnection;
+	}
+
+	async isExistingChannel(targetChannelId: number): Promise<boolean> {
+		const channel = await this.prisma.channel.findUnique({
+			where: { id: targetChannelId }
+		});
+		if (!channel) {
+			throw new ForbiddenException('Cannot find channel', {
+				description: 'Channel does not exist'
+			});
+		}
+		return !!channel;
 	}
 
 	isUserOwner(userId: number, channelConnectionList: ChannelConnection[]): boolean {
@@ -93,27 +129,19 @@ export class ChannelService {
 		return res;
 	}
 
-	async join(user: User, id: number, password?: string): Promise<ChannelConnection> {
-		// Get channel if it exists with the user connection
-		const channel = await this.prisma.channel.findUnique({
-			where: { id },
+	async join(user: User, targetChannelId: number, password?: string): Promise<ChannelConnection> {
+		const foundChannel = await this.prisma.channel.findUnique({
+			where: { id: targetChannelId },
 			include: {
 				channelConnection: {
-					where: { AND: [{ userId: user.id }, { channelId: id }] },
+					where: { AND: [{ userId: user.id }, { channelId: targetChannelId }] },
 					include: { channel: true }
 				}
 			}
 		});
 
-		if (!channel)
-			throw new ForbiddenException('Cannot join channel', {
-				description: 'Channel does not exist'
-			});
-
-		let channelConnection = channel.channelConnection[0];
-
-		// if the channel connection does not exist, create it
-		if (!channelConnection) return await this.joinChannel(user, channel, password);
+		let channelConnection = foundChannel.channelConnection[0];
+		if (!channelConnection) return await this.joinChannel(user, foundChannel, password);
 
 		switch (channelConnection.role) {
 			case ChannelRole.BANNED:
@@ -121,7 +149,7 @@ export class ChannelService {
 					description: 'User is banned'
 				});
 			case ChannelRole.INVITED:
-				channelConnection = await this.updateChannelRole(ChannelRole.DEFAULT, channelConnection);
+				channelConnection = await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, user.id);
 		}
 
 		// TODO: Join the socket.id, if specified, to the socket.io room
@@ -133,34 +161,46 @@ export class ChannelService {
 		return channel.password === password;
 	}
 
-	async updateChannelRole(role: ChannelRole, channelCo: ChannelConnection) {
-		return await this.prisma.channelConnection.update({
-			where: {
-				connectionId: {
-					userId: channelCo.userId,
-					channelId: channelCo.channelId
-				}
-			},
-			data: { role: role },
-			include: { channel: true }
-		});
+	async updateChannelRole(role: ChannelRole, targetChannelId: number, targetUserId: number) {
+		return await this.prisma.channelConnection
+			.update({
+				where: {
+					connectionId: {
+						userId: targetUserId,
+						channelId: targetChannelId
+					}
+				},
+				data: { role: role },
+				include: { channel: true }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot update user status', {
+					description: 'Something went wrong, channel or user do no exist'
+				});
+			});
 	}
 
 	async createChannel(user: User, data: ChannelCreationDto) {
-		return await this.prisma.channel.create({
-			data: {
-				name: data.name,
-				password: data.password,
-				kind: data.kind,
-				channelConnection: {
-					create: {
-						userId: user.id,
-						role: ChannelRole.OWNER
+		return await this.prisma.channel
+			.create({
+				data: {
+					name: data.name,
+					password: data.password,
+					kind: data.kind,
+					channelConnection: {
+						create: {
+							userId: user.id,
+							role: ChannelRole.OWNER
+						}
 					}
-				}
-			},
-			include: { channelConnection: true }
-		});
+				},
+				include: { channelConnection: true }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot create channel', {
+					description: 'Channel already exists'
+				});
+			});
 	}
 
 	async joinChannel(user: User, channel: Channel, password?: string): Promise<ChannelConnection> {
@@ -177,18 +217,24 @@ export class ChannelService {
 						description: 'Incorrect password'
 					});
 		}
-		return await this.prisma.channelConnection.create({
-			data: {
-				userId: user.id,
-				channelId: channel.id,
-				role: ChannelRole.DEFAULT
-			},
-			include: { channel: true }
-		});
+		return await this.prisma.channelConnection
+			.create({
+				data: {
+					userId: user.id,
+					channelId: channel.id,
+					role: ChannelRole.DEFAULT
+				},
+				include: { channel: true }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot join channel', {
+					description: 'Something went terribly wrong.'
+				});
+			});
 	}
 
 	async quit(user: User, targetChannelId: number) {
-		const channel = await this.prisma.channel.findFirst({
+		const foundChannel = await this.prisma.channel.findFirst({
 			where: {
 				AND: [{ id: targetChannelId }, { NOT: [{ kind: ChannelKind.DIRECT }] }]
 			},
@@ -200,11 +246,39 @@ export class ChannelService {
 				}
 			}
 		});
-		if (!channel) {
+		if (!foundChannel) {
 			console.log('1: Channel not found.');
 			throw new ForbiddenException('Cannot quit channel', {
 				cause: new Error(),
 				description: 'Channel does not exist'
+			});
+		}
+		if (this.isUserOwner(user.id, foundChannel.channelConnection)) {
+			let newOwner = await this.prisma.channelConnection.findFirst({
+				where: {
+					AND: [{ channelId: targetChannelId }, { role: ChannelRole.ADMIN }]
+				}
+			});
+			if (!newOwner) {
+				newOwner = await this.prisma.channelConnection.findFirst({
+					where: {
+						AND: [{ channelId: targetChannelId }, { role: ChannelRole.DEFAULT }]
+					}
+				});
+			}
+			if (!newOwner) {
+				await this.prisma.channelConnection.deleteMany({
+					where: { channelId: targetChannelId }
+				});
+				await this.prisma.channel.delete({ where: { id: targetChannelId } });
+				return;
+			}
+			await this.prisma.channelConnection.update({
+				where: { connectionId: { userId: newOwner.userId, channelId: newOwner.channelId } },
+				data: { role: ChannelRole.OWNER }
+			});
+			await this.prisma.channelConnection.delete({
+				where: { connectionId: { userId: user.id, channelId: targetChannelId } }
 			});
 		} else {
 			console.log('3: Found Channel.');
@@ -219,7 +293,7 @@ export class ChannelService {
 					]
 				}
 			});
-			if (channel.channelConnection.length === 1) {
+			if (foundChannel.channelConnection.length === 1) {
 				console.log('4: Channel is now empty, deleting it.');
 				await this.prisma.channel.delete({ where: { id: targetChannelId } });
 			}
@@ -231,16 +305,6 @@ export class ChannelService {
 			where: { id: targetChannelId },
 			include: { channelConnection: true }
 		});
-		if (!channel) {
-			throw new ForbiddenException('Cannot invite user', {
-				description: 'The channel does not exist'
-			});
-		}
-		if (!this.isUserAdmin(user.id, channel.channelConnection)) {
-			throw new ForbiddenException('Cannot invite user', {
-				description: "You don't have the necessary rights to invite on this channel"
-			});
-		}
 		if (this.userHasExistingConnection(targetId, targetChannelId, channel.channelConnection)) {
 			if (this.isUserConnected(targetId, channel.channelConnection)) {
 				throw new ForbiddenException('Cannot invite user', {
@@ -341,5 +405,73 @@ export class ChannelService {
 			});
 		this.chatService.emitToUser(targetId, 'chat:ban', banned);
 		return banned;
+	}
+
+	async updateChannel(userId: number, targetChannelId: number, data: ChannelDto): Promise<Channel> {
+		const foundChannel = await this.prisma.channel.findUnique({
+			where: { id: targetChannelId },
+			include: { channelConnection: true }
+		});
+		if (!foundChannel) {
+			throw new ForbiddenException('Cannot update channel', {
+				description: 'Channel does not exist'
+			});
+		}
+		if (data.kind === ChannelKind.PROTECTED && data.password === undefined) {
+			throw new ForbiddenException('Cannot update channel', {
+				description: 'A protected channel needs a password'
+			});
+		}
+		return await this.prisma.channel
+			.update({
+				where: { id: targetChannelId },
+				data: {
+					name: data.name,
+					kind: data.kind,
+					password: data.password
+				}
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot update channel', {
+					description: 'Something went horribly wrong'
+				});
+			});
+	}
+
+	async transfer(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
+		this.updateChannelRole(ChannelRole.ADMIN, targetChannelId, user.id);
+		return await this.updateChannelRole(ChannelRole.OWNER, targetChannelId, targetUserId);
+	}
+
+	async promote(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
+		if (await this.isUserOwnerInChannel(targetUserId, targetChannelId)) {
+			throw new ForbiddenException('Cannot promote user', {
+				description: 'Cannot promote the owner'
+			});
+		}
+		return await this.updateChannelRole(ChannelRole.ADMIN, targetChannelId, targetUserId);
+	}
+
+	async demote(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
+		if (await this.isUserOwnerInChannel(targetUserId, targetChannelId)) {
+			throw new ForbiddenException('Cannot demote user', {
+				description: 'Cannot demote the owner'
+			});
+		}
+		return await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, targetUserId);
+	}
+
+	async mute(user: User, targetChannelId: number, targetUserId: number, time: Date): Promise<ChannelConnection> {
+		if (await this.isUserOwnerInChannel(targetUserId, targetChannelId)) {
+			throw new ForbiddenException('Cannot mute user', {
+				description: 'Cannot mute the owner'
+			});
+		}
+		return await this.prisma.channelConnection.update({
+			where: {
+				connectionId: { userId: targetUserId, channelId: targetChannelId }
+			},
+			data: { muted: time }
+		});
 	}
 }

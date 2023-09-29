@@ -21,9 +21,9 @@ check_title()
 		#FIRST WORD IN TITLE
 		if [[ $arg_iterator == 1 ]]
 		then
-			if ! [[ "$var" =~ (ADD|FIX|MERGE|DOC|WIP|REWORK|UPDATE)$ ]]
+			if ! [[ "$var" =~ (ADD|FIX|MERGE|DOC|WIP|REWORK|UPDATE|HOTFIX)$ ]]
 			then
-				echo "Your flag '$var' is incorrect, choose one of the following : ADD, FIX, MERGE, DOC, WIP, REWORK, UPDATE"
+				echo "Your flag '$var' is incorrect, choose one of the following : ADD, FIX, MERGE, DOC, WIP, REWORK, UPDATE, HOTFIX"
 				return 1
 			fi
 		#LAST WORD IN TITLE
@@ -86,7 +86,7 @@ check_title()
 					open_parenthesis=0
 				fi
 			fi
-			if ! [[ "$var" =~ (^\($)|(^\(?[A-Z\&\.\_\-]{1,}\)?$)|(^\)) ]]
+			if ! [[ "$var" =~ (^\($)|(^\(?[A-Z\/\&\.\_\-]{1,}\)?$)|(^\)) ]]
 			then
 				echo "'$var' is not authorized in the title, chars allowed [A-Z], '_' '-' '&' '.' or '(' and ')'"
 				return 1

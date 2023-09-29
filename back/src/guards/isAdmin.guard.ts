@@ -1,5 +1,6 @@
 import { ChannelService } from '@chat/channel/channel.service';
 import { ArgumentMetadata, CanActivate, ExecutionContext, Injectable, ParseIntPipe } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class IsAdminGuard implements CanActivate {
@@ -12,6 +13,12 @@ export class IsAdminGuard implements CanActivate {
 			{} as ArgumentMetadata
 		);
 		const targetUserId = request.user.id;
-		return await this.channelService.isUserAdminInChannel(targetUserId, targetChannelId);
+		const isAdmin = await this.channelService.isUserAdminInChannel(targetUserId, targetChannelId);
+		if (!isAdmin) {
+			throw new ForbiddenException('Cannot do that', {
+				description: 'User is not the channel owner'
+			});
+		}
+		return true;
 	}
 }

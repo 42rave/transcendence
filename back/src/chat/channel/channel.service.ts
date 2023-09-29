@@ -49,12 +49,7 @@ export class ChannelService {
 				AND: [{ userId: targetUserId }, { channelId: targetChannelId }, { role: ChannelRole.OWNER }]
 			}
 		});
-		if (!channelConnection) {
-			throw new ForbiddenException('Cannot do that', {
-				description: 'User is not the channel owner'
-			});
-		}
-		return true;
+		return !!channelConnection;
 	}
 
 	async isUserAdminInChannel(targetUserId: number, targetChannelId: number): Promise<boolean> {
@@ -69,12 +64,7 @@ export class ChannelService {
 				]
 			}
 		});
-		if (!channelConnection) {
-			throw new ForbiddenException('Cannot do that', {
-				description: 'User is not an administrator of this channel'
-			});
-		}
-		return true;
+		return !!channelConnection;
 	}
 
 	async isExistingChannel(targetChannelId: number): Promise<boolean> {

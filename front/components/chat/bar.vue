@@ -36,9 +36,13 @@ export default defineNuxtComponent({
         method: 'POST',
       }).catch((err) => {
           console.log("oopsie");
-      }) ;
+      });
         if (res)
-          console.log(res);
+        {
+          this.$channel.currentChannel(res.channel.name, res.channel.id);
+          console.log(this.$channel.name);
+          console.log(this.$channel.id);
+        }
     },
 
     async joinProtectedChannel(id) {

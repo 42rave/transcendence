@@ -28,6 +28,7 @@ export default defineNuxtComponent({
 
 
 <template>
+  <h2>{{this.$channel.name}}</h2>
 	<div class="display__messages">
 		<div v-for="message in this.messageList" :key="message.id">
       {{message.message}}
@@ -36,6 +37,10 @@ export default defineNuxtComponent({
 </template>
 
 <style>
+
+h2 {
+  text-align: center;
+}
 
 .display__messages {
 	height: 94%;

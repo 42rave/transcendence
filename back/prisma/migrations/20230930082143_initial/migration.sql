@@ -32,7 +32,7 @@ CREATE TABLE "ChannelConnection" (
     "userId" INTEGER NOT NULL,
     "channelId" INTEGER NOT NULL,
     "role" "ChannelRole" NOT NULL,
-    "muted" TIMESTAMP(3),
+    "muted" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ChannelConnection_pkey" PRIMARY KEY ("userId","channelId")

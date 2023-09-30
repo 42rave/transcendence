@@ -32,7 +32,7 @@ model ChannelConnection {
   userId    Int
   channelId Int
   role      ChannelRole
-  muted     DateTime? 
+  muted     DateTime 	@default(now())
   createdAt DateTime    @default(now())
   @@id([userId, channelId], name: "connectionId")
 }

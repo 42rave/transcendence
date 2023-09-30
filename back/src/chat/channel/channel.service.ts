@@ -5,6 +5,7 @@ import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@pri
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
 import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
+import { MessageDto } from '@type/message.dto';
 import { ChatService } from '@chat/chat.service';
 
 @Injectable()
@@ -77,6 +78,25 @@ export class ChannelService {
 			});
 		}
 		return !!channel;
+	}
+
+	async canSpeakInChannel(targetUserId: number, targetChannelId: number): Promise<boolean> {
+		const foundChannelConnection = await this.prisma.channelConnection.findFirst({
+			where: {
+				AND: [
+					{ userId: targetUserId },
+					{ channelId: targetChannelId },
+					{
+						NOT: [
+							{
+								OR: [{ role: ChannelRole.BANNED }, { role: ChannelRole.INVITED }, { muted: { gt: new Date() } }]
+							}
+						]
+					}
+				]
+			}
+		});
+		return !!foundChannelConnection;
 	}
 
 	isUserOwner(userId: number, channelConnectionList: ChannelConnection[]): boolean {

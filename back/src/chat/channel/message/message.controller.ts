@@ -15,10 +15,10 @@ import { MessageService } from '@chat/channel/message/message.service';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import type { Request } from '@type/request';
 import { MessageDto } from '@type/message.dto';
-import { IsInChannelGuard } from '@guard/isInChannel.guard';
+import { IsNotMutedGuard } from '@guard/isNotMuted.guard';
 
 @Controller('chat/channel/:id/message')
-@UseGuards(...AuthenticatedGuard, IsInChannelGuard)
+@UseGuards(...AuthenticatedGuard)
 export class MessageController {
 	constructor(private readonly messageService: MessageService) {}
 
@@ -28,6 +28,7 @@ export class MessageController {
 	}
 
 	@Post()
+	@UseGuards(IsNotMutedGuard)
 	@UsePipes(ValidationPipe)
 	async sendMessage(
 		@Req() req: Request,

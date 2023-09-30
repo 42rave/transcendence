@@ -21,6 +21,7 @@ import { IsInChannelGuard } from '@guard/isInChannel.guard';
 import { IsOwnerGuard } from '@guard/isOwner.guard';
 import { IsAdminGuard } from '@guard/isAdmin.guard';
 import { IsChannelGuard } from '@guard/isChannel.guard';
+import { IsNotMutedGuard } from '@guard/isNotMuted.guard';
 
 @Controller('chat/channel')
 export class ChannelController {

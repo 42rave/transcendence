@@ -34,7 +34,7 @@ export class MessageController {
 	@UsePipes(ValidationPipe)
 	async sendMessage(
 		@Req() req: Request,
-		@Param('id', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Body() data: MessageDto
 	): Promise<Message> {
 		return await this.messageService.sendMessage(req.user.id, channelId, data);

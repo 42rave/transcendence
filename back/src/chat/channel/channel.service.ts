@@ -5,7 +5,6 @@ import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@pri
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
 import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
-import { MessageDto } from '@type/message.dto';
 import { ChatService } from '@chat/chat.service';
 
 @Injectable()
@@ -172,10 +171,10 @@ export class ChannelService {
 				});
 			case ChannelRole.INVITED:
 				channelConnection = await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, user.id);
-			this.chatService.emit('chat:join', channelConnection , `${targetChannelId}`);
-			this.chatService.joinRoom(`${user.id}`, `${targetChannelId}`);
+				this.chatService.emit('chat:join', channelConnection, `${targetChannelId}`);
+				this.chatService.joinRoom(`${user.id}`, `${targetChannelId}`);
 		}
-		this.chatService.emit('chat:join', channelConnection , `${user.id}`);
+		this.chatService.emit('chat:join', channelConnection, `${user.id}`);
 		return channelConnection;
 	}
 
@@ -258,7 +257,6 @@ export class ChannelService {
 			});
 		this.chatService.joinRoom(`${user.id}`, `${channel.id}`);
 		return channelConnection;
-
 	}
 
 	async quit(user: User, targetChannelId: number) {
@@ -514,17 +512,18 @@ export class ChannelService {
 				description: 'Cannot mute the owner'
 			});
 		}
-		const mutedUser = await this.prisma.channelConnection.update({
-			where: {
-				connectionId: { userId: targetUserId, channelId: targetChannelId }
-			},
-			data: { muted: time }
-		})
-		.catch(() => {
-			throw new BadRequestException('Cannot mute user', {
-				description: 'Something went wrong, channel or user do no exist'
+		const mutedUser = await this.prisma.channelConnection
+			.update({
+				where: {
+					connectionId: { userId: targetUserId, channelId: targetChannelId }
+				},
+				data: { muted: time }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot mute user', {
+					description: 'Something went wrong, channel or user do no exist'
+				});
 			});
-		});
 		this.chatService.emit('chat:mute', mutedUser, `${targetChannelId}`);
 		return mutedUser;
 	}

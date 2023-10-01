@@ -26,8 +26,9 @@ export default defineNuxtComponent({
       });
       if (res)
       {
-        this.$channel.addMessage(this.input);
+        this.$channel.addMessage(res);
         console.log(this.$channel.messages);
+
         this.input = '';
       }
     },

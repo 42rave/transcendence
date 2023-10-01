@@ -22,13 +22,13 @@ export default defineNuxtComponent({
 
 <template>
     <div class="chatBox">
-      <ChatConvDisplay :socket="socket" :messageList="messageList"/>
+      <ChatConvDisplay :socket="socket"/>
         <div class="chatFooter">
           <ChatMessageInput :socket="socket"/>
           <ChatMenu @drawer:click="drawer = !drawer"/>
         </div>
     </div>
-    <ChatBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer"/>
+    <ChatBar :socket="socket" @drawer:update="(v: boolean) => drawer = v" :drawer="drawer"/>
 </template>
 
 <style scoped>

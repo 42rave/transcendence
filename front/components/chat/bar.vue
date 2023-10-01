@@ -3,6 +3,7 @@ interface IChannel {
   name: string;
   owner: string;
 }
+
 export default defineNuxtComponent({
   props: ['socket', 'drawer'],
   data: () => ({
@@ -34,12 +35,16 @@ export default defineNuxtComponent({
       const res = await $fetch(`http://localhost:3000/chat/channel/${id}/join`, {
         credentials: 'include',
         method: 'POST',
+        body: {
+          socketId: this.socket.id
+        }
       }).catch((err) => {
           console.log("oopsie");
       });
         if (res)
         {
           this.$channel.currentChannel(res.channel.name, res.channel.id);
+          this.$channel.clearMessages();
           console.log(this.$channel.name);
           console.log(this.$channel.id);
         }
@@ -52,6 +57,7 @@ export default defineNuxtComponent({
         credentials: 'include',
         method: 'POST',
         body: {
+          socketId: this.socket.id,
           password: '`{this.protectedPassword}`'
         }
       }).catch((err) => {

@@ -2,21 +2,26 @@
 
 export default defineNuxtComponent({
   name: 'ChatConvDisplay',
-  props: ['socket', 'messageList'],
+  props: ['socket'],
   data: () => ({
    	config: useRuntimeConfig()
  }),
+
   beforeMount() {
-    this.socket?.on('test:message', (data: { message: string }) => {
+    console.log("bouh");
+    
+    this.socket?.on('chat:message', (data: any) => {
 	console.log("message received");
 	
-    const message = data.message;
-	this.messageList.push({message });
-    console.log(this.messageList);
+  //   const message = data.message;
+	// this.messageList.push({message });
+  //   console.log(this.messageList);
+      this.$channel.addMessage(data);
+      console.log('coucou', data);
     });
   },
   unmounted() {
-    this.socket?.off('test:message');
+    this.socket?.off('chat:message');
   },
 
   methods: {
@@ -30,8 +35,8 @@ export default defineNuxtComponent({
 <template>
   <h2>{{this.$channel.name}}</h2>
 	<div class="display__messages">
-		<div v-for="message in this.messageList" :key="message.id">
-      {{message.message}}
+		<div v-for="[id, message] in this.$channel.messages" key="id">
+      {{message.body}}
    		</div>
 	</div>
 </template>

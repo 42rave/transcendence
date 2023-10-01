@@ -1,7 +1,7 @@
 import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { PaginationDto } from '@type/pagination.dto';
-import { Channel, User, Relationship, RelationKind } from '@prisma/client';
+import { Channel, User, Relationship, RelationKind, ChannelRole, ChannelKind } from '@prisma/client';
 import { ChatService } from '@chat/chat.service';
 
 @Injectable()
@@ -15,7 +15,40 @@ export class PrivmsgService {
 		return await this.prisma.channel.findMany(pagination);
 	}
 
-	async join(user: User, privmsgId: number): Promise<Channel> {
+	async join(user: User, privmsgId: number, socketId: string): Promise<Channel> {
+		let lowUserId, highUserId;
+		if (user.id > privmsgId) {
+			lowUserId = privmsgId;
+			highUserId = user.id;
+		} else {
+			lowUserId = user.id;
+			highUserId = privmsgId;
+		}
+		let convName = lowUserId.toString() + '-' + highUserId.toString();
+		const privConv = await this.prisma.channel.findUnique({
+			where: { name: convName },
+			include: { channelConnection: true }
+		});
+		if (privConv) {
+			return privConv
+		}
+		return await this.prisma.channel.create({
+			data: {
+				name: convName,
+				kind: ChannelKind.DIRECT,
+				channelConnection: {
+					create: [
+						{ userId: lowUserId, role: ChannelRole.DEFAULT}, 
+						{ userId: highUserId, role: ChannelRole.DEFAULT}, 
+					]}
+			}
+		})
+		.catch(() => {
+			throw new BadRequestException('Cannot create conversation', {
+				description: 'Your partner is not online'
+			});
+		});
+		this.chatService.emitToUser
 		return null;
 	}
 

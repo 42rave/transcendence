@@ -10,9 +10,14 @@ export class IsPrivmsgGuard implements CanActivate {
 		const request = context.switchToHttp().getRequest();
 		const privmsgId: number = await new ParseIntPipe().transform(request.params.privmsgId, {} as ArgumentMetadata);
 		const userId = request.user.id;
+		if (userId === privmsgId) {
+			throw new ForbiddenException('Private conversation not reachable', {
+				description: 'Are you really this narcissist?'
+			});
+		}
 		const isPrivmsg = await this.privmsgService.isPossiblePrivmsg(userId, privmsgId);
 		if (!isPrivmsg) {
-			throw new ForbiddenException('Cannot do that', {
+			throw new ForbiddenException('Private conversation not reachable', {
 				description: 'Can only send privmsg to existing users'
 			});
 		}

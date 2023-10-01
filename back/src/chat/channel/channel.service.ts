@@ -148,7 +148,7 @@ export class ChannelService {
 		return res;
 	}
 
-	async join(user: User, targetChannelId: number, password?: string): Promise<ChannelConnection> {
+	async join(user: User, targetChannelId: number, socketId: string, password?: string): Promise<ChannelConnection> {
 		const foundChannel = await this.prisma.channel.findUnique({
 			where: { id: targetChannelId },
 			include: {
@@ -172,9 +172,9 @@ export class ChannelService {
 			case ChannelRole.INVITED:
 				channelConnection = await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, user.id);
 				this.chatService.emit('chat:join', channelConnection, `${targetChannelId}`);
-				this.chatService.joinRoom(`${user.id}`, `${targetChannelId}`);
+				this.chatService.joinRoom(socketId, targetChannelId.toString());
 		}
-		this.chatService.emit('chat:join', channelConnection, `${user.id}`);
+		this.chatService.emit('chat:join', channelConnection, user.id.toString());
 		return channelConnection;
 	}
 
@@ -227,7 +227,7 @@ export class ChannelService {
 		return channel;
 	}
 
-	async joinChannel(user: User, channel: Channel, password?: string): Promise<ChannelConnection> {
+	async joinChannel(user: User, channel: Channel, socketId: string, password?: string): Promise<ChannelConnection> {
 		// Perform some checks to make sure the user can join the channel
 		switch (channel.kind) {
 			case ChannelKind.PRIVATE:
@@ -255,7 +255,7 @@ export class ChannelService {
 					description: 'Something went terribly wrong.'
 				});
 			});
-		this.chatService.joinRoom(`${user.id}`, `${channel.id}`);
+		this.chatService.joinRoom(socketId, channel.id.toString());
 		return channelConnection;
 	}
 

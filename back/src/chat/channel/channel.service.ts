@@ -206,7 +206,7 @@ export class ChannelService {
 		const channel = await this.prisma.channel
 			.create({
 				data: {
-					name: data.name,
+					name: 'channel: ' + data.name,
 					password: data.password,
 					kind: data.kind,
 					channelConnection: {
@@ -463,7 +463,7 @@ export class ChannelService {
 			.update({
 				where: { id: targetChannelId },
 				data: {
-					name: data.name,
+					name: 'channel: ' + data.name,
 					kind: data.kind,
 					password: data.password
 				}

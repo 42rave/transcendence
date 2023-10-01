@@ -241,9 +241,9 @@ export class ChannelService {
 						description: 'Incorrect password'
 					});
 			case ChannelKind.DIRECT:
-					throw new ForbiddenException('Cannot join channel', {
-						description: 'Cannot join a private conversation'
-					});
+				throw new ForbiddenException('Cannot join channel', {
+					description: 'Cannot join a private conversation'
+				});
 		}
 		const channelConnection = await this.prisma.channelConnection
 			.create({

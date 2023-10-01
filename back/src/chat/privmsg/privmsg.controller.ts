@@ -15,7 +15,6 @@ import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { PrivmsgService } from './privmsg.service';
 import { Channel } from '@prisma/client';
 import { IsPrivmsgGuard } from '@guard/isPrivmsg.guard';
-import { IsNotBlockedGuard } from '@guard/isNotBlocked.guard';
 import { ChannelPasswordDto } from '@type/channel.dto';
 
 @Controller('chat/privmsg')
@@ -31,8 +30,11 @@ export class PrivmsgController {
 	@Post(':privmsgId/join')
 	@UseGuards(...AuthenticatedGuard, IsPrivmsgGuard)
 	@UsePipes(ValidationPipe)
-	async join(@Param('privmsgId', ParseIntPipe) privmsgId: number, @Req() req: Request, @Body() data: ChannelPasswordDto) {
+	async join(
+		@Param('privmsgId', ParseIntPipe) privmsgId: number,
+		@Req() req: Request,
+		@Body() data: ChannelPasswordDto
+	) {
 		return await this.privmsgService.join(req.user, privmsgId, data.socketId);
 	}
-
 }

@@ -47,8 +47,7 @@ export class ChatService {
 	}
 
 	quitRoom(userId: number, room: string) {
-		if (!this.clientMap.has(userId))
-				return ;
+		if (!this.clientMap.has(userId)) return;
 
 		const sockets: Array<string> = this.clientMap.get(userId);
 		for (const socketId of sockets) {

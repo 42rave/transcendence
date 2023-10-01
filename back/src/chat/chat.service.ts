@@ -51,8 +51,6 @@ export class ChatService {
 
 		if (!socket) throw new BadRequestException(`Socket ${socket_id} not found.`);
 
-		for (const room of socket.rooms) {
-			if (room === socket.id) socket.leave(room);
-		}
+		socket.leave(room);
 	}
 }

@@ -1,10 +1,23 @@
 import { defineStore } from 'pinia'
 
+interface IMessage {
+  id: number;
+  body: string;
+  createdAt: Date;
+}
+
+
+interface IChannel {
+  name: string;
+  id: number;
+  messages: Map<number, IMessage>
+}
+
 export const useChannelStore = defineStore('channel', {
-	state: () => ({
+	state: ():IChannel => ({
 		name: '',
 		id: 0,
-		messages: new Array<string>()
+		messages: new Map<number, IMessage>()
 	}),
 	getters: {
 		// getters can access the state through the parameters
@@ -14,13 +27,29 @@ export const useChannelStore = defineStore('channel', {
 	},
 	actions: {
 		// actions change the state, which can be accessed with "this"
-		currentChannel(name: string, id:number) {
+		async currentChannel(name: string, id:number) {
 			this.name = name;
 			this.id = id;
+			const loadMessages = await $fetch<IMessage[]>(`http://localhost:3000/chat/channel/${this.id}/message`, {
+				credentials: 'include',
+			}).catch((err) => {
+				console.log(err);
+				
+			})
+			if (loadMessages)
+			{
+				this.messages = new Map(loadMessages.map(message => [message.id, message]));
+			}
 		},
 
-		addMessage(message: string) {
-			this.messages.push(message);
+		addMessage(input: IMessage) {
+			this.messages.set(input.id, input);
+			console.log(this.messages);
+		},
+
+
+		clearMessages() {
+			this.messages.clear();
 		}
 	}
 })

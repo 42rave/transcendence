@@ -46,11 +46,15 @@ export class ChatService {
 		socket.join(room);
 	}
 
-	quitRoom(socket_id: string, room: string) {
-		const socket: Socket = (this.server.sockets as any as Map<string, Socket>).get(socket_id);
+	quitRoom(userId: number, room: string) {
+		if (!this.clientMap.has(userId))
+				return ;
 
-		if (!socket) throw new BadRequestException(`Socket ${socket_id} not found.`);
-
-		socket.leave(room);
+		const sockets: Array<string> = this.clientMap.get(userId);
+		for (const socketId of sockets) {
+			const socket: Socket = (this.server.sockets as any as Map<string, Socket>).get(socketId);
+			if (!socket) continue;
+			socket.leave(room);
+		}
 	}
 }

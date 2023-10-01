@@ -171,7 +171,7 @@ export class ChannelService {
 				});
 			case ChannelRole.INVITED:
 				channelConnection = await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, user.id);
-				this.chatService.emit('chat:join', channelConnection, `${targetChannelId}`);
+				this.chatService.emit('chat:join', channelConnection, targetChannelId.toString());
 				this.chatService.joinRoom(socketId, targetChannelId.toString());
 		}
 		this.chatService.emit('chat:join', channelConnection, user.id.toString());
@@ -240,6 +240,10 @@ export class ChannelService {
 					throw new ForbiddenException('Cannot join channel', {
 						description: 'Incorrect password'
 					});
+			case ChannelKind.DIRECT:
+					throw new ForbiddenException('Cannot join channel', {
+						description: 'Cannot join a private conversation'
+					});
 		}
 		const channelConnection = await this.prisma.channelConnection
 			.create({
@@ -304,12 +308,12 @@ export class ChannelService {
 				where: { connectionId: { userId: newOwner.userId, channelId: newOwner.channelId } },
 				data: { role: ChannelRole.OWNER }
 			});
-			this.chatService.emit('chat:promote', promotedOwner, `${targetChannelId}`);
+			this.chatService.emit('chat:promote', promotedOwner, targetChannelId.toString());
 			await this.prisma.channelConnection.delete({
 				where: { connectionId: { userId: user.id, channelId: targetChannelId } }
 			});
-			this.chatService.emit('chat:quit', user.id, `${targetChannelId}`);
-			this.chatService.quitRoom(`${user.id}`, `${targetChannelId}`);
+			this.chatService.emit('chat:quit', user.id, targetChannelId.toString());
+			this.chatService.quitRoom(user.id, targetChannelId.toString());
 		} else {
 			await this.prisma.channelConnection.deleteMany({
 				where: {
@@ -322,8 +326,8 @@ export class ChannelService {
 					]
 				}
 			});
-			this.chatService.emit('chat:quit', user.id, `${targetChannelId}`);
-			this.chatService.quitRoom(`${user.id}`, `${targetChannelId}`);
+			this.chatService.emit('chat:quit', user.id, targetChannelId.toString());
+			this.chatService.quitRoom(user.id, targetChannelId.toString());
 			if (foundChannel.channelConnection.length === 1) {
 				this.chatService.emit('chat:delete', targetChannelId);
 				await this.prisma.channel.delete({ where: { id: targetChannelId } });
@@ -397,9 +401,9 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.emitToUser('chat:kick', channel, targetUserId);
-		this.chatService.quitRoom(targetUserId.toString(), targetChannelId.toString());
+		this.chatService.quitRoom(targetUserId, targetChannelId.toString());
 		this.chatService.emit('chat:kicked', targetUserId, targetChannelId.toString());
+		this.chatService.emitToUser('chat:kick', channel, targetUserId);
 		return null;
 	}
 
@@ -438,9 +442,9 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.emitToUser('chat:ban', banned, targetUserId);
-		this.chatService.quitRoom(targetUserId.toString(), targetChannelId.toString());
+		this.chatService.quitRoom(targetUserId, targetChannelId.toString());
 		this.chatService.emit('chat:banning', targetUserId, targetChannelId.toString());
+		this.chatService.emitToUser('chat:ban', banned, targetUserId);
 		return banned;
 	}
 
@@ -480,7 +484,7 @@ export class ChannelService {
 	async transfer(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
 		this.updateChannelRole(ChannelRole.ADMIN, targetChannelId, user.id);
 		const newOwner = await this.updateChannelRole(ChannelRole.OWNER, targetChannelId, targetUserId);
-		this.chatService.emit('chat:transfer', newOwner.channel, `${targetChannelId}`);
+		this.chatService.emit('chat:transfer', newOwner.channel, targetChannelId.toString());
 		return newOwner;
 	}
 
@@ -491,7 +495,7 @@ export class ChannelService {
 			});
 		}
 		const promotedUser = await this.updateChannelRole(ChannelRole.ADMIN, targetChannelId, targetUserId);
-		this.chatService.emit('chat:promote', promotedUser, `${targetChannelId}`);
+		this.chatService.emit('chat:promote', promotedUser, targetChannelId.toString());
 		return promotedUser;
 	}
 
@@ -502,7 +506,7 @@ export class ChannelService {
 			});
 		}
 		const demotedUser = await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, targetUserId);
-		this.chatService.emit('chat:demote', demotedUser, `${targetChannelId}`);
+		this.chatService.emit('chat:demote', demotedUser, targetChannelId.toString());
 		return demotedUser;
 	}
 
@@ -524,7 +528,7 @@ export class ChannelService {
 					description: 'Something went wrong, channel or user do no exist'
 				});
 			});
-		this.chatService.emit('chat:mute', mutedUser, `${targetChannelId}`);
+		this.chatService.emit('chat:mute', mutedUser, targetChannelId.toString());
 		return mutedUser;
 	}
 }

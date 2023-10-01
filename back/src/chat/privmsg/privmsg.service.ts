@@ -52,8 +52,6 @@ export class PrivmsgService {
 		return null;
 	}
 
-	async send(sender: User, privmsgId: number, data) {}
-
 	async getBlockedRelation(userdId: number, privmsgId: number): Promise<Relationship> {
 		const relationship = await this.prisma.relationship.findFirst({
 			where: {

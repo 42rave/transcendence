@@ -11,7 +11,7 @@ import {
 	ValidationPipe
 } from '@nestjs/common';
 import { Message } from '@prisma/client';
-import { MessageService } from '@chat/channel/message/message.service';
+import { MessageService } from '@chat/message/message.service';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import type { Request } from '@type/request';
 import { MessageDto } from '@type/message.dto';

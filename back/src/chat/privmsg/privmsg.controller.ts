@@ -35,10 +35,4 @@ export class PrivmsgController {
 		return await this.privmsgService.join(req.user, privmsgId, data.socketId);
 	}
 
-	@Post(':privmsgId/send')
-	@UseGuards(...AuthenticatedGuard, IsPrivmsgGuard, IsNotBlockedGuard)
-	@UsePipes(ValidationPipe)
-	async send(@Param('privmsgId', ParseIntPipe) privmsgId: number, @Req() req: Request, @Body() data) {
-		return await this.privmsgService.send(req.user, privmsgId, data);
-	}
 }

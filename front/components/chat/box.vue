@@ -14,6 +14,11 @@ export default defineNuxtComponent({
     
   }),
 
+  mounted() {
+    this.$chat.currentConnections();
+    this.$chat.currentRelationships();
+  },
+
   methods: {
 
   }

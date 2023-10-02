@@ -12,7 +12,9 @@ export class PrivmsgService {
 	) {}
 
 	async getAll(pagination: PaginationDto): Promise<Channel[]> {
-		return await this.prisma.channel.findMany(pagination);
+		return await this.prisma.channel.findMany({
+			where: { kind: ChannelKind.DIRECT, ...pagination }
+			});
 	}
 
 	async join(user: User, privmsgId: number, socketId: string): Promise<Channel> {

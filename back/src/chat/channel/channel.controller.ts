@@ -21,6 +21,7 @@ import { IsInChannelGuard } from '@guard/isInChannel.guard';
 import { IsOwnerGuard } from '@guard/isOwner.guard';
 import { IsAdminGuard } from '@guard/isAdmin.guard';
 import { IsChannelGuard } from '@guard/isChannel.guard';
+import { IsUserSocketGuard } from '@guard/isUserSocket.guard';
 
 @Controller('chat/channel')
 export class ChannelController {
@@ -56,7 +57,7 @@ export class ChannelController {
 	}
 
 	@Post(':targetChannelId/join')
-	@UseGuards(...AuthenticatedGuard, IsChannelGuard)
+	@UseGuards(...AuthenticatedGuard, IsChannelGuard, IsUserSocketGuard)
 	@UsePipes(ValidationPipe)
 	async join(
 		@Param('targetChannelId', ParseIntPipe) channelId: number,

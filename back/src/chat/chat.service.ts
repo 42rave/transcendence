@@ -13,6 +13,17 @@ export class ChatService {
 		return { sockets, socketIds: sockets.map((socket) => socket.id) };
 	}
 
+	async isUserSocket(userId: number, socketId: string): Promise<boolean> {
+		console.log('isUserSocket-> userId:', userId, 'socketId', socketId);
+		const { sockets } = await this.fetchSockets(userId);
+
+		for (const socket of sockets) {
+			if (!socket) continue;
+			if (socketId === socket.id) return true;
+		}
+		return false;
+	}
+
 	async onConnection(socket: Socket) {
 		socket.join(`user:${socket.user.id}`);
 

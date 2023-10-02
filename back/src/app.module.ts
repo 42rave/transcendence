@@ -7,10 +7,11 @@ import { PrismaModule } from '@prisma/prisma.module';
 import { PaginationMiddleware } from '@middleware/pagination.middleware';
 import { RelationshipModule } from './relationship/relationship.module';
 import { TotpMiddleware } from '@middleware/totp.middleware';
+import { AppController } from '@/app.controller';
 
 @Module({
 	imports: [UserModule, AuthModule, ChatModule, GameModule, PrismaModule, RelationshipModule],
-	controllers: [],
+	controllers: [AppController],
 	providers: []
 })
 export class AppModule {

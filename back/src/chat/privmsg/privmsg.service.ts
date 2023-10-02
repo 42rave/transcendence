@@ -16,15 +16,8 @@ export class PrivmsgService {
 	}
 
 	async join(user: User, privmsgId: number, socketId: string): Promise<Channel> {
-		let lowUserId, highUserId;
-		if (user.id > privmsgId) {
-			lowUserId = privmsgId;
-			highUserId = user.id;
-		} else {
-			lowUserId = user.id;
-			highUserId = privmsgId;
-		}
-		const convName = lowUserId.toString() + '-' + highUserId.toString();
+		const [lowUserId, highUserId] = user.id > privmsgId ? [privmsgId, user.id] : [user.id, privmsgId];
+		const convName = `${lowUserId}-${highUserId}`;
 		const privConv = await this.prisma.channel.findUnique({
 			where: { name: convName },
 			include: { channelConnection: true }

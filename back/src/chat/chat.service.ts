@@ -46,14 +46,12 @@ export class ChatService {
 		socket.join(room);
 	}
 
-	quitRoom(userId: number, room: string) {
-		if (!this.clientMap.has(userId)) return;
+	async quitRoom(userId: number, room: string) {
+		const { sockets } = await this.fetchSockets(userId);
 
-		const sockets: Array<string> = this.clientMap.get(userId);
-		for (const socketId of sockets) {
-			const socket: Socket = (this.server.sockets as any as Map<string, Socket>).get(socketId);
+		for (const socket of sockets) {
 			if (!socket) continue;
-			socket.leave(room);
+			if (socket && room === room) socket.leave(room);
 		}
 	}
 }

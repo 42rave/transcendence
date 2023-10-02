@@ -7,6 +7,7 @@ import type { Request } from '@type/request';
 import { User } from '@prisma/client';
 import authConfig from '@config/auth.config';
 import { UserService } from '@user/user.service';
+import { ftGuard } from '@guard/fortyTwo.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -16,7 +17,7 @@ export class AuthController {
 	) {}
 
 	@Get('login')
-	@UseGuards(AuthGuard('42'))
+	@UseGuards(ftGuard)
 	async login() {}
 
 	@Get('logout')
@@ -25,7 +26,7 @@ export class AuthController {
 	}
 
 	@Get('callback')
-	@UseGuards(AuthGuard('42'))
+	@UseGuards(ftGuard)
 	async callback(@Req() req: Request, @Res() res: Response) {
 		const token: { access_token: string } = await this.authService.validateUser(req.user);
 		res.cookie('access_token', token.access_token, { httpOnly: true }).redirect(authConfig.webAppURL);

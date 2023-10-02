@@ -6,6 +6,8 @@ import type { Server } from '@type/server';
 export class ChatService {
 	server: Server;
 
+	// Get all sockets for a given userId, return an object with a list of sockets and a list of socket ids
+	// Example: { sockets: [socket1, socket2], socketIds: [socket1.id, socket2.id] }
 	async fetchSockets(userId: number) {
 		const sockets = await this.server.in(`user:${userId}`).fetchSockets();
 		return { sockets, socketIds: sockets.map((socket) => socket.id) };
@@ -13,6 +15,9 @@ export class ChatService {
 
 	async onConnection(socket: Socket) {
 		socket.join(`user:${socket.user.id}`);
+
+		// Simply log the socket ids of the user
+		// here we fetch the sockets of the user and store them in the socketIds variable. Then we log them.
 		const { socketIds } = await this.fetchSockets(socket.user.id);
 		console.log(`${socket.user.username} (onConnection): `, socketIds);
 	}
@@ -22,7 +27,7 @@ export class ChatService {
 		else this.server.emit(event, data);
 	}
 
-	emitToUser(userId: number, event: string, data: any): void {
+	emitToUser(event: string, data: any, userId: number): void {
 		this.emit(event, data, `user:${userId}`);
 	}
 

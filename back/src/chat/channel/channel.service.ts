@@ -315,7 +315,7 @@ export class ChannelService {
 				where: { connectionId: { userId: targetId, channelId: targetChannelId } },
 				data: { role: ChannelRole.INVITED }
 			});
-			this.chatService.emitToUser(targetId, 'chat:invite', invite);
+			this.chatService.emitToUser('chat:invite', invite, targetId);
 			return invite;
 		}
 		const invite = await this.prisma.channelConnection
@@ -331,7 +331,7 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.emitToUser(targetId, 'chat:invite', invite);
+		this.chatService.emitToUser('chat:invite', invite, targetId);
 		return invite;
 	}
 
@@ -364,7 +364,7 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.emitToUser(targetId, 'chat:kick', channel);
+		this.chatService.emitToUser('chat:kick', channel, targetId);
 		return null;
 	}
 
@@ -403,7 +403,7 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.emitToUser(targetId, 'chat:ban', banned);
+		this.chatService.emitToUser('chat:ban', banned, targetId);
 		return banned;
 	}
 

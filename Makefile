@@ -10,13 +10,16 @@ all: install_depencies_back install_depencies_front
 	$(MAKE) up
 
 up:
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+prod: 
 	docker compose up -d --build
 
 stop:
 	docker compose stop ${THREE_SERVICES}
 
 down:
-	docker compose down ${THREE_SERVICES}
+	docker compose down 
 
 install_depencies_back:
 	npm install --prefix ${BACK}
@@ -28,7 +31,7 @@ clean: down
 
 fclean: clean
 	docker rmi $(THREE_IMAGES) -f
-	docker builder prune
+	docker builder prune -f
 	docker volume rm postgres_volume
 
 clean_node_modules:

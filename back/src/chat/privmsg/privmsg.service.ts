@@ -14,31 +14,32 @@ export class PrivmsgService {
 	async getAll(pagination: PaginationDto): Promise<Channel[]> {
 		return await this.prisma.channel.findMany({
 			where: { kind: ChannelKind.DIRECT, ...pagination }
-			});
+		});
 	}
 
 	async join(user: User, privmsgId: number, socketId: string): Promise<Channel> {
 		const [lowUserId, highUserId] = user.id > privmsgId ? [privmsgId, user.id] : [user.id, privmsgId];
 		const convName = `${lowUserId}-${highUserId}`;
-		return await this.prisma.channel.upsert({
-			where: { name : convName },
-			update: {},
-			create: {
-				name: convName,
-				kind: ChannelKind.DIRECT,
-				channelConnection: {
-					create: [
-						{ userId: lowUserId, role: ChannelRole.DEFAULT },
-						{ userId: highUserId, role: ChannelRole.DEFAULT }
-					]
+		return await this.prisma.channel
+			.upsert({
+				where: { name: convName },
+				update: {},
+				create: {
+					name: convName,
+					kind: ChannelKind.DIRECT,
+					channelConnection: {
+						create: [
+							{ userId: lowUserId, role: ChannelRole.DEFAULT },
+							{ userId: highUserId, role: ChannelRole.DEFAULT }
+						]
+					}
 				}
-			}
-		})
-		.catch(() => {
-			throw new BadRequestException('Cannot create conversation', {
-				description: 'Your partner is not online'
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot create conversation', {
+					description: 'Your partner is not online'
+				});
 			});
-		});
 
 		//TODO: Define a new even for privmsg
 		void socketId;

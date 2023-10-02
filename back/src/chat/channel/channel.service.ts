@@ -161,7 +161,7 @@ export class ChannelService {
 
 		let channelConnection = foundChannel.channelConnection[0];
 		if (!channelConnection) {
-			return await this.joinChannel(user, foundChannel, password);
+			return await this.joinChannel(user, foundChannel, socketId, password);
 		}
 
 		switch (channelConnection.role) {
@@ -171,10 +171,9 @@ export class ChannelService {
 				});
 			case ChannelRole.INVITED:
 				channelConnection = await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, user.id);
-				this.chatService.emit('chat:join', channelConnection, targetChannelId.toString());
 				this.chatService.joinRoom(socketId, targetChannelId.toString());
+				this.chatService.emit('chat:join', channelConnection, targetChannelId.toString());
 		}
-		this.chatService.emit('chat:join', channelConnection, user.id.toString());
 		return channelConnection;
 	}
 
@@ -260,6 +259,7 @@ export class ChannelService {
 				});
 			});
 		this.chatService.joinRoom(socketId, channel.id.toString());
+		this.chatService.emit('chat:join', channelConnection, user.id.toString());
 		return channelConnection;
 	}
 

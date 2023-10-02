@@ -12,7 +12,7 @@ import { PrismaModule } from '@prisma/prisma.module';
 
 @Module({
 	imports: [UserModule, JwtModule, PrismaModule],
-	exports: [JwtService, AuthService],
+	exports: [JwtService, AuthService, DeviceService],
 	controllers: [AuthController, DeviceController],
 	providers: [AuthService, FortyTwoStrategy, JwtStrategy, JwtService, TotpStrategy, DeviceService]
 })

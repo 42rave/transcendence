@@ -8,12 +8,14 @@ import { User } from '@prisma/client';
 import authConfig from '@config/auth.config';
 import { UserService } from '@user/user.service';
 import { ftGuard } from '@guard/fortyTwo.guard';
+import { DeviceService } from '@auth/device/device.service';
 
 @Controller('auth')
 export class AuthController {
 	constructor(
 		private readonly authService: AuthService,
-		private readonly userService: UserService
+		private readonly userService: UserService,
+		private readonly deviceService: DeviceService
 	) {}
 
 	@Get('login')
@@ -55,6 +57,7 @@ export class AuthController {
 	async verifyTotp(@Req() req: Request, @Res() res: Response) {
 		const user = await this.userService.enableTotp(req.user.id);
 		const token: { access_token: string } = await this.authService.validateUser(user, true);
+		await this.deviceService.createDevice(req);
 		res
 			.cookie('access_token', token.access_token, { httpOnly: true })
 			.status(200)
@@ -66,6 +69,7 @@ export class AuthController {
 	async disableTotp(@Req() req: Request, @Res() res: Response) {
 		const user = await this.userService.disableTotp(req.user.id);
 		const token: { access_token: string } = await this.authService.validateUser(user);
+		await this.deviceService.deleteAllDevices(req.user.id);
 		res.cookie('access_token', token.access_token, { httpOnly: true }).status(200).json(user);
 	}
 }

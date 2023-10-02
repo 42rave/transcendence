@@ -1,5 +1,6 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import type { Request } from '@type/request';
 import appConfig from '@config/app.config';
 import { TrustedDevice } from '@prisma/client';
@@ -29,30 +30,42 @@ export class DeviceService {
 		);
 	}
 
-	async createDevice(userId: number, ip: string): Promise<TrustedDevice> {
-		return this.prisma.trustedDevice
-			.create({
-				data: {
-					userId,
-					ip
-				}
-			})
-			.catch(() => {
-				throw new ConflictException('Cannot create device', { description: 'ip already exists' });
-			});
-	}
+	async createDevice(request: Request): Promise<TrustedDevice> {
+		const userId = request.user.id;
+		const ip: string = String(appConfig.NODE_ENV === 'development' ? request.ip : request.headers['x-real-ip']);
 
-	async deleteDevice(deviceId: number): Promise<TrustedDevice> {
-		return this.prisma.trustedDevice.delete({
-			where: { id: deviceId }
+		return this.prisma.trustedDevice.upsert({
+			where: { ip },
+			update: { userId },
+			create: { ip, userId }
 		});
 	}
 
-	async isTrustedDevice(request: Request): Promise<boolean> {
+	async deleteDevice(deviceId: number, userId: number): Promise<TrustedDevice> {
+		return this.prisma.trustedDevice
+			.delete({
+				where: { id: deviceId, userId }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot delete device', { description: 'The device does not exist.' });
+			});
+	}
+
+	async deleteAllDevices(userId: number): Promise<Prisma.BatchPayload> {
+		return this.prisma.trustedDevice
+			.deleteMany({
+				where: { userId }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot delete devices', { description: 'The devices do not exist.' });
+			});
+	}
+
+	async isTrustedDevice(request: Request, userId: number): Promise<boolean> {
 		const currentIp: string = String(appConfig.NODE_ENV === 'development' ? request.ip : request.headers['x-real-ip']);
 		const device = await this.prisma.trustedDevice.findUnique({
 			where: { ip: currentIp }
 		});
-		return device?.userId === request.user.id;
+		return device?.userId === userId;
 	}
 }

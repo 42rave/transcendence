@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import type { Request } from '@type/request';
 import { DeviceService } from '@auth/device/device.service';
@@ -15,12 +15,7 @@ export class DeviceController {
 	}
 
 	@Delete('/:deviceId')
-	async deleteDevice(@Param('deviceId', ParseIntPipe) id: number): Promise<number> {
-		return (await this.deviceService.deleteDevice(id)).id;
-	}
-
-	@Post()
-	async createDevice(@Req() req: Request, @Body() data: { ip: string }): Promise<TrustedDevice> {
-		return await this.deviceService.createDevice(req.user.id, data.ip);
+	async deleteDevice(@Req() req: Request, @Param('deviceId', ParseIntPipe) id: number): Promise<number> {
+		return (await this.deviceService.deleteDevice(id, req.user.id)).id;
 	}
 }

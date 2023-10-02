@@ -58,7 +58,7 @@ export default defineNuxtComponent({
         method: 'POST',
         body: {
           socketId: this.socket.id,
-          password: '`{this.protectedPassword}`'
+          password: this.protectedPassword
         }
       }).catch((err) => {
           console.log("oopsie");
@@ -66,6 +66,25 @@ export default defineNuxtComponent({
         if (res)
           console.log(res);
     },
+
+    isInChannel(id: number) {
+      return this.$chat.channelConnections.has(id);
+    },
+
+    joinedChannel(channel) {
+      if (this.isInChannel(channel.id))
+      {
+        return 'mdi-unicorn';
+      }
+      switch (channel.kind) {
+        case 'PUBLIC':
+          return 'mdi-location-enter';
+        case 'PROTECTED':
+          return 'mdi-key-chain-variant';
+        case 'PRIVATE':
+          return 'mdi-lock';
+      }
+    }
 
   },
     watch: {
@@ -104,11 +123,11 @@ export default defineNuxtComponent({
                 <v-list-item v-for="channel in channelList" :key="channel.id">
                   {{channel.name}}
                   <template v-slot:append>
-                    <v-btn v-if="channel.kind === 'PUBLIC'" flat icon="mdi-location-enter" @click="joinChannel(channel.id)"></v-btn>
-
-                    <v-menu v-if="channel.kind === 'PROTECTED'">
+                    <v-btn v-if="channel.kind === 'PUBLIC' || isInChannel(channel.id)" flat :icon="joinedChannel(channel)" @click="joinChannel(channel.id)">
+                    </v-btn>
+                    <v-menu v-else-if="channel.kind === 'PROTECTED'">
                       <template v-slot:activator="{ props }">
-                        <v-btn flat icon="mdi-key-chain-variant" v-bind="props"></v-btn>
+                        <v-btn flat :icon="joinedChannel(channel)" v-bind="props"></v-btn>
                       </template>
                         <v-form @submit.prevent>
                           <v-text-field required hide-details v-model="protectedPassword"></v-text-field>
@@ -116,7 +135,7 @@ export default defineNuxtComponent({
                         </v-form>
                     </v-menu>
 
-                    <v-btn v-if="channel.kind === 'PRIVATE'" flat icon="mdi-lock"></v-btn>
+                    <v-btn v-else-if="channel.kind === 'PRIVATE'" flat :icon="joinedChannel(channel)"></v-btn>
 
                   </template>
                 </v-list-item>

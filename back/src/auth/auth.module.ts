@@ -6,11 +6,14 @@ import { JwtStrategy } from '@strategy/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TotpStrategy } from '@strategy/totp.strategy';
+import { DeviceController } from './device/device.controller';
+import { DeviceService } from './device/device.service';
+import { PrismaModule } from '@prisma/prisma.module';
 
 @Module({
-	imports: [UserModule, JwtModule],
+	imports: [UserModule, JwtModule, PrismaModule],
 	exports: [JwtService, AuthService],
-	controllers: [AuthController],
-	providers: [AuthService, FortyTwoStrategy, JwtStrategy, JwtService, TotpStrategy]
+	controllers: [AuthController, DeviceController],
+	providers: [AuthService, FortyTwoStrategy, JwtStrategy, JwtService, TotpStrategy, DeviceService]
 })
 export class AuthModule {}

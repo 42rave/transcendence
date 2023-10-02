@@ -1,37 +1,25 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Server } from 'socket.io';
 import Socket from '@type/socket';
+import type { Server } from '@type/server';
 
 @Injectable()
 export class ChatService {
 	server: Server;
-	clientMap: Map<number, string[]> = new Map();
 
-	addSocket(socket: Socket) {
-		if (!this.clientMap.has(socket.user.id)) this.clientMap.set(socket.user.id, [socket.id]);
-		else this.clientMap.get(socket.user.id).push(socket.id);
+	// Get all sockets for a given userId, return an object with a list of sockets and a list of socket ids
+	// Example: { sockets: [socket1, socket2], socketIds: [socket1.id, socket2.id] }
+	async fetchSockets(userId: number) {
+		const sockets = await this.server.in(`user:${userId}`).fetchSockets();
+		return { sockets, socketIds: sockets.map((socket) => socket.id) };
 	}
 
-	removeSocket(socket: Socket) {
-		if (this.clientMap.has(socket.user.id)) {
-			const sockets: string[] = this.clientMap.get(socket.user.id).filter((s: string) => s !== socket.id);
-			if (sockets.length === 0) this.clientMap.delete(socket.user.id);
-			else this.clientMap.set(socket.user.id, sockets);
-		}
-	}
+	async onConnection(socket: Socket) {
+		socket.join(`user:${socket.user.id}`);
 
-	onConnection(socket: Socket) {
-		this.addSocket(socket);
-		console.log(`${socket.user.username}: `, this.clientMap.get(socket.user.id));
-	}
-
-	onDisconnection(socket: Socket) {
-		this.removeSocket(socket);
-		console.log(`${socket.user.username}: `, this.clientMap.get(socket.user.id));
-	}
-
-	emitToUser(userId: number, event: string, data: any): void {
-		if (this.clientMap.has(userId)) this.server.to(this.clientMap.get(userId)).emit(event, data);
+		// Simply log the socket ids of the user
+		// here we fetch the sockets of the user and store them in the socketIds variable. Then we log them.
+		const { socketIds } = await this.fetchSockets(socket.user.id);
+		console.log(`${socket.user.username} (onConnection): `, socketIds);
 	}
 
 	emit(event: string, data: any, rooms?: string | string[]) {
@@ -39,13 +27,19 @@ export class ChatService {
 		else this.server.emit(event, data);
 	}
 
-	joinRoom(socket_id: string, room: string) {
-		const socket: Socket = (this.server.sockets as any as Map<string, Socket>).get(socket_id);
+	emitToUser(event: string, data: any, userId: number): void {
+		this.emit(event, data, `user:${userId}`);
+	}
 
-		if (!socket) throw new BadRequestException(`Socket ${socket_id} not found.`);
+	joinRoom(socketId: string, room: string) {
+		const socket: Socket = this.server.sockets.get(socketId);
+
+		if (!socket) {
+			throw new BadRequestException(`Socket ${socketId} not found.`);
+		}
 
 		for (const room of socket.rooms) {
-			if (room === socket.id) continue;
+			if (room && (room === socket.id || room.startsWith('user:'))) continue;
 			socket.leave(room);
 		}
 

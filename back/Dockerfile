@@ -2,9 +2,6 @@ FROM node:20.5.1 as build_and_migrate
 
 WORKDIR /app
 
-ARG PORT=3000
-ARG JWT_SECRET="SUp3r_D3f4u1t_53cr3t"
-ARG WEB_APP_URL="http://localhost"
 
 COPY . .
 

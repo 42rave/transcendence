@@ -32,7 +32,6 @@ export default defineNuxtComponent({
     }
   },
   beforeMount() {
-    console.log('beforeMount: ', this.$config.app.API_URL);
     this.socket = this.$nuxtSocket({
       name: 'chat',
       channel: 'chat',

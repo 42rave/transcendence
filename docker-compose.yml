@@ -36,7 +36,6 @@ services:
       - 3000
     env_file:
       - .env
-      - ./back/.env
     depends_on:
       database:
         condition: service_healthy

@@ -5,9 +5,6 @@ WORKDIR /app
 ARG API_URL="http://localhost/api"
 ARG WS_BASE_URL="ws://localhost/"
 
-RUN echo "API_URL=${API_URL}"
-RUN echo "WS_BASE_URL=${WS_BASE_URL}"
-
 COPY . .
 
 RUN npm install

@@ -14,10 +14,7 @@ export class PrivmsgService {
 	async getAll(userId: number, pagination: PaginationDto): Promise<Channel[]> {
 		return await this.prisma.channel.findMany({
 			where: {
-				AND: [
-						{ kind: ChannelKind.DIRECT, ...pagination },
-						{ channelConnection: { some: { userId: userId } } }
-				]
+				AND: [{ kind: ChannelKind.DIRECT, ...pagination }, { channelConnection: { some: { userId: userId } } }]
 			}
 		});
 	}

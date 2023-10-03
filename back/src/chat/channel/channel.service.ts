@@ -259,7 +259,7 @@ export class ChannelService {
 				});
 			});
 		this.chatService.joinRoom(socketId, channel.id.toString());
-		this.chatService.emit('chat:join', channelConnection, user.id.toString());
+		this.chatService.emit('chat:join', channelConnection, channel.id.toString());
 		return channelConnection;
 	}
 

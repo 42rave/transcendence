@@ -14,10 +14,10 @@ export class ChatService {
 	}
 
 	async isUserSocket(userId: number, socketId: string): Promise<boolean> {
-		const socket = await this.server.sockets.get(socketId)
+		const socket = await this.server.sockets.get(socketId);
 
-			if (!socket) throw new UnauthorizedException(`Socket ${socketId} not found!`);
-  			return socket.user.id === userId;
+		if (!socket) throw new UnauthorizedException(`Socket ${socketId} not found!`);
+		return socket.user.id === userId;
 	}
 
 	async onConnection(socket: Socket) {

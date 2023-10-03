@@ -11,9 +11,14 @@ export class PrivmsgService {
 		private readonly chatService: ChatService
 	) {}
 
-	async getAll(pagination: PaginationDto): Promise<Channel[]> {
+	async getAll(userId: number, pagination: PaginationDto): Promise<Channel[]> {
 		return await this.prisma.channel.findMany({
-			where: { kind: ChannelKind.DIRECT, ...pagination }
+			where: {
+				AND: [
+						{ kind: ChannelKind.DIRECT, ...pagination },
+						{ channelConnection: { some: { userId: userId } } }
+				]
+			}
 		});
 	}
 

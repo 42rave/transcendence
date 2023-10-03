@@ -25,7 +25,7 @@ export class PrivmsgController {
 	@Get()
 	@UseGuards(...AuthenticatedGuard)
 	async getAll(@Req() req: Request): Promise<Channel[]> {
-		return await this.privmsgService.getAll(req.pagination);
+		return await this.privmsgService.getAll(req.user.id, req.pagination);
 	}
 
 	@Post(':privmsgId/join')

@@ -10,16 +10,16 @@ all: install_depencies_back install_depencies_front
 	$(MAKE) up
 
 up:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build --remove-orphans
 
 prod: 
-	docker compose up -d --build
+	docker compose up -d --build --remove-orphans
 
 stop:
 	docker compose stop ${THREE_SERVICES}
 
 down:
-	docker compose down 
+	docker compose down --remove-orphans
 
 install_depencies_back:
 	npm install --prefix ${BACK}

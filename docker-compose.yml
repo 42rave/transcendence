@@ -67,7 +67,7 @@ services:
       - ./proxy/entrypoint-wrapper.sh:/entrypoint-wrapper.sh
     entrypoint: ['/entrypoint-wrapper.sh']
     ports:
-      - ${NGINX_PORT}:80
+      - ${BIND_ADDRESS:-0.0.0.0}:${NGINX_PORT}:80
     environment:
       - NGINX_HOST=${NGINX_HOST:-localhost}
       - NGINX_PORT=${NGINX_PORT:-80}

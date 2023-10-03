@@ -15,11 +15,18 @@ export class ChannelService {
 	) {}
 
 	async getAll(pagination: PaginationDto): Promise<Channel[]> {
-		return await this.prisma.channel.findMany(pagination);
+		return await this.prisma.channel.findMany({
+			where: { ...pagination, NOT: [{ kind: ChannelKind.DIRECT }] }
+		});
 	}
 
-	async getAllChannelConnections(): Promise<ChannelConnection[]> {
-		return await this.prisma.channelConnection.findMany();
+	async getAllUserChannelConnections(userId: number): Promise<ChannelConnection[]> {
+		return await this.prisma.channelConnection.findMany({
+			where: {
+				AND: [{ userId: userId }, { NOT: { role: ChannelRole.BANNED } }]
+			},
+			include: { channel: true }
+		});
 	}
 
 	async getChannelConnection(userId: number, channelId: number): Promise<ChannelConnection> {

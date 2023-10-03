@@ -35,8 +35,8 @@ export class ChannelController {
 
 	@Get('connection')
 	@UseGuards(...AuthenticatedGuard)
-	async getAllChannelConnections(): Promise<ChannelConnection[]> {
-		return await this.channelService.getAllChannelConnections();
+	async getAllChannelConnections(@Req() req: Request): Promise<ChannelConnection[]> {
+		return await this.channelService.getAllUserChannelConnections(req.user.id);
 	}
 
 	@Patch(':targetChannelId')

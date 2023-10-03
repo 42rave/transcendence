@@ -33,24 +33,25 @@ export default defineNuxtComponent({
 
 
 <template>
-  <h2>{{this.$channel.name}}</h2>
-	<div class="display__messages">
-		<div v-for="[id, message] in this.$channel.messages" key="id">
-      {{message.body}}
-   		</div>
-	</div>
+    <v-container class="fill-height overflow-auto" style="max-width: 100%; align-content: end">
+      <v-row class="d-flex flex-column">
+          <v-list-item v-for="[id, message] in this.$channel.messages" :key="message.createdAt" style="">
+              <v-card :color="message.userId != this.$auth.user.id ? 'primary' : 'success'" style="width: fit-content;" :class="{'ml-auto': this.$auth.user.id == message.userId}">
+                <v-card-text class="white--text pa-2 d-flex flex-column">
+                  <span class="text-subtitle-1">
+                  {{ message.body}}</span>
+                  <span class="text-caption font-italic">
+                  {{message.createdAt}}</span> 
+                </v-card-text>
+              </v-card>
+            </v-list-item>
+      </v-row>
+    </v-container>
 </template>
 
-<style>
+<style scoped>
 
-h2 {
-  text-align: center;
-}
 
-.display__messages {
-	height: 94%;
-  background: grey;
-}
 </style>
 
 

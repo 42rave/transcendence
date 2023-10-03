@@ -15,12 +15,6 @@ export class IsPrivmsgGuard implements CanActivate {
 				description: 'Are you really this narcissist?'
 			});
 		}
-		const isPrivmsg = await this.privmsgService.isPossiblePrivmsg(userId, privmsgId);
-		if (!isPrivmsg) {
-			throw new ForbiddenException('Private conversation not reachable', {
-				description: 'Can only send privmsg to existing users'
-			});
-		}
 		return true;
 	}
 }

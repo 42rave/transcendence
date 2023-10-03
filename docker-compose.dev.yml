@@ -8,8 +8,8 @@ services:
       args:
         - NODE_ENV=development
     ports:
-      - "3001:3000"
-      - "24678:24678"
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:3001:3000"
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:24678:24678"
     volumes:
       - ./front/:/app
     env_file:
@@ -22,7 +22,7 @@ services:
       args:
         - NODE_ENV=development
     ports:
-      - "3000:3000"
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:3000:3000"
     volumes:
       - ./back/:/app
     env_file:
@@ -38,7 +38,7 @@ services:
     image: timothyjmiller/prisma-studio:latest
     container_name: prisma-studio
     ports:
-      - "5555:5555"
+      - "127.0.0.1:5555:5555"
     restart: always
     env_file:
       - .env

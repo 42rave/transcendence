@@ -5,6 +5,7 @@ import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@pri
 import { PrismaService } from '@prisma/prisma.service';
 import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
 import { ChatService } from '@chat/chat.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChannelService {
@@ -185,9 +186,15 @@ export class ChannelService {
 		return channelConnection;
 	}
 
-	//TODO: Fix this garbage function
-	checkPassword(channel: Channel, password: string): boolean {
-		return channel.password === password;
+	async checkPassword(channel: Channel, password: string): Promise<boolean> {
+		return await bcrypt
+			.compare(password, channel.password)
+			.then(() => {
+				return true;
+			})
+			.catch(() => {
+				return false;
+			});
 	}
 
 	async updateChannelRole(role: ChannelRole, targetChannelId: number, targetUserId: number) {
@@ -209,12 +216,17 @@ export class ChannelService {
 			});
 	}
 
+	async hashPassword(password: string): Promise<string> {
+		const hash = await bcrypt.hash(password, 10);
+		return hash;
+	}
+
 	async createChannel(user: User, data: ChannelCreationDto) {
 		const channel = await this.prisma.channel
 			.create({
 				data: {
 					name: 'channel: ' + data.name,
-					password: data.password,
+					password: await this.hashPassword(data.password),
 					kind: data.kind,
 					channelConnection: {
 						create: {
@@ -235,15 +247,13 @@ export class ChannelService {
 	}
 
 	async joinChannel(user: User, channel: Channel, socketId: string, password?: string): Promise<ChannelConnection> {
-		// Perform some checks to make sure the user can join the channel
 		switch (channel.kind) {
 			case ChannelKind.PRIVATE:
 				throw new ForbiddenException('Cannot join channel', {
 					description: 'This channel is private'
 				});
 			case ChannelKind.PROTECTED:
-				//TODO: Make this a real function please
-				if (!this.checkPassword(channel, password))
+				if (!(await this.checkPassword(channel, password)))
 					throw new ForbiddenException('Cannot join channel', {
 						description: 'Incorrect password'
 					});
@@ -477,7 +487,7 @@ export class ChannelService {
 				data: {
 					name: 'channel: ' + data.name,
 					kind: data.kind,
-					password: data.password
+					password: await this.hashPassword(data.password)
 				}
 			})
 			.catch(() => {

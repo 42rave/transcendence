@@ -12,3 +12,7 @@ export function decrypt(data: string, iv: string | Buffer) {
 	const decipher = crypto.createDecipheriv('aes-256-cbc', cryptConfig.encrypt_secret, iv);
 	return decipher.update(data, 'hex', 'utf8') + decipher.final('utf8');
 }
+
+export function hash(data: string): string {
+	return crypto.createHash('md5').update(data).digest('hex');
+}

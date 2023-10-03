@@ -4,6 +4,7 @@ interface IMessage {
   id: number;
   body: string;
   createdAt: Date;
+  userId: number;
 }
 
 
@@ -17,7 +18,8 @@ export const useChannelStore = defineStore('channel', {
 	state: ():IChannel => ({
 		name: '',
 		id: 0,
-		messages: new Map<number, IMessage>()
+		messages: new Map<number, IMessage>(),
+
 	}),
 	getters: {
 		// getters can access the state through the parameters

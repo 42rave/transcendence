@@ -34,11 +34,36 @@ export default defineNuxtComponent({
 
 <template>
   <h2>{{this.$channel.name}}</h2>
-	<div class="display__messages">
-		<div v-for="[id, message] in this.$channel.messages" key="id">
-      {{message.body}}
-   		</div>
-	</div>
+    <v-container class="fill-height">
+      <v-row>
+		    <v-card 
+          v-for="[id, message] in this.$channel.messages" 
+          :key="message.createdAt">
+          <v-list-item
+            :key="message.createdAt"
+            v-if="message.userId != this.$auth.user.id">
+              <v-card color="success" class="flex-none received-message">
+                <v-card-text class="white--text pa-2 d-flex flex-column">
+                  <span class="align-self-start text-subtitle-1">
+                  {{ message.body}}</span>
+                  <span class="text-caption font-italic align-self-end">
+                  {{message.createdAt}}</span> 
+                </v-card-text>
+              </v-card>
+            </v-list-item>
+             <v-list-item v-else :key="message.createdAt">
+                <v-card color="primary" class="flex-none">
+                  <v-card-text class="white--text pa-2 d-flex flex-column">                                                                           
+                    <span class="text-subtitle-1 chat-message">
+                      {{ message.body }}</span>
+                    <span class="text-caption font-italic align-self-start">
+                    {{message.createdAt}}</span> 
+                  </v-card-text>
+                </v-card>
+          </v-list-item> 
+   		  </v-card>
+      </v-row>
+    </v-container>
 </template>
 
 <style>

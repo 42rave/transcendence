@@ -64,7 +64,7 @@ export class ChannelController {
 		@Req() req: Request,
 		@Body() data: ChannelPasswordDto
 	) {
-		return await this.channelService.join(req.user, channelId, data.password, data.socketId);
+		return await this.channelService.join(req.user, channelId, data.socketId, data.password);
 	}
 
 	@Post(':targetChannelId/quit')

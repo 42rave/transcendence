@@ -57,8 +57,7 @@ export class ChatService {
 		const { sockets } = await this.fetchSockets(userId);
 
 		for (const socket of sockets) {
-			if (!socket) continue;
-			if (socket && room === room) socket.leave(room);
+			socket.leave(room);
 		}
 	}
 }

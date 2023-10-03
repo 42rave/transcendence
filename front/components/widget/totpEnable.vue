@@ -7,17 +7,16 @@ export default defineNuxtComponent({
   emits: ['totp:hide'],
   data: () => ({
     code: '',
-    config: useRuntimeConfig(),
     error_qr: false,
     loading_qr: true,
     error_totp: false,
     data: {},
   }),
   async beforeMount() {
-    await $fetch(new URL('/auth/totp', useRuntimeConfig().app.API_URL).toString(), {
+    await $fetch(`${this.$config.app.API_URL}/auth/totp`, {
       credentials: 'include',
     }).then((data) => {
-      this.data = data;
+      this.data = data as object;
       this.loading_qr = false;
       this.error_qr = false;
     }).catch(() => {
@@ -27,11 +26,11 @@ export default defineNuxtComponent({
   methods: {
     async regenerate() {
       this.loading_qr = true;
-      await $fetch(new URL('/auth/totp', useRuntimeConfig().app.API_URL).toString(), {
+      await $fetch(`${this.$config.app.API_URL}/auth/totp`, {
         method: 'POST',
         credentials: 'include',
       }).then((data) => {
-        this.data = data;
+        this.data = data as object;
         this.loading_qr = false;
         this.error_qr = false;
       }).catch(() => {

@@ -21,6 +21,7 @@ import { IsInChannelGuard } from '@guard/isInChannel.guard';
 import { IsOwnerGuard } from '@guard/isOwner.guard';
 import { IsAdminGuard } from '@guard/isAdmin.guard';
 import { IsChannelGuard } from '@guard/isChannel.guard';
+import { IsUserSocketGuard } from '@guard/isUserSocket.guard';
 
 @Controller('chat/channel')
 export class ChannelController {
@@ -34,8 +35,8 @@ export class ChannelController {
 
 	@Get('connection')
 	@UseGuards(...AuthenticatedGuard)
-	async getAllChannelConnections(): Promise<ChannelConnection[]> {
-		return await this.channelService.getAllChannelConnections();
+	async getAllChannelConnections(@Req() req: Request): Promise<ChannelConnection[]> {
+		return await this.channelService.getAllUserChannelConnections(req.user.id);
 	}
 
 	@Patch(':targetChannelId')
@@ -56,14 +57,14 @@ export class ChannelController {
 	}
 
 	@Post(':targetChannelId/join')
-	@UseGuards(...AuthenticatedGuard, IsChannelGuard)
+	@UseGuards(...AuthenticatedGuard, IsChannelGuard, IsUserSocketGuard)
 	@UsePipes(ValidationPipe)
 	async join(
 		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
 		@Body() data: ChannelPasswordDto
 	) {
-		return await this.channelService.join(req.user, channelId, data.password);
+		return await this.channelService.join(req.user, channelId, data.socketId, data.password);
 	}
 
 	@Post(':targetChannelId/quit')

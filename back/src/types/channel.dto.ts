@@ -15,9 +15,8 @@ export class DirectChannelDto {
 	@IsNotEmpty()
 	@Equals(ChannelKind[ChannelKind.DIRECT])
 	kind: ChannelKind;
+
 	@IsString()
-	@IsString()
-	@IsOptional()
 	socketId: string;
 }
 
@@ -38,9 +37,8 @@ export class ChannelDto {
 	@IsNotEmpty()
 	@NotEquals(ChannelKind[ChannelKind.DIRECT])
 	kind: ChannelKind;
+
 	@IsString()
-	@IsString()
-	@IsOptional()
 	socketId: string;
 }
 
@@ -63,4 +61,7 @@ export class ChannelPasswordDto {
 	@IsString()
 	@IsOptional()
 	password: string;
+
+	@IsString()
+	socketId: string;
 }

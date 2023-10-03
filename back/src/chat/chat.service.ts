@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { UnauthorizedException, BadRequestException, Injectable } from '@nestjs/common';
 import Socket from '@type/socket';
 import type { Server } from '@type/server';
 
@@ -11,6 +11,13 @@ export class ChatService {
 	async fetchSockets(userId: number) {
 		const sockets = await this.server.in(`user:${userId}`).fetchSockets();
 		return { sockets, socketIds: sockets.map((socket) => socket.id) };
+	}
+
+	async isUserSocket(userId: number, socketId: string): Promise<boolean> {
+		const socket = await this.server.sockets.get(socketId);
+
+		if (!socket) throw new UnauthorizedException(`Socket ${socketId} not found!`);
+		return socket.user.id === userId;
 	}
 
 	async onConnection(socket: Socket) {
@@ -44,5 +51,13 @@ export class ChatService {
 		}
 
 		socket.join(room);
+	}
+
+	async quitRoom(userId: number, room: string) {
+		const { sockets } = await this.fetchSockets(userId);
+
+		for (const socket of sockets) {
+			socket.leave(room);
+		}
 	}
 }

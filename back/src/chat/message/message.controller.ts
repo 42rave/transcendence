@@ -16,6 +16,7 @@ import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import type { Request } from '@type/request';
 import { MessageDto } from '@type/message.dto';
 import { IsNotMutedGuard } from '@guard/isNotMuted.guard';
+import { IsInChannelGuard } from '@guard/isInChannel.guard';
 
 @Controller('chat/channel/:id/message')
 @UseGuards(...AuthenticatedGuard)
@@ -23,6 +24,7 @@ export class MessageController {
 	constructor(private readonly messageService: MessageService) {}
 
 	@Get()
+	@UseGuards(IsInChannelGuard)
 	async getMessages(@Param('id', ParseIntPipe) channelId: number, @Req() req: Request): Promise<Message[]> {
 		return await this.messageService.getMessages(channelId, req.pagination);
 	}

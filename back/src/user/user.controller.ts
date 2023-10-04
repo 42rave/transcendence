@@ -8,22 +8,20 @@ import {
 	Param,
 	ParseIntPipe,
 	Post,
-	Req,
 	UsePipes,
 	ValidationPipe
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from '@type/user.dto';
-import type { Request } from '@type/request';
 
 @Controller('user')
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@Get()
-	async getAllUsers(@Req() req: Request) {
+	async getAllUsers() {
 		try {
-			return await this.userService.getAll(req.pagination);
+			return await this.userService.getAll();
 		} catch {
 			throw new BadRequestException();
 		}

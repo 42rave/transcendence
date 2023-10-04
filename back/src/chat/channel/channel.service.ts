@@ -16,7 +16,7 @@ export class ChannelService {
 
 	async getAll(pagination: PaginationDto): Promise<Channel[]> {
 		return await this.prisma.channel.findMany({
-			where: { ...pagination, NOT: [{ kind: ChannelKind.DIRECT }] }
+			where: { NOT: [{ kind: ChannelKind.DIRECT }] }
 		});
 	}
 

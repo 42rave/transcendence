@@ -284,21 +284,33 @@ export class ChannelService {
 	async quit(user: User, targetChannelId: number) {
 		const foundChannel = await this.prisma.channel.findFirst({
 			where: {
-				AND: [{ id: targetChannelId }, { NOT: [{ kind: ChannelKind.DIRECT }] }]
+				AND: [
+					{ id: targetChannelId },
+					{ NOT: [{ kind: ChannelKind.DIRECT }] },
+					{
+						channelConnection: {
+							some: {
+								AND: [
+									{ userId: user.id },
+									{ NOT: [{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }] }
+								]
+							}
+						}
+					}
+				]
 			},
 			include: {
 				channelConnection: {
 					where: {
-						NOT: [{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }]
+						AND: [{ userId: user.id }, { NOT: [{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }] }]
 					}
 				}
 			}
 		});
 		if (!foundChannel) {
-			console.log('1: Channel not found.');
 			throw new ForbiddenException('Cannot quit channel', {
 				cause: new Error(),
-				description: 'Channel does not exist'
+				description: 'The channel does not exist or you are not in it'
 			});
 		}
 		if (this.isUserOwner(user.id, foundChannel.channelConnection)) {

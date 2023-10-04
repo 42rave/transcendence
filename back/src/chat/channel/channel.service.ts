@@ -178,9 +178,11 @@ export class ChannelService {
 				});
 			case ChannelRole.INVITED:
 				channelConnection = await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, user.id);
-				this.chatService.joinRoom(socketId, targetChannelId.toString());
-				this.chatService.emit('chat:join', channelConnection, targetChannelId.toString());
+				break;
 		}
+
+		this.chatService.joinRoom(socketId, targetChannelId.toString());
+		this.chatService.emit('chat:join', channelConnection, targetChannelId.toString());
 		return channelConnection;
 	}
 

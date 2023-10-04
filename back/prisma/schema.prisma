@@ -57,6 +57,7 @@ model User {
   invites           Relationship[]      @relation("senderRelation")
   invited           Relationship[]      @relation("receiverRelation")
   messages          Message[]			      @relation
+  trustedDevices    TrustedDevice[]
   otp               Otp?
 }
 
@@ -67,6 +68,14 @@ model Otp {
   secret    String
   iv        String
   createdAt DateTime	@default(now())
+}
+
+model TrustedDevice {
+  id        Int       @unique @default(autoincrement())
+  ip        String    @id @unique
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime  @default(now())
 }
 
 enum ChannelRole {

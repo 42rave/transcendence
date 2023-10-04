@@ -42,6 +42,23 @@ export class ChannelService {
 	}
 
 	async isUserInChannel(userId: number, channelId: number): Promise<boolean> {
+		return !!(await this.prisma.channelConnection.findFirst({
+			where: {
+				AND: [
+					{ userId },
+					{ channelId },
+					{
+						OR: [
+							{ role: ChannelRole.OWNER },
+							{ role: ChannelRole.ADMIN },
+							{ role: ChannelRole.DEFAULT },
+							{ role: ChannelRole.INVITED }
+						]
+					}
+				]
+			}
+		}));
+
 		const channelConnection = await this.getChannelConnection(userId, channelId);
 		return !(
 			!channelConnection ||
@@ -258,7 +275,7 @@ export class ChannelService {
 					throw new ForbiddenException('Cannot join channel', {
 						description: 'Incorrect password'
 					});
-					break;
+				break;
 			case ChannelKind.DIRECT:
 				throw new ForbiddenException('Cannot join channel', {
 					description: 'Cannot join a private conversation'

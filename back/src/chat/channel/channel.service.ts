@@ -497,6 +497,44 @@ export class ChannelService {
 		return banned;
 	}
 
+	async unban(user: User, targetChannelId: number, targetUserId: number) {
+		const channel = await this.prisma.channel.findUnique({
+			where: { id: targetChannelId },
+			include: { channelConnection: true }
+		});
+		if (!channel) {
+			throw new ForbiddenException('Cannot unban user', {
+				description: 'The channel does not exist'
+			});
+		}
+		if (!this.isUserAdmin(user.id, channel.channelConnection)) {
+			throw new ForbiddenException('Cannot unban user', {
+				description: "You don't have the necessary rights to unban on this channel"
+			});
+		}
+		if (this.isUserOwner(targetUserId, channel.channelConnection)) {
+			throw new ForbiddenException('Cannot unban user', {
+				description: 'Have you lost your mind trying to unban the owner?'
+			});
+		}
+		const unbanned = await this.prisma.channelConnection
+			.deleteMany({
+				where: {
+						AND: [
+								{ userId: targetUserId },
+								{ channelId: targetChannelId },
+								{ role: ChannelRole.BANNED }
+						]}
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot unban user', {
+					description: 'User does not exist or is not banned'
+				});
+			});
+		this.chatService.quitRoom(targetUserId, targetChannelId.toString());
+		this.chatService.emit('chat:unbanning', targetUserId, targetChannelId.toString());
+		this.chatService.emitToUser('chat:unban', targetChannelId, targetUserId);
+	}
 	async updateChannel(userId: number, targetChannelId: number, data: ChannelDto): Promise<Channel> {
 		const foundChannel = await this.prisma.channel.findUnique({
 			where: { id: targetChannelId },
@@ -565,6 +603,11 @@ export class ChannelService {
 				description: 'Cannot mute the owner'
 			});
 		}
+		if (!time) {
+			throw new ForbiddenException('Cannot mute user', {
+				description: 'You did not specify a time'
+			});
+		}
 		const mutedUser = await this.prisma.channelConnection
 			.update({
 				where: {
@@ -579,5 +622,27 @@ export class ChannelService {
 			});
 		this.chatService.emit('chat:mute', mutedUser, targetChannelId.toString());
 		return mutedUser;
+	}
+
+	async unmute(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
+		if (await this.isUserOwnerInChannel(targetUserId, targetChannelId)) {
+			throw new ForbiddenException('Cannot unmute user', {
+				description: 'Cannot unmute the owner'
+			});
+		}
+		const unmutedUser = await this.prisma.channelConnection
+			.update({
+				where: {
+					connectionId: { userId: targetUserId, channelId: targetChannelId }
+				},
+				data: { muted: Date() }
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot unmute user', {
+					description: 'Something went wrong, user does not exist'
+				});
+			});
+		this.chatService.emit('chat:unmute', unmutedUser, targetChannelId.toString());
+		return unmutedUser;
 	}
 }

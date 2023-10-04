@@ -107,6 +107,17 @@ export class ChannelController {
 		return await this.channelService.ban(req.user, channelId, targetUserId);
 	}
 
+	@Post(':targetChannelId/unban/:targetUserId')
+	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
+	@UsePipes(ValidationPipe)
+	async unban(
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
+		@Req() req: Request,
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
+	) {
+		await this.channelService.unban(req.user, channelId, targetUserId);
+	}
+
 	@Post(':targetChannelId/transfer/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsOwnerGuard)
 	@UsePipes(ValidationPipe)
@@ -150,6 +161,17 @@ export class ChannelController {
 		@Body() muteTime: Date
 	) {
 		return await this.channelService.mute(req.user, channelId, targetUserId, muteTime);
+	}
+
+	@Post(':targetChannelId/mute/:targetUserId')
+	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
+	@UsePipes(ValidationPipe)
+	async unmute(
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
+		@Req() req: Request,
+		@Param('targetUserId', ParseIntPipe) targetUserId: number,
+	) {
+		return await this.channelService.unmute(req.user, channelId, targetUserId);
 	}
 
 	@Post()

@@ -85,6 +85,17 @@ export class ChannelController {
 		return await this.channelService.invite(req.user, channelId, targetUserId);
 	}
 
+	@Post(':targetChannelId/uninvite/:targetUserId')
+	@UseGuards(...AuthenticatedGuard, IsChannelGuard, IsAdminGuard)
+	@UsePipes(ValidationPipe)
+	async uninvite(
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
+		@Req() req: Request,
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
+	) {
+		await this.channelService.uninvite(req.user, channelId, targetUserId);
+	}
+
 	@Post(':targetChannelId/kick/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(ValidationPipe)

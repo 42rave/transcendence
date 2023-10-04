@@ -52,7 +52,6 @@ export class ChannelService {
 							{ role: ChannelRole.OWNER },
 							{ role: ChannelRole.ADMIN },
 							{ role: ChannelRole.DEFAULT },
-							{ role: ChannelRole.INVITED }
 						]
 					}
 				]
@@ -385,31 +384,20 @@ export class ChannelService {
 	}
 
 	async invite(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
-		const channel = await this.prisma.channel.findUnique({
-			where: { id: targetChannelId },
-			include: { channelConnection: true }
-		});
-		if (this.userHasExistingConnection(targetUserId, targetChannelId, channel.channelConnection)) {
-			if (this.isUserConnected(targetUserId, channel.channelConnection)) {
+			if (await this.isUserInChannel(targetUserId, targetChannelId)) {
 				throw new ForbiddenException('Cannot invite user', {
 					description: 'User is already connected to the channel'
 				});
 			}
-			const invite: ChannelConnection = await this.prisma.channelConnection.update({
-				where: { connectionId: { userId: targetUserId, channelId: targetChannelId } },
-				data: { role: ChannelRole.INVITED }
-			});
-			this.chatService.emitToUser('chat:invite', invite, targetUserId);
-			this.chatService.emit('chat:invite', invite, targetChannelId.toString());
-			return invite;
-		}
 		const invite = await this.prisma.channelConnection
-			.create({
-				data: {
-					role: ChannelRole.INVITED,
+			.upsert({
+				where: { connectionId: { userId: targetUserId, channelId: targetChannelId } },
+				create: {
 					userId: targetUserId,
-					channelId: targetChannelId
-				}
+					channelId: targetChannelId,
+					role: ChannelRole.INVITED
+				},
+				update: { role: ChannelRole.INVITED }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot invite user', {
@@ -419,6 +407,30 @@ export class ChannelService {
 		this.chatService.emitToUser('chat:invite', invite, targetUserId);
 		this.chatService.emit('chat:invite', invite, targetChannelId.toString());
 		return invite;
+	}
+
+	async uninvite(user: User, targetChannelId: number, targetUserId: number) {
+			if (await this.isUserInChannel(targetUserId, targetChannelId)) {
+				throw new ForbiddenException('Cannot uninvite user', {
+					description: 'User is already connected to the channel'
+				});
+			}
+			await this.prisma.channelConnection.deleteMany({
+				where: {
+						AND: [
+								{ channelId: targetChannelId },
+								{ userId: targetUserId },
+								{ role: ChannelRole.INVITED }
+						]
+				}
+			})
+			.catch(() => {
+				throw new BadRequestException('Cannot uninvite user', {
+					description: 'user does not exist'
+				});
+			});
+		this.chatService.emitToUser('chat:uninvite', targetChannelId, targetUserId);
+		this.chatService.emit('chat:uninvite', targetUserId, targetChannelId.toString());
 	}
 
 	async kick(user: User, targetChannelId: number, targetUserId: number) {

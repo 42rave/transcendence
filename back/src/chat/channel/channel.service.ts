@@ -252,11 +252,13 @@ export class ChannelService {
 				throw new ForbiddenException('Cannot join channel', {
 					description: 'This channel is private'
 				});
+				break;
 			case ChannelKind.PROTECTED:
 				if (!(await this.checkPassword(channel, password)))
 					throw new ForbiddenException('Cannot join channel', {
 						description: 'Incorrect password'
 					});
+					break;
 			case ChannelKind.DIRECT:
 				throw new ForbiddenException('Cannot join channel', {
 					description: 'Cannot join a private conversation'

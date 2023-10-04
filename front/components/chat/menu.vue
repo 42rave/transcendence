@@ -2,32 +2,57 @@
 
 export default defineNuxtComponent({
   name: 'ChatMenu',
-  props: ['socket'],
+  props: ['socket', 'drawer'],
   data: () => ({
 	config: useRuntimeConfig(),
     input: '',
   }),
 
   methods: {
-    },
+    getIcon() {
+      if (!this.drawer)
+        return "mdi-chevron-left"
+      return "mdi-chevron-right"
+    }
+  },
 
 })
 </script>
 
 <template>
-  <div class="menu">
-	<v-icon icon="mdi-forum" hide-details @click.stop="$emit('drawer:click')"/>
+  <div id="wip">
+    <v-icon :icon="getIcon()" size="2.5rem" class="menu-icon" style=""/>
   </div>
+  <!-- <div class="menu">
+	<v-icon icon="mdi-forum" hide-details @click.stop="$emit('drawer:click')"/>
+  </div> -->
+  <!-- <v-btn icon="mdi-forum" class="menu"/> -->
 
 </template>
 
-<style>
+<style scoped>
 
 .menu {
-	padding: 15px;
-	margin: 5px;
 	align-self: center;
-	border-radius: 50%;
 	background-color: purple;
+  
+}
+
+#wip {
+  position: relative;
+  margin-left: auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#wip:hover {
+  cursor: pointer;
+}
+
+.menu-icon:hover {
+  color: #7b1414;
 }
 </style>

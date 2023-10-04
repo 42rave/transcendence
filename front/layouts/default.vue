@@ -19,6 +19,7 @@ export default defineNuxtComponent({
           icon: 'mdi-chat',
         },
       },
+      loading: true,
       socket: null as NuxtSocket | null,
     }
   },
@@ -31,7 +32,9 @@ export default defineNuxtComponent({
       ],
     }
   },
-  beforeMount() {
+  async beforeMount() {
+    await this.$auth.fetchUser();
+    this.loading = false;
     this.socket = this.$nuxtSocket({
       name: 'chat',
       channel: 'chat',
@@ -50,7 +53,10 @@ export default defineNuxtComponent({
 
 <template>
   <v-app dark>
-    <div v-if="$auth.isAuthenticated && (!$auth.user.twoFAEnabled || $auth.user.twoFALogged)" class="w-100 h-100">
+    <div v-if="loading" class="w-100">
+      <v-progress-linear indeterminate color="white" />
+    </div>
+    <div v-else-if="$auth.isAuthenticated && (!$auth.user.twoFAEnabled || $auth.user.twoFALogged)" class="w-100 h-100">
       <LayoutAppBar @drawer:click="drawer = !drawer" :socket="socket" />
       <LayoutNavBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer" :routes="routes" />
       <v-main>
@@ -58,7 +64,6 @@ export default defineNuxtComponent({
           <NuxtPage :socket="socket"/>
         </v-container>
       </v-main>
-      <LayoutAlert />
     </div>
     <div v-else-if="$auth.isAuthenticated && $auth.user.twoFAEnabled && !$auth.user.twoFALogged">
       <WidgetTotpLogin :socket="socket" />
@@ -66,6 +71,7 @@ export default defineNuxtComponent({
     <div v-else>
       <WidgetLogin />
     </div>
+    <LayoutAlert />
   </v-app>
 </template>
 

@@ -13,29 +13,22 @@ export default defineNuxtComponent({
     data: {},
   }),
   async beforeMount() {
-    await $fetch(`${this.$config.app.API_URL}/auth/totp`, {
-      credentials: 'include',
-    }).then((data) => {
-      this.data = data as object;
-      this.loading_qr = false;
-      this.error_qr = false;
-    }).catch(() => {
-      this.error_qr = true;
-    });
+    const data = await this.$api.get('/auth/totp');
+
+    if (!data) { this.error_qr = true; return; }
+    this.data = data as object;
+    this.loading_qr = false;
+    this.error_qr = false;
   },
   methods: {
     async regenerate() {
       this.loading_qr = true;
-      await $fetch(`${this.$config.app.API_URL}/auth/totp`, {
-        method: 'POST',
-        credentials: 'include',
-      }).then((data) => {
-        this.data = data as object;
-        this.loading_qr = false;
-        this.error_qr = false;
-      }).catch(() => {
-        this.error_qr = true;
-      });
+      const data = await this.$api.post('/auth/totp');
+
+      if (!data) { this.error_qr = true; return ; }
+      this.data = data as object;
+      this.loading_qr = false;
+      this.error_qr = false;
     },
     async verify() {
       const ret = await this.$auth.verifyTotp(this.code);

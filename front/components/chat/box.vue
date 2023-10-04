@@ -24,10 +24,8 @@ export default defineNuxtComponent({
   methods: {
     sendMessage() {
       if (!this.input) return;
-      $fetch(`${this.$config.app.API_URL}/chat/sendTest`, {
-        credentials: 'include',
-        method: 'POST',
-        body: JSON.stringify({ message: this.input }),
+      this.$api.post('/chat/sendTest', {
+        body: { message: this.input }
       })
       this.input = '';
     },

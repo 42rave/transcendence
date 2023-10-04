@@ -108,9 +108,9 @@ export default defineNuxtComponent({
   <v-navigation-drawer v-model=_drawer location="right" width="320">
     <div class="d-flex flex-row">
       <v-tabs v-model="tab" direction="vertical">
-      	<v-tab prepend-icon="mdi-forum" value="channels"></v-tab>
-        <v-tab prepend-icon="mdi-chat" value="private_messages"></v-tab>
-        <v-tab prepend-icon="mdi-plus" value="create_channel"></v-tab>
+      	<v-tab value="channels"><v-icon icon="mdi-forum" /></v-tab>
+        <v-tab value="private_messages"><v-icon icon="mdi-chat" /></v-tab>
+        <v-tab value="create_channel"><v-icon icon="mdi-plus" /></v-tab>
       </v-tabs>
 
       <v-divider :thickness="2" inset vertical></v-divider>
@@ -159,3 +159,9 @@ export default defineNuxtComponent({
     </div>
   </v-navigation-drawer>
 </template>
+
+<style scoped>
+.v-tab.v-tab {
+  min-width: 0 !important;
+}
+</style>

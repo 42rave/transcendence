@@ -33,49 +33,25 @@ export default defineNuxtComponent({
 
 
 <template>
-  <h2>{{this.$channel.name}}</h2>
-    <v-container class="fill-height">
-      <v-row>
-		    <v-card 
-          v-for="[id, message] in this.$channel.messages" 
-          :key="message.createdAt">
-          <v-list-item
-            :key="message.createdAt"
-            v-if="message.userId != this.$auth.user.id">
-              <v-card color="success" class="flex-none received-message">
+    <v-container class="fill-height overflow-auto" style="max-width: 100%; align-content: end">
+      <v-row class="d-flex flex-column">
+          <v-list-item v-for="[id, message] in this.$channel.messages" :key="message.createdAt" style="">
+              <v-card :color="message.userId != this.$auth.user.id ? 'primary' : 'success'" style="width: fit-content;" :class="{'ml-auto': this.$auth.user.id == message.userId}">
                 <v-card-text class="white--text pa-2 d-flex flex-column">
-                  <span class="align-self-start text-subtitle-1">
+                  <span class="text-subtitle-1">
                   {{ message.body}}</span>
-                  <span class="text-caption font-italic align-self-end">
+                  <span class="text-caption font-italic">
                   {{message.createdAt}}</span> 
                 </v-card-text>
               </v-card>
             </v-list-item>
-             <v-list-item v-else :key="message.createdAt">
-                <v-card color="primary" class="flex-none">
-                  <v-card-text class="white--text pa-2 d-flex flex-column">                                                                           
-                    <span class="text-subtitle-1 chat-message">
-                      {{ message.body }}</span>
-                    <span class="text-caption font-italic align-self-start">
-                    {{message.createdAt}}</span> 
-                  </v-card-text>
-                </v-card>
-          </v-list-item> 
-   		  </v-card>
       </v-row>
     </v-container>
 </template>
 
-<style>
+<style scoped>
 
-h2 {
-  text-align: center;
-}
 
-.display__messages {
-	height: 94%;
-  background: grey;
-}
 </style>
 
 

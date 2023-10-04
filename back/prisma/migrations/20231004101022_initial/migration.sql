@@ -71,6 +71,16 @@ CREATE TABLE "Otp" (
     CONSTRAINT "Otp_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "TrustedDevice" (
+    "id" SERIAL NOT NULL,
+    "ip" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "TrustedDevice_pkey" PRIMARY KEY ("ip")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Channel_name_key" ON "Channel"("name");
 
@@ -82,6 +92,12 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Otp_userId_key" ON "Otp"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TrustedDevice_id_key" ON "TrustedDevice"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TrustedDevice_ip_key" ON "TrustedDevice"("ip");
 
 -- AddForeignKey
 ALTER TABLE "Relationship" ADD CONSTRAINT "Relationship_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -103,3 +119,6 @@ ALTER TABLE "Message" ADD CONSTRAINT "Message_channelId_fkey" FOREIGN KEY ("chan
 
 -- AddForeignKey
 ALTER TABLE "Otp" ADD CONSTRAINT "Otp_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TrustedDevice" ADD CONSTRAINT "TrustedDevice_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

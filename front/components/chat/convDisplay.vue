@@ -7,15 +7,12 @@ export default defineNuxtComponent({
    	config: useRuntimeConfig()
  }),
 
-  beforeMount() {
+  mounted() {
     console.log("bouh");
     
     this.socket?.on('chat:message', (data: any) => {
 	console.log("message received");
 	
-  //   const message = data.message;
-	// this.messageList.push({message });
-  //   console.log(this.messageList);
       this.$channel.addMessage(data);
       console.log('coucou', data);
     });
@@ -33,8 +30,8 @@ export default defineNuxtComponent({
 
 
 <template>
-    <v-container class="fill-height overflow-auto" style="max-width: 100%; align-content: end">
-      <v-row class="d-flex flex-column">
+    <v-container class="fill-height" style="max-width: 100%; flex-direction: column-reverse; overflow: auto">
+      <v-row class="d-flex flex-column w-100">
           <v-list-item v-for="[id, message] in this.$channel.messages" :key="message.createdAt" style="">
               <v-card :color="message.userId != this.$auth.user.id ? 'primary' : 'success'" style="width: fit-content;" :class="{'ml-auto': this.$auth.user.id == message.userId}">
                 <v-card-text class="white--text pa-2 d-flex flex-column">

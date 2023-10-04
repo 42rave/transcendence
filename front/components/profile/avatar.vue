@@ -5,7 +5,7 @@
     <div class="avatar-prevent" />
   </div>
   <v-avatar v-else size="150" class="avatar my-2" :image="this.user.avatar" />
-  <h2>{{ user.username }}</h2>
+  <h2>{{ this.user.username }}</h2>
 </template>
 
 <script lang="ts">

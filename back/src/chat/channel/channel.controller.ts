@@ -180,7 +180,7 @@ export class ChannelController {
 	async unmute(
 		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
-		@Param('targetUserId', ParseIntPipe) targetUserId: number,
+		@Param('targetUserId', ParseIntPipe) targetUserId: number
 	) {
 		return await this.channelService.unmute(req.user, channelId, targetUserId);
 	}

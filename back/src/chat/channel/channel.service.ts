@@ -48,11 +48,7 @@ export class ChannelService {
 					{ userId },
 					{ channelId },
 					{
-						OR: [
-							{ role: ChannelRole.OWNER },
-							{ role: ChannelRole.ADMIN },
-							{ role: ChannelRole.DEFAULT },
-						]
+						OR: [{ role: ChannelRole.OWNER }, { role: ChannelRole.ADMIN }, { role: ChannelRole.DEFAULT }]
 					}
 				]
 			}
@@ -384,11 +380,11 @@ export class ChannelService {
 	}
 
 	async invite(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
-			if (await this.isUserInChannel(targetUserId, targetChannelId)) {
-				throw new ForbiddenException('Cannot invite user', {
-					description: 'User is already connected to the channel'
-				});
-			}
+		if (await this.isUserInChannel(targetUserId, targetChannelId)) {
+			throw new ForbiddenException('Cannot invite user', {
+				description: 'User is already connected to the channel'
+			});
+		}
 		const invite = await this.prisma.channelConnection
 			.upsert({
 				where: { connectionId: { userId: targetUserId, channelId: targetChannelId } },
@@ -410,18 +406,15 @@ export class ChannelService {
 	}
 
 	async uninvite(user: User, targetChannelId: number, targetUserId: number) {
-			if (await this.isUserInChannel(targetUserId, targetChannelId)) {
-				throw new ForbiddenException('Cannot uninvite user', {
-					description: 'User is already connected to the channel'
-				});
-			}
-			await this.prisma.channelConnection.deleteMany({
+		if (await this.isUserInChannel(targetUserId, targetChannelId)) {
+			throw new ForbiddenException('Cannot uninvite user', {
+				description: 'User is already connected to the channel'
+			});
+		}
+		await this.prisma.channelConnection
+			.deleteMany({
 				where: {
-						AND: [
-								{ channelId: targetChannelId },
-								{ userId: targetUserId },
-								{ role: ChannelRole.INVITED }
-						]
+					AND: [{ channelId: targetChannelId }, { userId: targetUserId }, { role: ChannelRole.INVITED }]
 				}
 			})
 			.catch(() => {
@@ -529,14 +522,11 @@ export class ChannelService {
 				description: 'Have you lost your mind trying to unban the owner?'
 			});
 		}
-		const unbanned = await this.prisma.channelConnection
+		await this.prisma.channelConnection
 			.deleteMany({
 				where: {
-						AND: [
-								{ userId: targetUserId },
-								{ channelId: targetChannelId },
-								{ role: ChannelRole.BANNED }
-						]}
+					AND: [{ userId: targetUserId }, { channelId: targetChannelId }, { role: ChannelRole.BANNED }]
+				}
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot unban user', {

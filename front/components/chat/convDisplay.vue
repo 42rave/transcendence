@@ -7,16 +7,13 @@ export default defineNuxtComponent({
    	config: useRuntimeConfig()
  }),
 
-  mounted() {
-    console.log("bouh");
-    
-    this.socket?.on('chat:message', (data: any) => {
-	console.log("message received");
-	
+  beforeMount() {
+      this.$channel.getMessages();
+      this.socket?.on('chat:message', (data: any) => {
       this.$channel.addMessage(data);
-      console.log('coucou', data);
     });
   },
+  
   unmounted() {
     this.socket?.off('chat:message');
   },

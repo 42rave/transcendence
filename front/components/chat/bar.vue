@@ -15,9 +15,21 @@ export default defineNuxtComponent({
     channelKind: '',
     protectedPassword: '',
   }),
-  mounted () {
+
+  beforeMount() {
     this.displayChannels();
   },
+
+  mounted () {
+    this.socket?.on('chat:create', (data: IChannel) => {
+      this.displayChannels();
+    })
+  },
+
+  unmounted() {
+    this.socket?.off('chat:create');
+  },
+
   methods: {
     async displayChannels() {
       const channels = await this.$api.get('/chat/channel');          

@@ -9,12 +9,8 @@
     </v-avatar>
     <v-menu activator="#menu-activator">
       <v-list>
-        <v-list-item
-            v-for="(item, index) in menu"
-            :key="index"
-            :value="index"
-        >
-          <v-list-item-title @click="item.action">
+        <v-list-item v-for="(item, index) in menu" :key="index" :value="index" @click="item.action">
+          <v-list-item-title>
             <v-icon size="1rem">{{ item.icon }}</v-icon>
             {{ item.title }}
           </v-list-item-title>

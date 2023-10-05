@@ -30,9 +30,9 @@ install_depencies_front:
 clean: down
 
 fclean: clean
-	docker rmi $(THREE_IMAGES) -f
-	docker builder prune -f
-	docker volume rm postgres_volume
+	-docker rmi $(THREE_IMAGES) -f 2>/dev/null
+	-docker builder prune -f
+	-docker volume rm postgres_volume
 
 clean_node_modules:
 	rm -rfv ${BACK}node_modules dist

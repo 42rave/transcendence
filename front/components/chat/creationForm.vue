@@ -4,7 +4,6 @@ export default defineNuxtComponent({
   props: ['socket'],
   data: () => ({
     valid: false,
-    config: useRuntimeConfig(),
     channelName: '',
     channelKind: 'PUBLIC',
     protectedPassword: '',
@@ -30,12 +29,12 @@ export default defineNuxtComponent({
        		this.$emit("channelList:update", res);
           this.$event('alert:show', {title: 'Channel successfully created', message: 'chat away'})
           this.$refs.form.reset();
+          this.channelKind = 'PUBLIC';
         }
     },
 
     async validate() {
       const { valid } = await this.$refs.form.validate();
-      console.log(valid);
       if (valid)
         this.createChannel();
     }

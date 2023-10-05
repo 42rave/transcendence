@@ -8,9 +8,6 @@ export default defineNuxtComponent({
   props: ['socket'],
   data: () => ({
     drawer: false,
-    input: '',
-    config: useRuntimeConfig(),
-    messageList: Array<IMessage>(),
     
   }),
 
@@ -20,8 +17,8 @@ export default defineNuxtComponent({
   },
 
   methods: {
-
   }
+
 })
 </script>
 
@@ -40,6 +37,7 @@ export default defineNuxtComponent({
 </template>
 
 <style scoped>
+
 h2 {
   text-align: center;
   width: 100%;

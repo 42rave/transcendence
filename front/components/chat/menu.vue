@@ -2,10 +2,8 @@
 
 export default defineNuxtComponent({
   name: 'ChatMenu',
-  props: ['socket', 'drawer'],
+  props: ['drawer'],
   data: () => ({
-	config: useRuntimeConfig(),
-    input: '',
   }),
 
   methods: {
@@ -23,11 +21,6 @@ export default defineNuxtComponent({
   <div id="wip">
     <v-icon :icon="getIcon()" size="2.5rem" class="menu-icon" style=""/>
   </div>
-  <!-- <div class="menu">
-	<v-icon icon="mdi-forum" hide-details @click.stop="$emit('drawer:click')"/>
-  </div> -->
-  <!-- <v-btn icon="mdi-forum" class="menu"/> -->
-
 </template>
 
 <style scoped>
@@ -35,7 +28,6 @@ export default defineNuxtComponent({
 .menu {
 	align-self: center;
 	background-color: purple;
-  
 }
 
 #wip {

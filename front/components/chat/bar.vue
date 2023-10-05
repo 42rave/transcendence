@@ -73,10 +73,10 @@ export default defineNuxtComponent({
       return this.$chat.channelConnections.has(id);
     },
 
-    joinedChannel(channel) {
+    channelIconUpdate(channel) {
       if (this.isInChannel(channel.id))
       {
-        return 'mdi-unicorn';
+        return 'mdi-check-circle-outline';
       }
       switch (channel.kind) {
         case 'PUBLIC':
@@ -125,19 +125,19 @@ export default defineNuxtComponent({
                 <v-list-item v-for="channel in channelList" :key="channel.id">
                   {{channel.name}}
                   <template v-slot:append>
-                    <v-btn v-if="channel.kind === 'PUBLIC' || isInChannel(channel.id)" flat :icon="joinedChannel(channel)" @click="joinChannel(channel.id)">
+                    <v-btn v-if="channel.kind === 'PUBLIC' || isInChannel(channel.id)" flat :icon="channelIconUpdate(channel)" @click="joinChannel(channel.id)">
                     </v-btn>
                     <v-menu v-else-if="channel.kind === 'PROTECTED'">
                       <template v-slot:activator="{ props }">
-                        <v-btn flat :icon="joinedChannel(channel)" v-bind="props"></v-btn>
+                        <v-btn flat :icon="channelIconUpdate(channel)" v-bind="props"></v-btn>
                       </template>
-                        <v-form @submit.prevent>
+                        <v-form @submit.prevent ref="form">
                           <v-text-field required hide-details v-model="protectedPassword"></v-text-field>
                           <v-btn type="submit" block @click="joinProtectedChannel(channel.id)">Join Channel</v-btn>
                         </v-form>
                     </v-menu>
 
-                    <v-btn v-else-if="channel.kind === 'PRIVATE'" flat :icon="joinedChannel(channel)"></v-btn>
+                    <v-btn v-else-if="channel.kind === 'PRIVATE'" flat :icon="channelIconUpdate(channel)"></v-btn>
 
                   </template>
                 </v-list-item>
@@ -163,7 +163,9 @@ export default defineNuxtComponent({
 </template>
 
 <style scoped>
+
 .v-tab.v-tab {
   min-width: 0 !important;
 }
+
 </style>

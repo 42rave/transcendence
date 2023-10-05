@@ -1,6 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
-import { PaginationDto } from '@type/pagination.dto';
 import { Channel, User, Relationship, RelationKind, ChannelRole, ChannelKind } from '@prisma/client';
 import { ChatService } from '@chat/chat.service';
 
@@ -11,10 +10,10 @@ export class PrivmsgService {
 		private readonly chatService: ChatService
 	) {}
 
-	async getAll(userId: number, pagination: PaginationDto): Promise<Channel[]> {
+	async getAll(userId: number): Promise<Channel[]> {
 		return await this.prisma.channel.findMany({
 			where: {
-				AND: [{ kind: ChannelKind.DIRECT, ...pagination }, { channelConnection: { some: { userId: userId } } }]
+				AND: [{ kind: ChannelKind.DIRECT }, { channelConnection: { some: { userId: userId } } }]
 			}
 		});
 	}
@@ -22,7 +21,7 @@ export class PrivmsgService {
 	async join(user: User, privmsgId: number, socketId: string): Promise<Channel> {
 		const [lowUserId, highUserId] = user.id > privmsgId ? [privmsgId, user.id] : [user.id, privmsgId];
 		const convName = `${lowUserId}-${highUserId}`;
-		return await this.prisma.channel
+		return this.prisma.channel
 			.upsert({
 				where: { name: convName },
 				update: {},

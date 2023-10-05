@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { UserDto } from '@type/user.dto';
-import { PaginationDto } from '@type/pagination.dto';
 import { Otp, User } from '@prisma/client';
 import { decrypt, encrypt } from '@/utils/crypt-manager';
 
@@ -13,8 +12,8 @@ export class UserService {
 		return this.prisma.user.create({ data });
 	}
 
-	async getAll(pagination: PaginationDto): Promise<User[]> {
-		return this.prisma.user.findMany(pagination as object);
+	async getAll(): Promise<User[]> {
+		return this.prisma.user.findMany();
 	}
 
 	async getById(id: number): Promise<User> {

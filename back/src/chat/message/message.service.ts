@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { MessageDto } from '@type/message.dto';
 import { Message } from '@prisma/client';
-import { PaginationDto } from '@type/pagination.dto';
 import { ChatService } from '@chat/chat.service';
 
 @Injectable()
@@ -12,11 +11,10 @@ export class MessageService {
 		private readonly chatService: ChatService
 	) {}
 
-	async getMessages(channelId: number, pagination: PaginationDto) {
+	async getMessages(channelId: number) {
 		return await this.prismaService.message.findMany({
 			where: { channelId },
-			include: { user: true, channel: true },
-			...pagination
+			include: { user: true, channel: true }
 		});
 	}
 

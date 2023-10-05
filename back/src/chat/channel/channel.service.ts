@@ -3,7 +3,6 @@ import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/com
 import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@prisma/client';
 
 import { PrismaService } from '@prisma/prisma.service';
-import { PaginationDto } from '@type/pagination.dto';
 import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
 import { ChatService } from '@chat/chat.service';
 
@@ -14,9 +13,9 @@ export class ChannelService {
 		private readonly chatService: ChatService
 	) {}
 
-	async getAll(pagination: PaginationDto): Promise<Channel[]> {
+	async getAll(): Promise<Channel[]> {
 		return await this.prisma.channel.findMany({
-			where: { ...pagination, NOT: [{ kind: ChannelKind.DIRECT }] }
+			where: { NOT: [{ kind: ChannelKind.DIRECT }] }
 		});
 	}
 

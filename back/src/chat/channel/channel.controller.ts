@@ -29,8 +29,8 @@ export class ChannelController {
 
 	@Get()
 	@UseGuards(...AuthenticatedGuard)
-	async getAll(@Req() req: Request): Promise<Channel[]> {
-		return await this.channelService.getAll(req.pagination);
+	async getAll(): Promise<Channel[]> {
+		return await this.channelService.getAll();
 	}
 
 	@Get('connection')

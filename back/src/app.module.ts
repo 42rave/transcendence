@@ -4,7 +4,6 @@ import { AuthModule } from '@auth/auth.module';
 import { ChatModule } from '@chat/chat.module';
 import { GameModule } from '@game/game.module';
 import { PrismaModule } from '@prisma/prisma.module';
-import { PaginationMiddleware } from '@middleware/pagination.middleware';
 import { RelationshipModule } from './relationship/relationship.module';
 import { TotpMiddleware } from '@middleware/totp.middleware';
 import { AppController } from '@/app.controller';
@@ -16,6 +15,6 @@ import { AppController } from '@/app.controller';
 })
 export class AppModule {
 	configure(consumer: MiddlewareConsumer) {
-		consumer.apply(PaginationMiddleware, TotpMiddleware).forRoutes('*');
+		consumer.apply(TotpMiddleware).forRoutes('*');
 	}
 }

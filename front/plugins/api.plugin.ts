@@ -12,28 +12,28 @@ interface ErrorCallback {
 class Api {
 	constructor(private readonly $config: RuntimeConfig, private readonly error_callback: ErrorCallback) {}
 
-	private async _fetch(route: string, options: any) {
+	private async _fetch(route: string, options: any, customErrorCallback?: ErrorCallback) {
 		return $fetch(route, {
 			baseURL: this.$config.app.API_URL,
 			credentials: 'include',
 			...options
-		}).catch(this.error_callback);
+		}).catch(customErrorCallback || this.error_callback);
 	}
 
-	public async get(route: string, options?: WrapperOptions) {
-		return this._fetch(route, { method: 'GET', ...options });
+	public async get(route: string, options?: WrapperOptions, customErrorCallback?: ErrorCallback) {
+		return this._fetch(route, { method: 'GET', ...options }, customErrorCallback);
 	}
 
-	public async post(route: string, options: WrapperOptions) {
-		return this._fetch(route, { method: 'POST', ...options });
+	public async post(route: string, options: WrapperOptions, customErrorCallback?: ErrorCallback) {
+		return this._fetch(route, { method: 'POST', ...options }, customErrorCallback);
 	}
 
-	public async put(route: string, options?: WrapperOptions) {
-		return this._fetch(route, { method: 'PUT', ...options });
+	public async put(route: string, options?: WrapperOptions, customErrorCallback?: ErrorCallback) {
+		return this._fetch(route, { method: 'PUT', ...options }, customErrorCallback);
 	}
 
-	public async delete(route: string, options?: WrapperOptions) {
-		return this._fetch(route, { method: 'DELETE', ...options });
+	public async delete(route: string, options?: WrapperOptions, customErrorCallback?: ErrorCallback) {
+		return this._fetch(route, { method: 'DELETE', ...options }, customErrorCallback);
 	}
 
 	public url(route: string) {

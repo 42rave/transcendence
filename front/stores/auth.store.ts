@@ -28,7 +28,7 @@ export const useAuthStore = defineStore('auth', {
     async verifyTotp(code: string) {
       const { $api }: any = useNuxtApp();
 
-      const user = await $api.post('/auth/totp/verify', { params: { code } });
+      const user = await $api.post('/auth/totp/verify', { params: { code } }, (reason: any) => undefined);
       if (!user) return false;
 
       this.user = user;
@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
     async disableTotp(code: string) {
       const { $api }: any = useNuxtApp();
 
-      const user = await $api.delete('/auth/totp', { params: { code } });
+      const user = await $api.delete('/auth/totp', { params: { code } }, (reason: any) => undefined);
       if (!user) return false;
 
       this.user = user;

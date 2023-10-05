@@ -1,22 +1,59 @@
 <template>
-  <div v-if="this.editable" class="placeholder my-2">
-    <v-avatar size="150" class="avatar avatar-blur" :image="this.user.avatar"></v-avatar>
-    <v-avatar size="150" class="avatar" :image="this.user.avatar" />
-    <div class="avatar-prevent" />
+  <div v-if="this.uploading" class="d-flex flex-column align-center">
+    <v-progress-circular class="my-2" indeterminate size="150" color="primary" />
+    <h2>Uploading...</h2>
   </div>
-  <v-avatar v-else size="150" class="avatar my-2" :image="this.user.avatar" />
-  <h2>{{ this.user.username }}</h2>
+  <div v-else class="d-flex flex-column align-center">
+    <div v-if="this.editable" class="placeholder my-2">
+      <v-avatar size="150" class="avatar avatar-blur" :image="this.user.avatar"></v-avatar>
+      <v-avatar size="150" class="avatar" :image="this.user.avatar" />
+      <input class="avatar-prevent" type="file" id="file" accept="image/gif, image/jpeg, image/png" @change="uploadFile" >
+    </div>
+    <v-avatar v-else size="150" class="avatar my-2" :image="this.user.avatar" />
+    <h2>{{ this.user.username }}</h2>
+  </div>
 </template>
 
 <script lang="ts">
+import type { User } from "~/types/user";
+
 export default defineNuxtComponent({
-  props: ["user", "editable"]
+  props: ["user", "editable"],
+  data: () => ({
+    uploading: false,
+  }),
+  methods: {
+    async uploadFile(e: any) {
+      try {
+        console.log(e.target.files[0]);
+        const formData = new FormData();
+        formData.append("file", e.target.files[0]);
+        for (const entry of formData.entries()) {
+          console.log(entry);
+        }
+        this.uploading = true;
+        await this.$api.post("/user/avatar", {
+          body: formData
+        }).then((data: { user: User } | undefined) => {
+          if (!data) return ;
+          this.$auth.setUser(data.user);
+          this.$emit("user:updated", data.user);
+        });
+      } catch (e) {}
+      this.uploading = false;
+    }
+  }
 });
 </script>
 
 <style scoped>
 .placeholder {
   position: relative;
+  cursor: pointer;
+}
+
+.avatar-prevent {
+  opacity: 0;
   cursor: pointer;
 }
 

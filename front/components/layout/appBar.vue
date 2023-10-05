@@ -4,7 +4,7 @@
     <v-toolbar-title>Application</v-toolbar-title>
     {{ $auth.user.username }}
     <v-avatar id="menu-activator" class="avatar mx-4" size="40px" color="grey" dark>
-      <v-img v-if="$auth.user.avatar" :src="$auth.user.avatar"></v-img>
+      <v-img v-if="$auth.user.avatar" :src="$auth.user.avatar" cover class="avatar-menu" />
       <v-icon v-else>mdi-account</v-icon>
     </v-avatar>
     <v-menu activator="#menu-activator">
@@ -51,7 +51,7 @@ export default defineNuxtComponent({
 .avatar {
   cursor: pointer;
   transition: border-color 0.3s;
-  border: 3px solid grey; /* Adjust the border size and color as needed */
+  border: 3px solid #73377d; /* Adjust the border size and color as needed */
   border-spacing: 20px;
 }
 

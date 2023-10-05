@@ -18,6 +18,13 @@ export default defineNuxtComponent({
   methods: {
     editable() {
       return this.user && this.user.id === this.$auth.user.id;
+    },
+    uploadFile: async (e: any) => {
+      console.log(typeof e);
+    },
+    onUpdateUser(user: User) {
+      console.log(user);
+      this.user = user;
     }
   }
 })
@@ -28,7 +35,7 @@ export default defineNuxtComponent({
     <template v-slot:title>Profile</template>
     <div v-if="this.user" class="profile-content overflow-hidden d-flex flex-column w-100">
       <div class="d-flex flex-column h-100 overflow-auto align-center">
-        <ProfileAvatar :user="this.user" :editable="this.editable()" />
+        <ProfileAvatar :user="this.user" :editable="this.editable()" @user:updated="onUpdateUser" />
       </div>
     </div>
     <div v-else class="d-flex w-100 h-100">

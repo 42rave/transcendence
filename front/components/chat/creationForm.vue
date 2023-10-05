@@ -19,22 +19,12 @@ export default defineNuxtComponent({
   methods: {
 
     async createChannel() {
-      const res = await $fetch(new URL('/chat/channel/', this.config.app.API_URL).toString(), {
-        credentials: 'include',
-        method: 'POST',
+      const res = await await this.$api.post(`/chat/channel/`, {
         body: {
           name: this.channelName,
           kind: this.channelKind,
           password: this.protectedPassword,
         }
-      }).catch((err) => {
-        if (err.statusCode == 500)
-        {
-          this.$event('alert:show', {title: 'Channel already exists', message: 'choose another name'});
-          return;
-        }
-        
-        this.$event('alert:show', {title: 'Invalid input', message: 'try again'})
       });
         if (res) {
        		this.$emit("channelList:update", res);

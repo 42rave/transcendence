@@ -32,10 +32,10 @@ export const useChatStore = defineStore('chat', {
 	actions: {
 		async currentConnections () {
 			const config = useRuntimeConfig();
-			const currentConnections = await $fetch<IChannelConnection[]>(`${config.app.API_URL}chat/channel/connection`, {
+			const currentConnections = await $fetch<IChannelConnection[]>(`${config.app.API_URL}/chat/channel/connection`, {
 				credentials: 'include'
 			}).catch((err) => {
-				console.log(err);
+				console.log(err.response._data.message);
 			})
 			if (currentConnections)
 			{
@@ -46,16 +46,14 @@ export const useChatStore = defineStore('chat', {
 
 		async currentRelationships () {
 			const config = useRuntimeConfig();
-			const currentRelationships = await $fetch<IRelationship[]>(`${config.app.API_URL}relationship`, {
+			const currentRelationships = await $fetch<IRelationship[]>(`${config.app.API_URL}/relationship`, {
 				credentials: 'include'
 			}).catch((err) => {
-				console.log(err);
+				console.log(err.response._data.message);
 			})
 			if (currentRelationships)
 			{
-				this.relationships = new Map(currentRelationships.map(relationship => [relationship.senderId, relationship]))
-				console.log(this.relationships);
-				
+				this.relationships = new Map(currentRelationships.map(relationship => [relationship.senderId, relationship]))			
 			}
 		}
 	}

@@ -9,26 +9,17 @@ export default defineNuxtComponent({
   }),
 
   methods: {
-   async sendMessage(e: KeyboardEvent) {
-	console.log("message sent");
-	
+     async sendMessage(e: KeyboardEvent) {
       if (e.shiftKey) return;
       if (!this.input.trim()) return;
-      const res = await $fetch(`http://localhost:3000/chat/channel/${this.$channel.id}/message`, {
-        credentials: 'include',
-        method: 'POST',
+      const res = await this.$api.post(`/chat/channel/${this.$channel.id}/message`, {
         body: {
-          id: this.$channel.id,
           body: this.input
-        },
-      }).catch((err) => {
-          console.log(err.response._data.message);
+        }
       });
       if (res)
       {
         this.$channel.addMessage(res);
-        console.log(this.$channel.messages);
-
         this.input = '';
       }
     },

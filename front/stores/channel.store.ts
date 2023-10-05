@@ -7,7 +7,6 @@ interface IMessage {
   userId: number;
 }
 
-
 interface IChannel {
   name: string;
   id: number;
@@ -30,13 +29,18 @@ export const useChannelStore = defineStore('channel', {
 	actions: {
 		// actions change the state, which can be accessed with "this"
 		async currentChannel(name: string, id:number) {
+			const config = useRuntimeConfig();
 			this.name = name;
 			this.id = id;
-			const loadMessages = await $fetch<IMessage[]>(`http://localhost:3000/chat/channel/${this.id}/message`, {
+			await this.getMessages();
+		},
+
+		async getMessages() {
+			const config = useRuntimeConfig();
+			const loadMessages = await $fetch<IMessage[]>(`${config.app.API_URL}/chat/channel/${this.id}/message`, {
 				credentials: 'include',
 			}).catch((err) => {
-				console.log(err);
-				
+				console.log(err.response._data.message);
 			})
 			if (loadMessages)
 			{
@@ -46,7 +50,6 @@ export const useChannelStore = defineStore('channel', {
 
 		addMessage(input: IMessage) {
 			this.messages.set(input.id, input);
-			console.log(this.messages);
 		},
 
 

@@ -20,11 +20,11 @@ export default defineNuxtComponent({
   },
   methods: {
     async displayChannels() {
-      const channels = await $fetch(new URL('/chat/channel', this.config.app.API_URL).toString(), {
-        credentials: 'include',
-        method: 'GET',
-      }).catch();
-      this.channelList = channels;
+      const channels = await this.$api.get('/chat/channel');          
+      if (channels)
+      {
+        this.channelList = channels;
+      }
     },
 
     addNewChannel(newChannel) {
@@ -32,39 +32,29 @@ export default defineNuxtComponent({
     },
 
     async joinChannel(id) {
-      const res = await $fetch(`http://localhost:3000/chat/channel/${id}/join`, {
-        credentials: 'include',
-        method: 'POST',
+      const res = await this.$api.post(`/chat/channel/${id}/join`, {
         body: {
           socketId: this.socket.id
         }
-      }).catch((err) => {
-          console.log("oopsie");
       });
         if (res)
         {
           this.$channel.currentChannel(res.channel.name, res.channel.id);
-          this.$channel.clearMessages();
-          console.log(this.$channel.name);
-          console.log(this.$channel.id);
+          this.$channel.clearMessages();        
         }
     },
 
-    async joinProtectedChannel(id) {
-      console.log(id, ' ', this.protectedPassword);
-      
-      const res = await $fetch(`http://localhost:3000/chat/channel/${id}/join`, {
-        credentials: 'include',
-        method: 'POST',
+    async joinProtectedChannel(id) {    
+      const res = await this.$api.post(`/chat/channel/${id}/join`, {
         body: {
           socketId: this.socket.id,
           password: this.protectedPassword
         }
-      }).catch((err) => {
-          console.log("oopsie");
       }) ;
         if (res)
-          console.log(res);
+          this.$channel.currentChannel(res.channel.name, res.channel.id);
+          this.$channel.clearMessages();
+          this.$refs.form.reset();
     },
 
     isInChannel(id: number) {

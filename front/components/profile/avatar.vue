@@ -1,15 +1,14 @@
 <template>
-  <div v-if="this.uploading" class="d-flex flex-column align-center">
-    <v-progress-circular class="my-2" indeterminate size="150" color="primary" />
+  <div v-if="this.uploading" class="uploading d-flex flex-column align-center my-2">
+    <v-progress-circular class="ma-auto" indeterminate size="75" color="primary" />
     <h2>Uploading...</h2>
   </div>
   <div v-else class="d-flex flex-column align-center">
-    <div v-if="this.editable" class="placeholder my-2">
+    <div class="placeholder my-2" :class="{'pointer': this.editable}">
       <v-avatar size="150" class="avatar avatar-blur" :image="this.user.avatar"></v-avatar>
       <v-avatar size="150" class="avatar" :image="this.user.avatar" />
-      <input class="avatar-prevent" type="file" id="file" accept="image/gif,image/jpeg,image/png" @change="this.uploadFile">
+      <input v-if="this.editable" class="avatar-prevent" type="file" id="file" accept="image/gif,image/jpeg,image/png" @change="this.uploadFile">
     </div>
-    <v-avatar v-else size="150" class="avatar my-2" :image="this.user.avatar" />
   </div>
 </template>
 
@@ -47,9 +46,17 @@ export default defineNuxtComponent({
 </script>
 
 <style scoped>
+.uploading {
+  width: 150px;
+  height: 150px;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
 .placeholder {
   position: relative;
-  cursor: pointer;
 }
 
 .avatar-prevent {

@@ -72,13 +72,15 @@ export default defineNuxtComponent({
                 <v-divider></v-divider>
                 <v-btn @click="blockBTN" size="small" block>block</v-btn>
                 <v-divider></v-divider>
-                <v-btn v-if="allowedActions()" @click="kickBTN" size="small" block>kick</v-btn>
-                <v-divider></v-divider>
-                <v-btn v-if="allowedActions()" @click="banBTN" size="small" block>ban</v-btn>
-                <v-divider></v-divider>
-                <v-btn v-if="allowedActions()" @click="muteBTN" size="small" block>mute</v-btn>
-                <v-divider></v-divider>
                 <v-btn @click="profileBTN" size="small" block>Profile</v-btn>
+                <v-list class="allowed_actions" v-if="allowedActions()">
+                  <v-divider></v-divider>
+                  <v-btn  @click="kickBTN" size="small" block>kick</v-btn>
+                  <v-divider></v-divider>
+                  <v-btn @click="banBTN" size="small" block>ban</v-btn>
+                  <v-divider></v-divider>
+                  <v-btn @click="muteBTN" size="small" block>mute</v-btn>
+                </v-list>
               </v-card>
             </v-menu>
 
@@ -101,11 +103,14 @@ export default defineNuxtComponent({
   gap: 0.5rem;
   font-size: small;
   padding: 0.2rem;
-}
-
-.bloop {
   cursor: pointer;
 }
+
+.allowed_actions {
+  padding: 0;
+}
+
+
 
 </style>
 

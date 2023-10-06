@@ -20,12 +20,24 @@ export default defineNuxtComponent({
     async fetchRelations() {
       this.loading = true;
       this.connectionsList = await this.$api.get(`/relationship/${this.kind.toLowerCase()}`);
-      console.log(this.connectionsList);
+      if (this.connectionsList) {
+        this.connectionsList = this.sortConnections(this.connectionsList);
+      }
       this.loading = false;
     },
     async onDelete(connectionId: number) {
       this.$api.delete(`/relationship/${connectionId}`);
       this.connectionsList = this.connectionsList!.filter((connection) => connection.receiverId !== connectionId);
+    },
+    sortConnections(connections: Relationship[]) {
+      if (this.kind === 'Friends') {
+        connections.sort((a: Relationship, b: Relationship) => {
+          const cmp = a.status.localeCompare(b.status);
+          return !!cmp ? -cmp : a.receiver.username.localeCompare(b.receiver.username);
+        });
+      }
+      else connections.sort((a, b) => a.receiver.username.localeCompare(b.receiver.username));
+      return connections;
     }
   }
 })
@@ -60,7 +72,16 @@ export default defineNuxtComponent({
           </template>
           <div class='d-flex flex-row'>
             <v-list-item-title>
-              {{ connection.receiver.username }}
+              <div class="d-flex flex-column">
+                <p>{{ connection.receiver.username }}</p>
+                <p
+                  v-if="this.kind === 'Friends'"
+                  class="status text-caption font-italic"
+                  :class="{'online': connection.status === 'online'}"
+                >
+                  {{connection.status}}
+                </p>
+              </div>
             </v-list-item-title>
             <v-spacer />
             <div v-if="this.kind === 'Friends'">
@@ -84,5 +105,13 @@ export default defineNuxtComponent({
   height: 100%;
   max-height: 20rem;
   overflow: auto;
+}
+
+.status {
+  color: #a73d3d;
+}
+
+.status.online {
+  color: #3da73d;
 }
 </style>

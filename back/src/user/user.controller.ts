@@ -25,13 +25,17 @@ import { diskStorage } from 'multer';
 import appConfig from '@config/app.config';
 import { User } from '@prisma/client';
 import type { Request } from '@type/request';
+import { StatusService } from '@user/status/status.service';
 
 declare type File = Express.Multer.File;
 
 @Controller('user')
 @UseGuards(...AuthenticatedGuard)
 export class UserController {
-	constructor(private readonly userService: UserService) {}
+	constructor(
+		private readonly userService: UserService,
+		private readonly statusService: StatusService
+	) {}
 
 	@Get()
 	async getAllUsers() {
@@ -43,8 +47,10 @@ export class UserController {
 	}
 
 	@Get(':id')
-	async getUserById(@Param('id', ParseIntPipe) id: number) {
-		return await this.userService.getById(id);
+	async getUserById(@Param('id', ParseIntPipe) id: number): Promise<(User & { status: string }) | undefined> {
+		const user = await this.userService.getById(id);
+		if (!user) return undefined;
+		return { ...user, ...(await this.statusService.getByUserId(id)) };
 	}
 
 	@Put('username')

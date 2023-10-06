@@ -18,15 +18,15 @@ import { MessageDto } from '@type/message.dto';
 import { IsNotMutedGuard } from '@guard/isNotMuted.guard';
 import { IsInChannelGuard } from '@guard/isInChannel.guard';
 
-@Controller('chat/channel/:id/message')
+@Controller('chat/channel/:targetChannelId/message')
 @UseGuards(...AuthenticatedGuard)
 export class MessageController {
 	constructor(private readonly messageService: MessageService) {}
 
 	@Get()
 	@UseGuards(IsInChannelGuard)
-	async getMessages(@Param('id', ParseIntPipe) channelId: number): Promise<Message[]> {
-		return this.messageService.getMessages(channelId);
+	async getMessages(@Param('targetChannelId', ParseIntPipe) channelId: number): Promise<Message[]> {
+		return await this.messageService.getMessages(channelId);
 	}
 
 	@Post()
@@ -34,7 +34,7 @@ export class MessageController {
 	@UsePipes(ValidationPipe)
 	async sendMessage(
 		@Req() req: Request,
-		@Param('id', ParseIntPipe) channelId: number,
+		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Body() data: MessageDto
 	): Promise<Message> {
 		return await this.messageService.sendMessage(req.user.id, channelId, data);

@@ -14,25 +14,44 @@ import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { RelationshipService } from './relationship.service';
 import type { Request } from '@type/request';
 import { Relationship } from '@prisma/client';
+import { StatusService } from '@user/status/status.service';
 
 @Controller('relationship')
 @UseGuards(...AuthenticatedGuard)
 export class RelationshipController {
-	constructor(private readonly relationshipService: RelationshipService) {}
+	constructor(
+		private readonly relationshipService: RelationshipService,
+		private statusService: StatusService
+	) {}
 
 	@Get()
 	async getAll(@Req() req: Request): Promise<Relationship[]> {
-		return await this.relationshipService.getAll(req.user.id);
+		const relations = await this.relationshipService.getAll(req.user.id);
+		const statuses = await this.statusService.getByUserIds(relations.map((relation) => relation.receiverId));
+		return relations.map((relation, index) => ({
+			...relation,
+			...statuses[index]
+		}));
 	}
 
 	@Get('friends')
 	async getAllFriends(@Req() req: Request): Promise<Relationship[]> {
-		return await this.relationshipService.getAllFriends(req.user.id);
+		const friends = await this.relationshipService.getAllFriends(req.user.id);
+		const statuses = await this.statusService.getByUserIds(friends.map((relation) => relation.receiverId));
+		return friends.map((relation, index) => ({
+			...relation,
+			...statuses[index]
+		}));
 	}
 
 	@Get('blocked')
 	async getAllBlocked(@Req() req: Request): Promise<Relationship[]> {
-		return await this.relationshipService.getAllBlocked(req.user.id);
+		const blocked = await this.relationshipService.getAllBlocked(req.user.id);
+		const statuses = await this.statusService.getByUserIds(blocked.map((relation) => relation.receiverId));
+		return blocked.map((relation, index) => ({
+			...relation,
+			...statuses[index]
+		}));
 	}
 
 	@Get(':id')

@@ -7,6 +7,12 @@ CREATE TYPE "ChannelKind" AS ENUM ('DIRECT', 'PROTECTED', 'PRIVATE', 'PUBLIC');
 -- CreateEnum
 CREATE TYPE "RelationKind" AS ENUM ('FRIEND', 'BLOCKED');
 
+-- CreateEnum
+CREATE TYPE "GameState" AS ENUM ('WON', 'LOST', 'DRAW');
+
+-- CreateEnum
+CREATE TYPE "GamePosition" AS ENUM ('LEFT', 'RIGHT');
+
 -- CreateTable
 CREATE TABLE "Relationship" (
     "senderId" INTEGER NOT NULL,
@@ -81,6 +87,23 @@ CREATE TABLE "TrustedDevice" (
     CONSTRAINT "TrustedDevice_pkey" PRIMARY KEY ("ip")
 );
 
+-- CreateTable
+CREATE TABLE "GameRecord" (
+    "playerId" INTEGER NOT NULL,
+    "result" "GameState" NOT NULL,
+    "position" "GamePosition" NOT NULL,
+    "score" INTEGER NOT NULL,
+    "gameId" INTEGER NOT NULL,
+
+    CONSTRAINT "GameRecord_pkey" PRIMARY KEY ("playerId","gameId")
+);
+
+-- CreateTable
+CREATE TABLE "Game" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Channel_name_key" ON "Channel"("name");
 
@@ -98,6 +121,9 @@ CREATE UNIQUE INDEX "TrustedDevice_id_key" ON "TrustedDevice"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "TrustedDevice_ip_key" ON "TrustedDevice"("ip");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Game_id_key" ON "Game"("id");
 
 -- AddForeignKey
 ALTER TABLE "Relationship" ADD CONSTRAINT "Relationship_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -122,3 +148,9 @@ ALTER TABLE "Otp" ADD CONSTRAINT "Otp_userId_fkey" FOREIGN KEY ("userId") REFERE
 
 -- AddForeignKey
 ALTER TABLE "TrustedDevice" ADD CONSTRAINT "TrustedDevice_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GameRecord" ADD CONSTRAINT "GameRecord_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GameRecord" ADD CONSTRAINT "GameRecord_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

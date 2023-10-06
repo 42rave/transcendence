@@ -13,7 +13,10 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 	imports: [
 		ServeStaticModule.forRoot({
 			rootPath: './avatars',
-			serveRoot: '/avatars'
+			serveRoot: '/avatars',
+			serveStaticOptions: {
+				index: false
+			}
 		}),
 		UserModule,
 		AuthModule,

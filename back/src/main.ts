@@ -1,3 +1,4 @@
+import { ServeStaticExceptionFilter } from '@/filters/serve-static.exception';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import apiConfig from './config/api.config';
@@ -13,6 +14,7 @@ async function bootstrap() {
 		credentials: true
 	});
 	mkdirSync('./avatars', { recursive: true });
+	app.useGlobalFilters(new ServeStaticExceptionFilter());
 	await app.listen(apiConfig.port);
 }
 bootstrap();

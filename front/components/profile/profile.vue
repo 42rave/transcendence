@@ -72,7 +72,7 @@ export default defineNuxtComponent({
                 <ProfileSocial :user="this.user" />
               </div>
               <div v-else class="d-flex flex-row flex-wrap" style="gap: 1rem;">
-                <ProfileRelations kind="Friends" class="flex-grow-1" style="flex-basis: 325px;" />
+                <ProfileRelations :socket="this.socket" kind="Friends" class="flex-grow-1" style="flex-basis: 325px;" />
                 <ProfileRelations kind="Blocked" class="flex-grow-1" style="flex-basis: 325px;" />
               </div>
             </v-window-item>

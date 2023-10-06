@@ -2,13 +2,18 @@
 import { Relationship } from '~/types/relation';
 
 export default defineNuxtComponent({
-  props: ["kind"],
+  props: ["kind", "socket"],
   data: () => ({
     connectionsList: null as Relationship[] | null,
     loading: true,
   }),
-  beforeMount() {
-    this.fetchRelations();
+  async beforeMount() {
+    await this.fetchRelations();
+  },
+  unmounted() {
+    for (const connection of this.connectionsList!) {
+      this.removeWsHook(connection);
+    }
   },
   methods: {
     getIcon() {
@@ -19,25 +24,40 @@ export default defineNuxtComponent({
     },
     async fetchRelations() {
       this.loading = true;
-      this.connectionsList = await this.$api.get(`/relationship/${this.kind.toLowerCase()}`);
-      if (this.connectionsList) {
-        this.connectionsList = this.sortConnections(this.connectionsList);
+      this.connectionsList = this.sortConnections(await this.$api.get(`/relationship/${this.kind.toLowerCase()}`));
+      for (const connection of this.connectionsList) {
+        this.addWsHook(connection);
       }
       this.loading = false;
     },
     async onDelete(connectionId: number) {
+      const _i = this.connectionsList!.findIndex((connection: Relationship) => connection.receiverId === connectionId);
+      if (_i === -1) return ;
+      this.removeWsHook(this.connectionsList![_i]);
       this.$api.delete(`/relationship/${connectionId}`);
-      this.connectionsList = this.connectionsList!.filter((connection) => connection.receiverId !== connectionId);
+      this.connectionsList!.splice(_i, 1);
     },
     sortConnections(connections: Relationship[]) {
       if (this.kind === 'Friends') {
-        connections.sort((a: Relationship, b: Relationship) => {
+        return connections.sort((a: Relationship, b: Relationship) => {
           const cmp = a.status.localeCompare(b.status);
           return !!cmp ? -cmp : a.receiver.username.localeCompare(b.receiver.username);
         });
+      } else
+      return connections.sort((a, b) => a.receiver.username.localeCompare(b.receiver.username));
+    },
+    addWsHook(connection: Relationship) {
+      if (this.socket) {
+        this.socket.on(`user:${connection.receiverId}:status`, (data: { status: string }) => {
+          connection.status = data.status;
+          this.connectionsList = this.sortConnections(this.connectionsList!);
+        });
       }
-      else connections.sort((a, b) => a.receiver.username.localeCompare(b.receiver.username));
-      return connections;
+    },
+    removeWsHook(connection: Relationship) {
+      if (this.socket) {
+        this.socket.off(`user:${connection.receiverId}:status`);
+      }
     }
   }
 })

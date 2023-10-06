@@ -9,7 +9,6 @@ export default defineNuxtComponent({
   }),
   async beforeMount() {
     await this.fetchRelation();
-    this.relation = null;
   },
   methods: {
     async fetchRelation() {

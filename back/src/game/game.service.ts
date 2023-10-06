@@ -30,7 +30,6 @@ export class GameService {
 				},
 			},
 		});
-		console.log(allUsers);
 		for (var i = 0; i < allUsers.length; i++) {
 			ladder.push({id: allUsers[i].id, username: allUsers[i].username,
 					winNb: allUsers[i]._count.gameRecords });
@@ -40,15 +39,40 @@ export class GameService {
 
 	/* This returns a HistoryDisplay array
 	   HistoryDisplay {
-	     data: Date,
+	     date: Date,
 	     player_1: { id: number, username: string, score: number },
 	     player_2: { id: number, username: string, score: number },
 	     state: GameState
 	   }
 	   GameState is a prisma enum { WON, LOST, DRAW } */
 	async getHistory(userId: number): Promise<HistoryDisplay[]> {
-		return null;
+		let gameHistory: Array<HistoryDisplay> = []
+
+		const allGames = await this.prisma.game.findMany({
+			where : { 
+				records: {
+					some: { playerId: userId }
+					}
+				},
+			include: { records: { include: { player: true } } }
+		});
+		for (var i = 0; i < allGames.length; i++) {
+			gameHistory.push({date: allGames[i].createdAt,
+				player_1: {
+					id: allGames[i].records[0].playerId,
+					username: allGames[i].records[0].player.username,
+					score: allGames[i].records[0].score,
+				},
+				player_2: {
+					id: allGames[i].records[1].playerId,
+					username: allGames[i].records[1].player.username,
+					score: allGames[i].records[1].score,
+				},
+				state: (allGames[i].records[0].playerId) === userId ? allGames[i].records[0].result : allGames[i].records[1].result })
+		}
+		return gameHistory;
 	}
+
 	/* This returns a GameState 
 	   GameState {
 	     data: Date,

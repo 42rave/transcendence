@@ -9,7 +9,7 @@ import {
 	ParseIntPipe,
 	ValidationPipe,
 	UsePipes,
-	UseGuards,
+	UseGuards
 } from '@nestjs/common';
 import { GameService } from './game.service';
 import type { Request } from '@type/request';
@@ -34,9 +34,9 @@ export class GameController {
 	//@Get()
 	//@UseGuards(...AuthenticatedGuard)
 	//async getAll(
-		//@Req() req: Request,
+	//@Req() req: Request,
 	//): Promise<
-	
+
 	@Get('ladder')
 	@UseGuards(...AuthenticatedGuard)
 	async getLadder(): Promise<LadderDisplay[]> {
@@ -45,13 +45,13 @@ export class GameController {
 
 	@Get('history/:userId')
 	@UseGuards(...AuthenticatedGuard)
-	async getHistory( @Param('userId', ParseIntPipe) userId: number): Promise<HistoryDisplay[]> {
+	async getHistory(@Param('userId', ParseIntPipe) userId: number): Promise<HistoryDisplay[]> {
 		return await this.gameService.getHistory(userId);
 	}
 
 	@Get('stats/:userId')
 	@UseGuards(...AuthenticatedGuard)
-	async getStats( @Param('userId', ParseIntPipe) userId: number) {
+	async getStats(@Param('userId', ParseIntPipe) userId: number) {
 		return await this.gameService.getStats(userId);
 	}
 }

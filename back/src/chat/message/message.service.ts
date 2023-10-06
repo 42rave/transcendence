@@ -29,7 +29,8 @@ export class MessageService {
 				body: data.body,
 				userId,
 				channelId
-			}
+			},
+			include: { user: true }
 		});
 		this.socialService.emit('chat:message', message, `${channelId}`);
 		return message;

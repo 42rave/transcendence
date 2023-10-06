@@ -70,7 +70,7 @@ export default defineNuxtComponent({
 
 <template>
   <div v-if="!this.editing">
-    <div class="d-flex position-relative" :class="{'editable': this.editable }"  @click="this.editing = true">
+    <div class="d-flex position-relative" :class="{'editable': this.editable }"  @click="this.editing = this.editable">
       <h2> {{ this.user.username }} </h2>
       <v-icon v-if="this.editable" class="ml-3 my-auto">mdi-pencil</v-icon>
     </div>

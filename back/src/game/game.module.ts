@@ -3,12 +3,11 @@ import { GameController } from '@game/game.controller';
 import { GameService } from '@game/game.service';
 import { PrismaModule } from '@prisma/prisma.module';
 import { AuthModule } from '@auth/auth.module';
-import { ChatService } from '@chat/chat.service';
-import { ChatGateway } from '@chat/chat.gateway';
+import { ChatModule } from '@chat/chat.module';
 
 @Module({
-	imports: [AuthModule, PrismaModule],
+	imports: [AuthModule, PrismaModule, ChatModule],
 	controllers: [GameController],
-	providers: [GameService, ChatService, ChatGateway]
+	providers: [GameService]
 })
 export class GameModule {}

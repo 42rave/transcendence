@@ -52,7 +52,6 @@ export default defineNuxtComponent({
         }
       })
       if (user) {
-        console.log(user);
         this.$auth.setUser(user);
         this.$emit("user:updated", user);
         this.editing = false;

@@ -26,9 +26,6 @@ export default defineNuxtComponent({
         console.log(e.target.files[0]);
         const formData = new FormData();
         formData.append("file", e.target.files[0]);
-        for (const entry of formData.entries()) {
-          console.log(entry);
-        }
         this.uploading = true;
         await this.$api.post("/user/avatar", {
           body: formData

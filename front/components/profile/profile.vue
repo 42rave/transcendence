@@ -33,11 +33,7 @@ export default defineNuxtComponent({
     editable() {
       return this.user && this.user.id === this.$auth.user.id;
     },
-    uploadFile: async (e: any) => {
-      console.log(typeof e);
-    },
     onUpdateUser(user: User) {
-      console.log(user);
       this.user = user;
     },
     getStatusColor() {

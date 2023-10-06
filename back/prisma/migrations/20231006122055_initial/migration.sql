@@ -93,7 +93,9 @@ CREATE TABLE "GameRecord" (
     "result" "GameState" NOT NULL,
     "position" "GamePosition" NOT NULL,
     "score" INTEGER NOT NULL,
-    "gameId" INTEGER NOT NULL
+    "gameId" INTEGER NOT NULL,
+
+    CONSTRAINT "GameRecord_pkey" PRIMARY KEY ("playerId","gameId")
 );
 
 -- CreateTable
@@ -119,9 +121,6 @@ CREATE UNIQUE INDEX "TrustedDevice_id_key" ON "TrustedDevice"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "TrustedDevice_ip_key" ON "TrustedDevice"("ip");
-
--- CreateIndex
-CREATE UNIQUE INDEX "GameRecord_playerId_key" ON "GameRecord"("playerId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Game_id_key" ON "Game"("id");

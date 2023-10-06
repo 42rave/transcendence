@@ -1,10 +1,17 @@
 <script lang="ts">
 import type { User } from '~/types/user';
 
+enum Status {
+  OFFLINE = 'offline',
+  ONLINE = 'online',
+  IN_GAME = 'in game',
+}
+
 export default defineNuxtComponent({
-  props: ['id'],
+  props: ['id', 'socket'],
   data: () => ({
     user: null as User | null,
+    status: Status.OFFLINE
   }),
   async beforeMount() {
     const data = await this.$api.get(`/user/${this.id}`);
@@ -14,6 +21,13 @@ export default defineNuxtComponent({
       return ;
     }
     this.user = data;
+    this.status = this.user.status;
+    this.socket.on(`user:${this.id}:status`, (data: { status: Status }) => {
+      this.status = data.status;
+    });
+  },
+  async unmounted() {
+    this.socket.off(`user:${this.id}:status`);
   },
   methods: {
     editable() {
@@ -25,6 +39,14 @@ export default defineNuxtComponent({
     onUpdateUser(user: User) {
       console.log(user);
       this.user = user;
+    },
+    getStatusColor() {
+      if (this.status === Status.OFFLINE)
+        return '#be4545';
+      if (this.status === Status.ONLINE)
+        return '#62de62';
+      if (this.status === Status.IN_GAME)
+        return '#6161c9';
     }
   }
 })
@@ -37,6 +59,7 @@ export default defineNuxtComponent({
       <div class="d-flex flex-column h-100 overflow-auto align-center">
         <ProfileAvatar :user="this.user" :editable="this.editable()" @user:updated="this.onUpdateUser" />
         <ProfileUsername :user="this.user" :editable="this.editable()" @user:updated="this.onUpdateUser" />
+        <p :style="{'color': this.getStatusColor()}">{{ this.status }}</p>
       </div>
     </div>
     <div v-else class="d-flex w-100 h-100">

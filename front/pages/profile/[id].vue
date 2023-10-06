@@ -1,10 +1,12 @@
-<script setup lang="ts">
-
+<script lang="ts">
+export default defineNuxtComponent({
+  props: ['socket'],
+})
 </script>
 
 <template>
   <div class="profile-page d-flex align-center justify-center">
-    <Profile :id="this.$route.params.id" />
+    <Profile :socket="this.socket" :id="this.$route.params.id" />
   </div>
 </template>
 

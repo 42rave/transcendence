@@ -35,7 +35,8 @@ export default defineNuxtComponent({
     <template v-slot:title>Profile</template>
     <div v-if="this.user" class="profile-content overflow-hidden d-flex flex-column w-100">
       <div class="d-flex flex-column h-100 overflow-auto align-center">
-        <ProfileAvatar :user="this.user" :editable="this.editable()" @user:updated="onUpdateUser" />
+        <ProfileAvatar :user="this.user" :editable="this.editable()" @user:updated="this.onUpdateUser" />
+        <ProfileUsername :user="this.user" :editable="this.editable()" @user:updated="this.onUpdateUser" />
       </div>
     </div>
     <div v-else class="d-flex w-100 h-100">

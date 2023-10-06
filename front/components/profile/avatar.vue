@@ -7,10 +7,9 @@
     <div v-if="this.editable" class="placeholder my-2">
       <v-avatar size="150" class="avatar avatar-blur" :image="this.user.avatar"></v-avatar>
       <v-avatar size="150" class="avatar" :image="this.user.avatar" />
-      <input class="avatar-prevent" type="file" id="file" accept="image/gif, image/jpeg, image/png" @change="uploadFile" >
+      <input class="avatar-prevent" type="file" id="file" accept="image/gif,image/jpeg,image/png" @change="this.uploadFile">
     </div>
     <v-avatar v-else size="150" class="avatar my-2" :image="this.user.avatar" />
-    <h2>{{ this.user.username }}</h2>
   </div>
 </template>
 
@@ -36,6 +35,7 @@ export default defineNuxtComponent({
           body: formData
         }).then((data: { user: User } | undefined) => {
           if (!data) return ;
+          data.user.avatar = data.user.avatar + '?' + new Date().getTime(); // the new date is only to bypass cache and reload the new image.
           this.$auth.setUser(data.user);
           this.$emit("user:updated", data.user);
         });

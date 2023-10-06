@@ -42,6 +42,9 @@ export const useAuthStore = defineStore('auth', {
 
       this.user = user;
       return true
+    },
+    async setUser(user: User) {
+      this.user = user;
     }
   },
 });

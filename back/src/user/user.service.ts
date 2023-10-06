@@ -20,7 +20,7 @@ export class UserService {
 		return this.prisma.user.findUnique({ where: { id: id } });
 	}
 
-	async update(data: UserDto): Promise<User> {
+	async update(data: { id?: number; username?: string; avatar?: string }): Promise<User> {
 		return this.prisma.user.update({ where: { id: data.id }, data });
 	}
 
@@ -29,12 +29,17 @@ export class UserService {
 	}
 
 	async createOrUpdate(data: UserDto): Promise<User> {
-		const user = await this.prisma.user.findUnique({ where: { id: data.id } });
-		if (user) {
-			return this.prisma.user.update({ where: { id: data.id }, data });
-		} else {
-			return this.prisma.user.create({ data });
-		}
+		return this.prisma.user
+			.upsert({
+				where: { id: data.id },
+				create: data,
+				update: {}
+			})
+			.catch(async (e) => {
+				if (e.code === 'P2002') {
+					return this.createOrUpdate({ ...data, username: data.username + '_' + Math.floor(Math.random() * 10000) });
+				}
+			});
 	}
 
 	async setSecret(userId: number, secret: string, iv: string): Promise<Otp> {

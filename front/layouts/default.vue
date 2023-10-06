@@ -6,7 +6,7 @@ export default defineNuxtComponent({
   name: 'DefaultLayout',
   data() {
     return {
-      drawer: true,
+      drawer: false,
       routes: {
         home: {
           name: 'Home',

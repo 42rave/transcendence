@@ -1,5 +1,5 @@
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { FortyTwoStrategy } from '@strategy/fortyTwo.strategy';
 import { UserModule } from '@user/user.module';
 import { JwtStrategy } from '@strategy/jwt.strategy';
@@ -11,7 +11,7 @@ import { DeviceService } from './device/device.service';
 import { PrismaModule } from '@prisma/prisma.module';
 
 @Module({
-	imports: [UserModule, JwtModule, PrismaModule],
+	imports: [forwardRef(() => UserModule), JwtModule, PrismaModule],
 	exports: [JwtService, AuthService, DeviceService],
 	controllers: [AuthController, DeviceController],
 	providers: [AuthService, FortyTwoStrategy, JwtStrategy, JwtService, TotpStrategy, DeviceService]

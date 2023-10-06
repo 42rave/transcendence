@@ -1,8 +1,9 @@
 import { RuntimeConfig } from "nuxt/schema";
 
 declare type WrapperOptions = {
+	headers?: { [key: string]: any };
 	body?: { [key: string]: any };
-	params?: { [key: string]: string };
+	params?: { [key: string]: any };
 }
 
 interface ErrorCallback {

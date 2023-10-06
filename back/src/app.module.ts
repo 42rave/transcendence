@@ -7,9 +7,24 @@ import { PrismaModule } from '@prisma/prisma.module';
 import { RelationshipModule } from './relationship/relationship.module';
 import { TotpMiddleware } from '@middleware/totp.middleware';
 import { AppController } from '@/app.controller';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
-	imports: [UserModule, AuthModule, ChatModule, GameModule, PrismaModule, RelationshipModule],
+	imports: [
+		ServeStaticModule.forRoot({
+			rootPath: './avatars',
+			serveRoot: '/avatars',
+			serveStaticOptions: {
+				index: false
+			}
+		}),
+		UserModule,
+		AuthModule,
+		ChatModule,
+		GameModule,
+		PrismaModule,
+		RelationshipModule
+	],
 	controllers: [AppController],
 	providers: []
 })

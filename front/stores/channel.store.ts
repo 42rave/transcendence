@@ -10,13 +10,15 @@ interface IMessage {
 interface IChannel {
   name: string;
   id: number;
-  messages: Map<number, IMessage>
+  messages: Map<number, IMessage>;
+  role: string;
 }
 
 export const useChannelStore = defineStore('channel', {
 	state: ():IChannel => ({
 		name: '',
 		id: 0,
+		role: '',
 		messages: new Map<number, IMessage>(),
 
 	}),
@@ -28,11 +30,12 @@ export const useChannelStore = defineStore('channel', {
 	},
 	actions: {
 		// actions change the state, which can be accessed with "this"
-		async currentChannel(name: string, id:number) {
+		async currentChannel(name: string, id:number, role: string) {
 			const config = useRuntimeConfig();
 			this.name = name;
 			this.id = id;
-			await this.getMessages();
+			this.role = role;
+			await this.getMessages();	
 		},
 
 		async getMessages() {

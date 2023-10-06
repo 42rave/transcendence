@@ -37,6 +37,9 @@ export default defineNuxtComponent({
         }
       }, (e: any) => {
         switch (e.status) {
+          case 400:
+            this.set_error(e.data.message);
+            break ;
           case 401:
             this.$emit('alert:show', { title: 'Unauthorized', message: e.data.error });
             this.$auth.logout();
@@ -60,7 +63,7 @@ export default defineNuxtComponent({
       if (!value) return 'Username is required';
       if (value.length < 3) return 'Username must be at least 3 characters long';
       if (value.length > 12) return 'Username must be at most 12 characters long';
-      const forbidden_char = value.match(/[^a-zA-Z0-9_]/);
+      const forbidden_char = value.match(/[^a-zA-Z0-9_\-]/);
       if (forbidden_char) return `Username cannot contain '${forbidden_char[0]}'`;
       return true;
     }

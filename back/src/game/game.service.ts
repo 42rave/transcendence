@@ -75,19 +75,73 @@ export class GameService {
 		return gameHistory;
 	}
 
-	/* This returns a GameState 
-	   GameState {
-	     data: Date,
-	     player_1: { id: number, username: string, score: number },
-	     player_2: { id: number, username: string, score: number },
-	     state: GameState
+	async getGameNbByResult(userId: number, result: GameState): Promise<number> {
+		const gameWon = await this.prisma.game.count({
+			where: {
+				records: {
+					some: {
+						AND: [{ playerId: userId }, { result: result }]
+					}
+				}
+			}
+		});
+
+		return gameWon;
+	}
+
+	async getGoalTaken(userId: number): Promise<number> {
+		const gameRecord = await this.prisma.gameRecord.aggregate({
+			where: {
+				AND: [{ game: { records: { some: { playerId: userId } } } }, { NOT: [{ playerId: userId }] }]
+			},
+			_sum: {
+				score: true
+			}
+		});
+		return gameRecord._sum.score;
+	}
+
+	async getGoalScored(userId: number): Promise<number> {
+		const gameRecord = await this.prisma.gameRecord.aggregate({
+			where: { playerId: userId },
+			_sum: {
+				score: true
+			}
+		});
+		return gameRecord._sum.score;
+	}
+
+	/* This returns a GameStats class (/!\ != GameState ! /!\ )
+	  GameStats {
+			gameNb: number;
+			wonNb: number;
+			lostNb: number;
+			drawNb: number;
+			goalScored: number;
+			goalTaken: number;
+			winRatio: number;
+			goalRatio: number;
 	   }
-	   GameState is a prisma enum { WON, LOST, DRAW } */
-
+	*/
 	async getStats(userId: number): Promise<GameStats> {
-		let gameStats: GameStats;
-		void userId;
+		const gameWon = await this.getGameNbByResult(userId, GameState.WON);
+		const gameLost = await this.getGameNbByResult(userId, GameState.LOST);
+		const gameDrawn = await this.getGameNbByResult(userId, GameState.DRAW);
+		const gameNb = gameWon + gameLost + gameDrawn;
 
+		const goalTaken = await this.getGoalTaken(userId);
+		const goalScored = await this.getGoalScored(userId);
+
+		const gameStats: GameStats = {
+			gameNb: gameNb,
+			wonNb: gameWon,
+			lostNb: gameLost,
+			drawNb: gameDrawn,
+			winRatio: gameNb === 0 ? 0 : (gameWon / gameNb) * 100,
+			goalScored: 0,
+			goalTaken: 0,
+			goalRatio: goalTaken === 0 ? goalScored : parseFloat(((goalScored / goalTaken) * 100).toFixed(2))
+		};
 		return gameStats;
 	}
 }

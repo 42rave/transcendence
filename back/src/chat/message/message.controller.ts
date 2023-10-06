@@ -25,7 +25,7 @@ export class MessageController {
 
 	@Get()
 	@UseGuards(IsInChannelGuard)
-	async getMessages(@Param('targetChannelId', ParseIntPipe) channelId: number, @Req() req: Request): Promise<Message[]> {
+	async getMessages(@Param('targetChannelId', ParseIntPipe) channelId: number): Promise<Message[]> {
 		return await this.messageService.getMessages(channelId);
 	}
 

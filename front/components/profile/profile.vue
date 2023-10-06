@@ -62,13 +62,19 @@ export default defineNuxtComponent({
           <v-tabs v-model="tab" class="w-100">
             <v-tab>Stats</v-tab>
             <v-tab>Games</v-tab>
-            <v-tab v-if="!this.editable()">Social</v-tab>
+            <v-tab>Social</v-tab>
           </v-tabs>
           <v-window v-model="tab" class="my-4">
             <v-window-item> Stats </v-window-item>
             <v-window-item> Games </v-window-item>
-            <v-window-item v-if="!this.editable()">
-              <ProfileSocial :user="this.user" />
+            <v-window-item>
+              <div v-if="!this.editable()">
+                <ProfileSocial :user="this.user" />
+              </div>
+              <div v-else class="d-flex flex-row flex-wrap" style="gap: 1rem;">
+                <ProfileRelations kind="Friends" class="flex-grow-1" style="flex-basis: 325px;" />
+                <ProfileRelations kind="Blocked" class="flex-grow-1" style="flex-basis: 325px;" />
+              </div>
             </v-window-item>
           </v-window>
         </div>

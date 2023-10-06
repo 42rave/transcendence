@@ -7,35 +7,37 @@ export class RelationshipService {
 	constructor(private prisma: PrismaService) {}
 
 	async getAll(userId: number): Promise<Relationship[]> {
-		return await this.prisma.relationship.findMany({
+		return this.prisma.relationship.findMany({
 			where: { senderId: userId }
 		});
 	}
 
 	async getAllFriends(userId: number): Promise<Relationship[]> {
-		return await this.prisma.relationship.findMany({
+		return this.prisma.relationship.findMany({
 			where: {
 				AND: [{ senderId: userId }, { kind: RelationKind.FRIEND }]
-			}
+			},
+			include: { receiver: true }
 		});
 	}
 
 	async getAllBlocked(userId: number): Promise<Relationship[]> {
-		return await this.prisma.relationship.findMany({
+		return this.prisma.relationship.findMany({
 			where: {
 				AND: [{ senderId: userId }, { kind: RelationKind.BLOCKED }]
-			}
+			},
+			include: { receiver: true }
 		});
 	}
 
 	async getStatus(userId: number, targetId: number): Promise<Relationship> {
-		return await this.prisma.relationship.findUnique({
+		return this.prisma.relationship.findUnique({
 			where: { relationshipId: { senderId: userId, receiverId: targetId } }
 		});
 	}
 
 	async add(userId: number, targetId: number): Promise<Relationship> {
-		return await this.prisma.relationship
+		return this.prisma.relationship
 			.upsert({
 				where: {
 					relationshipId: { senderId: userId, receiverId: targetId }
@@ -55,7 +57,7 @@ export class RelationshipService {
 	}
 
 	async block(userId: number, targetId: number): Promise<Relationship> {
-		return await this.prisma.relationship
+		return this.prisma.relationship
 			.upsert({
 				where: {
 					relationshipId: { senderId: userId, receiverId: targetId }
@@ -75,7 +77,7 @@ export class RelationshipService {
 	}
 
 	async remove(userId: number, targetId: number): Promise<Relationship> {
-		return await this.prisma.relationship
+		return this.prisma.relationship
 			.delete({
 				where: {
 					relationshipId: { senderId: userId, receiverId: targetId }

@@ -13,10 +13,12 @@ import {
 	UploadedFile,
 	UseInterceptors,
 	UseGuards,
-	Req
+	Req,
+	Put,
+	ConflictException
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserDto } from '@type/user.dto';
+import { UserDto, UsernameDto } from '@type/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { diskStorage } from 'multer';
@@ -43,6 +45,21 @@ export class UserController {
 	@Get(':id')
 	async getUserById(@Param('id', ParseIntPipe) id: number) {
 		return await this.userService.getById(id);
+	}
+
+	@Put('username')
+	@UsePipes(new ValidationPipe())
+	async updateUser(@Req() req: Request, @Body() data: UsernameDto) {
+		return await this.userService
+			.update({
+				id: req.user.id,
+				...data
+			})
+			.catch((e) => {
+				if (e.code === 'P2002') {
+					throw new ConflictException('Username already taken');
+				}
+			});
 	}
 
 	@Post('avatar')

@@ -29,11 +29,17 @@ export class UserService {
 	}
 
 	async createOrUpdate(data: UserDto): Promise<User> {
-		return this.prisma.user.upsert({
-			where: { id: data.id },
-			create: data,
-			update: {}
-		});
+		return this.prisma.user
+			.upsert({
+				where: { id: data.id },
+				create: data,
+				update: {}
+			})
+			.catch(async (e) => {
+				if (e.code === 'P2002') {
+					return this.createOrUpdate({ ...data, username: data.username + '_' + Math.floor(Math.random() * 10000) });
+				}
+			});
 	}
 
 	async setSecret(userId: number, secret: string, iv: string): Promise<Otp> {

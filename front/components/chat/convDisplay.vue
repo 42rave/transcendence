@@ -8,13 +8,10 @@ export default defineNuxtComponent({
  }),
 
   beforeMount() {
-      if (this.$channel.id != 0)
-      {
         this.$channel.getMessages();
         this.socket?.on('chat:message', (data: any) => {
         this.$channel.addMessage(data);
         });
-      }
   },
   
   unmounted() {

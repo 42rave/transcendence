@@ -40,6 +40,8 @@ export const useChannelStore = defineStore('channel', {
 
 		async getMessages() {
 			const config = useRuntimeConfig();
+			if (this.id === 0)
+				return;
 			const loadMessages = await $fetch<IMessage[]>(`${config.app.API_URL}/chat/channel/${this.id}/message`, {
 				credentials: 'include',
 			}).catch((err) => {

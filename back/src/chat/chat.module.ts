@@ -10,10 +10,12 @@ import { PrivmsgController } from '@chat/privmsg/privmsg.controller';
 import { ChannelService } from '@chat/channel/channel.service';
 import { MessageService } from '@chat/message/message.service';
 import { PrivmsgService } from '@chat/privmsg/privmsg.service';
+import { StatusModule } from '@user/status/status.module';
 
 @Module({
-	imports: [AuthModule, PrismaModule],
+	imports: [AuthModule, PrismaModule, StatusModule],
 	controllers: [ChatController, ChannelController, MessageController, PrivmsgController],
-	providers: [ChatGateway, ChatService, ChannelService, MessageService, PrivmsgService]
+	providers: [ChatGateway, ChatService, ChannelService, MessageService, PrivmsgService],
+	exports: [ChatService]
 })
 export class ChatModule {}

@@ -52,7 +52,8 @@ export default defineNuxtComponent({
         if (res)
         {
           this.$channel.currentChannel(res.channel.name, res.channel.id);
-          this.$channel.clearMessages();        
+          this.$channel.clearMessages();
+          this.$chat.currentConnections();
         }
     },
 
@@ -67,6 +68,7 @@ export default defineNuxtComponent({
           this.$channel.currentChannel(res.channel.name, res.channel.id);
           this.$channel.clearMessages();
           this.$refs.form.reset();
+          this.$chat.currentConnections();
     },
 
     isInChannel(id: number) {

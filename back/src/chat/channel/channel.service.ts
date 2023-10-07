@@ -234,6 +234,11 @@ export class ChannelService {
 	}
 
 	async createChannel(user: User, data: ChannelCreationDto) {
+		if (data.kind === ChannelKind.PROTECTED && data.password === null) {
+			throw new BadRequestException('Cannot create channel', {
+				description: 'Password of protected channel cannot be empty'
+			});
+		}
 		const channel = await this.prisma.channel
 			.create({
 				data: {
@@ -538,6 +543,11 @@ export class ChannelService {
 		this.chatService.emitToUser('chat:unban', targetChannelId, targetUserId);
 	}
 	async updateChannel(userId: number, targetChannelId: number, data: ChannelDto): Promise<Channel> {
+		if (data.kind === ChannelKind.PROTECTED && data.password === null) {
+			throw new BadRequestException('Cannot update channel', {
+				description: 'Password of protected channel cannot be empty'
+			});
+		}
 		const foundChannel = await this.prisma.channel.findUnique({
 			where: { id: targetChannelId },
 			include: { channelConnection: true }

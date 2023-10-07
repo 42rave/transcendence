@@ -47,7 +47,7 @@ export default defineNuxtComponent({
     addRelation(connection: Relationship) {
       const _i = this.connectionsList!.findIndex((c: Relationship) => c.receiverId === connection.receiverId);
       if (_i !== -1) {
-        this.connectionsList[_i] = connection;
+        this.connectionsList[_i].update(connection);
         return ;
       }
       this.connectionsList!.push(connection);
@@ -60,7 +60,8 @@ export default defineNuxtComponent({
       this.removeWsHook(this.connectionsList![_i]);
       this.connectionsList!.splice(_i, 1);
     },
-    async onDelete(connectionId: number) {
+    async onDelete(connectionId: number, e?: Event) {
+      if (e) e.stopPropagation();
       this.$api.delete(`/relationship/${connectionId}`);
     },
     sortConnections(connections: Relationship[]) {
@@ -84,6 +85,9 @@ export default defineNuxtComponent({
       if (this.socket) {
         this.socket.off(`user:${connection.receiverId}:status`);
       }
+    },
+    redirectProfile(connection: Relationship) {
+      this.$router.push(`/profile/${connection.receiverId}`);
     }
   }
 })
@@ -112,7 +116,7 @@ export default defineNuxtComponent({
         </v-alert>
       </div>
       <v-list v-else>
-        <v-list-item v-for="connection in this.connectionsList" :list="connection">
+        <v-list-item v-for="connection in this.connectionsList" :list="connection" @click="redirectProfile(connection)">
           <template v-slot:prepend>
             <v-avatar :image="connection.receiver.avatar" />
           </template>
@@ -130,8 +134,8 @@ export default defineNuxtComponent({
               </div>
             </v-list-item-title>
             <v-spacer />
-            <div>
-              <v-icon color="red" @click.prevent="this.onDelete(connection.receiverId)" class="mx-2">mdi-minus</v-icon>
+            <div class="my-auto remove-zone" @click.prevent="(e) => {this.onDelete(connection.receiverId, e)}">
+              <v-icon color="red" class="btn">mdi-minus</v-icon>
             </div>
           </div>
         </v-list-item>
@@ -156,5 +160,9 @@ export default defineNuxtComponent({
 
 .status.online {
   color: #3da73d;
+}
+.remove-zone:hover .btn {
+  background-color: #4b3434;
+  border-radius: 50%;
 }
 </style>

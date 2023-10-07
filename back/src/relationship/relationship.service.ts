@@ -37,7 +37,12 @@ export class RelationshipService {
 	}
 
 	async add(userId: number, targetId: number): Promise<Relationship> {
-		return this.prisma.relationship
+		if (userId === targetId) {
+			throw new BadRequestException('Cannot add user as friend', {
+				description: 'You are you own friend <3'
+			});
+		}
+		return await this.prisma.relationship
 			.upsert({
 				where: {
 					relationshipId: { senderId: userId, receiverId: targetId }
@@ -58,7 +63,12 @@ export class RelationshipService {
 	}
 
 	async block(userId: number, targetId: number): Promise<Relationship> {
-		return this.prisma.relationship
+		if (userId === targetId) {
+			throw new BadRequestException('Cannot block user', {
+				description: "Come on... you're not that bad"
+			});
+		}
+		return await this.prisma.relationship
 			.upsert({
 				where: {
 					relationshipId: { senderId: userId, receiverId: targetId }
@@ -79,7 +89,12 @@ export class RelationshipService {
 	}
 
 	async remove(userId: number, targetId: number): Promise<Relationship> {
-		return this.prisma.relationship
+		if (userId === targetId) {
+			throw new BadRequestException('Cannot remove yourself', {
+				description: "It's just a tough time, keep smiling!"
+			});
+		}
+		return await this.prisma.relationship
 			.delete({
 				where: {
 					relationshipId: { senderId: userId, receiverId: targetId }

@@ -53,7 +53,7 @@ export class GameService {
 					some: { playerId: userId }
 				}
 			},
-			include: { records: { include: { player: true } } }
+			include: { records: { include: { player: true }, orderBy: { position: 'asc' } } }
 		});
 		for (let i = 0; i < allGames.length; i++) {
 			gameHistory.push({

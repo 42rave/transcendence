@@ -123,6 +123,9 @@ CREATE UNIQUE INDEX "TrustedDevice_id_key" ON "TrustedDevice"("id");
 CREATE UNIQUE INDEX "TrustedDevice_ip_key" ON "TrustedDevice"("ip");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "GameRecord_gameId_position_key" ON "GameRecord"("gameId", "position");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Game_id_key" ON "Game"("id");
 
 -- AddForeignKey

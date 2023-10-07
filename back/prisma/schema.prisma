@@ -89,6 +89,7 @@ model GameRecord {
   gameId    Int
 
 	@@id([playerId, gameId], name: "id")
+	@@unique([gameId, position])
 }
 
 model Game {

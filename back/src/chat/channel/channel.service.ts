@@ -469,8 +469,8 @@ export class ChannelService {
 				});
 			});
 		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
-		this.chatService.emit('chat:kicked', targetUserId, targetChannelId.toString());
-		this.chatService.emitToUser('chat:kick', channel, targetUserId);
+		this.chatService.emit('chat:kicking', targetUserId, targetChannelId.toString());
+		this.chatService.emitToUser('chat:kicked', channel, targetUserId);
 		return null;
 	}
 
@@ -502,7 +502,8 @@ export class ChannelService {
 					userId: targetUserId,
 					role: ChannelRole.BANNED
 				},
-				update: { role: ChannelRole.BANNED }
+				update: { role: ChannelRole.BANNED },
+				include: { channel: true }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot ban user', {
@@ -511,7 +512,7 @@ export class ChannelService {
 			});
 		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
 		this.chatService.emit('chat:banning', targetUserId, targetChannelId.toString());
-		this.chatService.emitToUser('chat:ban', banned, targetUserId);
+		this.chatService.emitToUser('chat:banned', banned, targetUserId);
 		return banned;
 	}
 
@@ -548,7 +549,7 @@ export class ChannelService {
 			});
 		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
 		this.chatService.emit('chat:unbanning', targetUserId, targetChannelId.toString());
-		this.chatService.emitToUser('chat:unban', targetChannelId, targetUserId);
+		this.chatService.emitToUser('chat:unbanned', targetChannelId, targetUserId);
 	}
 	async updateChannel(userId: number, targetChannelId: number, data: ChannelDto): Promise<Channel> {
 		if (data.kind === ChannelKind.PROTECTED && data.password === null) {

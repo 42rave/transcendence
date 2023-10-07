@@ -238,7 +238,7 @@ export class ChannelService {
 			.create({
 				data: {
 					name: 'channel: ' + data.name,
-					password: await this.hashPassword(data.password),
+					password: (data.password) ? await this.hashPassword(data.password) : null,
 					kind: data.kind,
 					channelConnection: {
 						create: {

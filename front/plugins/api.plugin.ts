@@ -49,11 +49,11 @@ export default defineNuxtPlugin(({ $config, $event, $auth }: any) => {
 		if (!$auth.isAuthenticated || ($auth.user.twoFAEnabled && !$auth.user.twoFALogged))
 			return ;
 		if (reason.status === 401) {
-			$event('alert:show', { title: 'Disconnected', message: reason.data.error});
+			$event('alert:error', { title: 'Disconnected', message: reason.data.error});
 			$auth.logout();
 		}
 		else {
-			$event('alert:show', { title: reason.data.message, message: reason.data.error});
+			$event('alert:error', { title: reason.data.message, message: reason.data.error});
 		}
 	});
 

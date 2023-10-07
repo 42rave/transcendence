@@ -27,7 +27,7 @@ export default defineNuxtComponent({
       });
         if (res) {
        		this.$emit("channelList:update", res);
-          this.$event('alert:show', {title: 'Channel successfully created', message: 'chat away'})
+          this.$event('alert:success', {title: 'Channel successfully created', message: 'chat away'})
           this.$refs.form.reset();
           this.channelKind = 'PUBLIC';
         }

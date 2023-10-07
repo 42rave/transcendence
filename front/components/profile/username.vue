@@ -41,14 +41,14 @@ export default defineNuxtComponent({
             this.set_error(e.data.message);
             break ;
           case 401:
-            this.$emit('alert:show', { title: 'Unauthorized', message: e.data.error });
+            this.$emit('alert:error', { title: 'Unauthorized', message: e.data.error });
             this.$auth.logout();
             break;
           case 409:
             this.set_error('Username already taken');
             break;
           default:
-            this.$emit('alert:show', { title: e.data.message, message: e.data.error });
+            this.$emit('alert:error', { title: e.data.message, message: e.data.error });
         }
       })
       if (user) {

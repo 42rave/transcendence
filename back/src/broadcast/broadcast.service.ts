@@ -51,7 +51,7 @@ export class BroadcastService {
 		this.logger.debug(`Emitting ${event} ${JSON.stringify(data)} to ${rooms ? rooms : 'all'}`);
 	}
 
-	emitToUser(event: string, data: any, userId: number): void {
+	emitToUser(event: string, data: any, userId: number) {
 		this.emit(event, data, `user:${userId}`);
 		this.logger.debug(`Emitting ${event} (${data}) to user:${userId}`);
 	}

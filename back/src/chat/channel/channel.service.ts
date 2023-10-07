@@ -37,7 +37,8 @@ export class ChannelService {
 
 	async getChannelConnections(channelId: number): Promise<ChannelConnection[]> {
 		return await this.prisma.channelConnection.findMany({
-			where: { channelId }
+			where: { channelId },
+			include: { user: true }
 		});
 	}
 

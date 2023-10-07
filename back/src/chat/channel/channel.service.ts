@@ -370,7 +370,7 @@ export class ChannelService {
 				where: { connectionId: { userId: user.id, channelId: targetChannelId } }
 			});
 			this.chatService.emit('chat:quit', user.id, targetChannelId.toString());
-			this.chatService.quitRoom(user.id, targetChannelId.toString());
+			await this.chatService.quitRoom(user.id, targetChannelId.toString());
 		} else {
 			await this.prisma.channelConnection.deleteMany({
 				where: {
@@ -384,7 +384,7 @@ export class ChannelService {
 				}
 			});
 			this.chatService.emit('chat:quit', user.id, targetChannelId.toString());
-			this.chatService.quitRoom(user.id, targetChannelId.toString());
+			await this.chatService.quitRoom(user.id, targetChannelId.toString());
 			if (foundChannel.channelConnection.length === 1) {
 				this.chatService.emit('chat:delete', targetChannelId);
 				await this.prisma.channel.delete({ where: { id: targetChannelId } });
@@ -468,7 +468,7 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.quitRoom(targetUserId, targetChannelId.toString());
+		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
 		this.chatService.emit('chat:kicked', targetUserId, targetChannelId.toString());
 		this.chatService.emitToUser('chat:kick', channel, targetUserId);
 		return null;
@@ -509,7 +509,7 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.quitRoom(targetUserId, targetChannelId.toString());
+		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
 		this.chatService.emit('chat:banning', targetUserId, targetChannelId.toString());
 		this.chatService.emitToUser('chat:ban', banned, targetUserId);
 		return banned;
@@ -546,7 +546,7 @@ export class ChannelService {
 					description: 'User does not exist or is not banned'
 				});
 			});
-		this.chatService.quitRoom(targetUserId, targetChannelId.toString());
+		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
 		this.chatService.emit('chat:unbanning', targetUserId, targetChannelId.toString());
 		this.chatService.emitToUser('chat:unban', targetChannelId, targetUserId);
 	}

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { MessageDto } from '@type/message.dto';
-import { Message } from '@prisma/client';
+import { Message, RelationKind, User } from '@prisma/client';
 import { SocialService } from '@chat/social.service';
 
 @Injectable()
@@ -11,9 +11,22 @@ export class MessageService {
 		private readonly socialService: SocialService
 	) {}
 
-	async getMessages(channelId: number) {
+	async getBlockedUsersIds(user: User): Promise<number[]> {
+		return (
+			await this.prismaService.relationship.findMany({
+				where: {
+					AND: [{ senderId: user.id }, { kind: RelationKind.BLOCKED }]
+				}
+			})
+		).map((blocked) => blocked.receiverId);
+	}
+
+	async getMessages(user: User, channelId: number) {
+		const blockedUsersIds: number[] = await this.getBlockedUsersIds(user);
 		return await this.prismaService.message.findMany({
-			where: { channelId },
+			where: {
+				AND: [{ channelId }, { userId: { notIn: blockedUsersIds } }]
+			},
 			include: { user: true, channel: true }
 		});
 	}

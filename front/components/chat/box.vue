@@ -28,7 +28,6 @@ export default defineNuxtComponent({
     the current channel state is reset 
     and the user is redirected to channel 0 */
     this.socket?.on('chat:kicked', (data: any) => {
-		  console.log("KICKED");
 		  this.$userChat.removeConnection(this.$channel.id);
      	this.$router.push('/chat');
 		  this.$channel.$reset();
@@ -36,10 +35,7 @@ export default defineNuxtComponent({
 
     /*  if a user is kicked from the channel, his connection is removed from the channel */
     this.socket?.on('chat:kicking', (data: number) => {
-		  console.log("KICKING - data : ", data);
-		  this.$channel.removeConnection(data);
-      console.log(this.$channel.currentConnections);
-      
+		  this.$channel.removeUser(data);     
     });
   },
 

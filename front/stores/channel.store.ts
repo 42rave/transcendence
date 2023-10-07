@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-interface ICurrentConnections {
+interface IUser {
 	userId: number;
 	role: string;
 }
@@ -17,7 +17,7 @@ interface IChannel {
   id: number;
   messages: Map<number, IMessage>;
   userRole: string;
-  currentConnections: Map<number, ICurrentConnections>;
+  userList: Map<number, IUser>;
 }
 
 export const useChannelStore = defineStore('channel', {
@@ -26,7 +26,7 @@ export const useChannelStore = defineStore('channel', {
 		id: 0,
 		userRole: '',
 		messages: new Map<number, IMessage>(),
-		currentConnections: new Map<number, ICurrentConnections>(),
+		userList: new Map<number, IUser>(),
 
 	}),
 	getters: {
@@ -37,13 +37,13 @@ export const useChannelStore = defineStore('channel', {
 	},
 	actions: {
 		// actions change the state, which can be accessed with "this"
-		async currentChannel(name: string, id:number, role: string) {
+		async getCurrentChannel(name: string, id:number, role: string) {
 			const config = useRuntimeConfig();
 			this.name = name;
 			this.id = id;
 			this.userRole = role;
 			await this.getMessages();
-			await this.getCurrentConnections();
+			await this.getUserList();
 		},
 
 		async getMessages() {
@@ -61,9 +61,9 @@ export const useChannelStore = defineStore('channel', {
 			}
 		},
 
-		async getCurrentConnections () {
+		async getUserList () {
 			const config = useRuntimeConfig();
-			const loadUsers = await $fetch<ICurrentConnections[]>(`http://localhost:3000/chat/channel/${this.id}/connection`, {
+			const loadUsers = await $fetch<IUser[]>(`http://localhost:3000/chat/channel/${this.id}/connection`, {
 				credentials: 'include',
 			}).catch((err) => {
 				console.log(err.response._data.err);	
@@ -71,17 +71,17 @@ export const useChannelStore = defineStore('channel', {
 	
 			if (loadUsers)
 			{
-				this.currentConnections = new Map(loadUsers.map((currentConnection: ICurrentConnections) => [currentConnection.userId, currentConnection]));
+				this.userList = new Map(loadUsers.map((user: IUser) => [user.userId, user]));
 				
 			}
 		},
 
-		async addUser(currentConnection: ICurrentConnections) {
-			this.currentConnections.set(currentConnection.userId, currentConnection);
+		async addnewUser(newUser: IUser) {
+			this.userList.set(newUser.userId, newUser);
 		},
 
-		async removeConnection(currentConnection: ICurrentConnections) {
-			this.currentConnections.delete(currentConnection.userId);
+		async removeUser(newUser: IUser) {
+			this.userList.delete(newUser.userId);
 		},
 
 		addMessage(input: IMessage) {

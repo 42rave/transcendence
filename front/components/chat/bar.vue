@@ -52,10 +52,10 @@ export default defineNuxtComponent({
         if (res)
         {
         
-          this.$channel.currentChannel(res.channel.name, res.channel.id, res.role);
+          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role);
           this.$channel.clearMessages();
           this.$userChat.currentConnections();
-          this.$channel.getCurrentConnections();      
+          this._drawer = false;    
         }
     },
 
@@ -67,10 +67,11 @@ export default defineNuxtComponent({
         }
       }) ;
         if (res)
-          this.$channel.currentChannel(res.channel.name, res.channel.id, res.role);
+          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role);
           this.$channel.clearMessages();
           this.$refs.form.reset();
           this.$userChat.currentConnections();
+           this._drawer = false;  
     },
 
     isInChannel(id: number) {

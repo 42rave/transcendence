@@ -42,6 +42,8 @@ export default defineNuxtComponent({
   unmounted() {
     this.socket.off('relation:update');
     this.socket.off('relation:remove');
+    this.socket.off('chat:kicked');
+    this.socket.off('chat:kicking');
   },
 
   methods: {

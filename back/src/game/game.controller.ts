@@ -1,8 +1,11 @@
 import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { GameService } from './game.service';
-import type { LadderDisplay, HistoryDisplay, GameStats } from '@type/game';
+import type { LadderDisplay, HistoryDisplay, GameStats, GameResult } from '@type/game';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
+import { Result } from '@prisma/client/runtime/library';
 
+
+//The request handler
 @Controller('game')
 export class GameController {
 	constructor(private readonly gameService: GameService) {
@@ -32,4 +35,11 @@ export class GameController {
 	async getStats(@Param('userId', ParseIntPipe) userId: number): Promise<GameStats> {
 		return await this.gameService.getStats(userId);
 	}
+
+	@Get('play')
+	@UseGuards(...AuthenticatedGuard)
+	async playGame(): Promise<GameResult> {
+		return await this.gameService.playGame();
+	}
+
 }

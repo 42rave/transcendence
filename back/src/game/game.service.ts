@@ -2,16 +2,36 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { SocialService } from '@chat/social.service';
 import { BroadcastService } from '@broadcast/broadcast.service';
-import type { LadderDisplay, HistoryDisplay, GameStats } from '@type/game';
+import { LadderDisplay, HistoryDisplay, GameStats, Colour, Ball, Paddle, Coord, Rectangle, GameField, Player, GameResult } from '@type/game';
 import { GameState } from '@prisma/client';
+import { Socket } from 'dgram';
+import { Result } from '@prisma/client/runtime/library';
 
+//the game itself
 @Injectable()
 export class GameService extends BroadcastService {
+    protected game: GameField;
+	protected result: GameResult;
+
 	constructor(
 		private readonly prisma: PrismaService,
-		private readonly socialService: SocialService
+		private readonly socialService: SocialService,
+		//private readonly idPlayer1: number,
+		//private readonly socketIdPlayer1: Socket,
+		//private readonly idPlayer2: number,
+		//private readonly socketIdPlayer2: Socket,
 	) {
 		super('BroadcastService');
+		//this.player1 = { userId: idPlayer1, socketId: socketIdPlayer1, score: 0 };
+		//this.player2 = { userId: idPlayer1, socketId: socketIdPlayer1, score: 0 };
+
+		let ball = { colour: Colour.RED, coord: { x: 4.5, y: 8 }, diameter: 1 };
+        let field = { colour: Colour.BLACK, width: 9, length: 16 };
+		let paddleForm = { colour: Colour.WHITE, width: 3, length: 1 };
+		let paddle1 = { coord: { x: 1, y:  8 }, obj: paddleForm };
+		let paddle2 = { coord: { x: 15, y: 8 }, obj: paddleForm };
+	
+        this.game = { field, ball, paddle1, paddle2 };
 	}
 
 	/* This returns a LadderDisplay array.
@@ -143,5 +163,19 @@ export class GameService extends BroadcastService {
 			goalTaken: 0,
 			goalRatio: goalTaken === 0 ? goalScored : parseFloat(((goalScored / goalTaken) * 100).toFixed(2))
 		};
+	}
+
+
+    // -------------------------------------------- THE GAME STARTS HERE -------------------------------------------- //
+
+	/*  This starts game, calculate scores and returns the GameResult
+        GameResult {
+			player1: { userId: number, socketId: Socket, score: number};
+			player2: { userId: number, socketId: Socket, score: number};
+			winnerId: number;
+        }
+    */
+	async playGame(): Promise<GameResult> {
+		return this.result;
 	}
 }

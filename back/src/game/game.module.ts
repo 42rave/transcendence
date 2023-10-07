@@ -5,6 +5,7 @@ import { PrismaModule } from '@prisma/prisma.module';
 import { AuthModule } from '@auth/auth.module';
 import { ChatModule } from '@chat/chat.module';
 
+//Encapsulation
 @Module({
 	imports: [AuthModule, PrismaModule, ChatModule],
 	controllers: [GameController],

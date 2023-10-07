@@ -34,12 +34,12 @@ export const useChatStore = defineStore('chat', {
 			const config = useRuntimeConfig();
 			const currentConnections = await $fetch<IChannelConnection[]>(`${config.app.API_URL}/chat/channel/connection`, {
 				credentials: 'include'
-			}).catch((err) => {
+			}).catch((err: any) => {
 				console.log(err.response._data.message);
 			})
 			if (currentConnections)
 			{
-				this.channelConnections = new Map(currentConnections.map(connection => [connection.channelId, connection]))
+				this.channelConnections = new Map(currentConnections.map((connection: IChannelConnection) => [connection.channelId, connection]))
 				console.log(this.channelConnections);
 			}
 		},
@@ -48,13 +48,19 @@ export const useChatStore = defineStore('chat', {
 			const config = useRuntimeConfig();
 			const currentRelationships = await $fetch<IRelationship[]>(`${config.app.API_URL}/relationship`, {
 				credentials: 'include'
-			}).catch((err) => {
+			}).catch((err: any) => {
 				console.log(err.response._data.message);
 			})
 			if (currentRelationships)
 			{
-				this.relationships = new Map(currentRelationships.map(relationship => [relationship.senderId, relationship]))			
+				this.relationships = new Map(currentRelationships.map((relationship: IRelationship) => [relationship.receiverId, relationship]))
 			}
+		},
+		async updateRelationship (relationship: IRelationship) {
+			this.relationships.set(relationship.receiverId, relationship);
+		},
+		async removeRelationship (relationship: IRelationship) {
+			this.relationships.delete(relationship.receiverId);
 		}
 	}
 })

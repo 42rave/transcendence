@@ -1,7 +1,7 @@
 <script lang='ts'>
 import { Relationship, RelationKind } from '~/types/relation';
 export default defineNuxtComponent({
-  props: ["user"],
+  props: ["user", "socket"],
   data: () => ({
     relation: null as Relationship | null,
     loading: false,
@@ -9,6 +9,20 @@ export default defineNuxtComponent({
   }),
   async beforeMount() {
     await this.fetchRelation();
+    if (!this.socket) return;
+    this.socket.on('relation:update', (data: Relationship) => {
+      if (this.user.id === data.receiverId)
+        this.relation = data;
+    });
+    this.socket.on('relation:remove', (data: Relationship) => {
+      if (this.user.id === data.receiverId)
+        this.relation = null;
+    });
+  },
+  unmounted() {
+    if (!this.socket) return;
+    this.socket.off('relation:update');
+    this.socket.off('relation:remove');
   },
   methods: {
     async fetchRelation() {

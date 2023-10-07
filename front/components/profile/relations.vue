@@ -9,23 +9,20 @@ export default defineNuxtComponent({
   }),
   async beforeMount() {
     await this.fetchRelations();
-    if (this.socket) {
-      this.socket.on('relation:update', (data: Relationship) => {
-        if (data.kind === this.getKind())
-          this.addRelation(data);
-        else
-          this.removeRelation(data);
-      });
-      this.socket.on(['relation:remove'], (data: { receiverId: number }) => {
+    this.socket.on('relation:update', (data: Relationship) => {
+      if (data.kind === this.getKind())
+        this.addRelation(data);
+      else
         this.removeRelation(data);
-      });
-    }
+    });
+    this.socket.on(['relation:remove'], (data: { receiverId: number }) => {
+      this.removeRelation(data);
+    });
   },
   unmounted() {
     for (const connection of this.connectionsList!) {
       this.removeWsHook(connection);
     }
-    if (!this.socket) return;
     this.socket.off('relation:update');
     this.socket.off('relation:remove');
   },
@@ -115,7 +112,7 @@ export default defineNuxtComponent({
         </v-alert>
       </div>
       <v-list v-else>
-        <v-list-item v-for="(connection, i) in this.connectionsList" :list="connection">
+        <v-list-item v-for="connection in this.connectionsList" :list="connection">
           <template v-slot:prepend>
             <v-avatar :image="connection.receiver.avatar" />
           </template>
@@ -133,10 +130,7 @@ export default defineNuxtComponent({
               </div>
             </v-list-item-title>
             <v-spacer />
-            <div v-if="this.kind === 'Friends'">
-              <v-icon color="red" @click.prevent="this.onDelete(connection.receiverId)" class="mx-2">mdi-minus</v-icon>
-            </div>
-            <div v-else>
+            <div>
               <v-icon color="red" @click.prevent="this.onDelete(connection.receiverId)" class="mx-2">mdi-minus</v-icon>
             </div>
           </div>

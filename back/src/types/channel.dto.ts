@@ -1,4 +1,14 @@
-import { IsNumber, IsString, IsNotEmpty, IsOptional, IsEnum, NotEquals, Equals, ValidateIf } from 'class-validator';
+import {
+	IsNumber,
+	IsString,
+	IsNotEmpty,
+	IsOptional,
+	IsEnum,
+	NotEquals,
+	Equals,
+	ValidateIf,
+	Length
+} from 'class-validator';
 
 import { ChannelKind } from '@prisma/client';
 
@@ -31,6 +41,8 @@ export class ChannelDto {
 
 	@ValidateIf((o) => o.kind === ChannelKind.PROTECTED)
 	@IsNotEmpty()
+	@IsString()
+	@Length(3, 32, { message: 'Password must be between 3 and 32 characters' })
 	password: string;
 
 	@IsEnum(ChannelKind)
@@ -47,8 +59,9 @@ export class ChannelCreationDto {
 	@IsNotEmpty()
 	name: string;
 
-	@ValidateIf((o) => o.kind === ChannelKind.PROTECTED)
-	@IsNotEmpty()
+	@IsOptional()
+	@IsString()
+	@Length(3, 32, { message: 'Password must be between 3 and 32 characters' })
 	password: string;
 
 	@IsEnum(ChannelKind)
@@ -60,6 +73,7 @@ export class ChannelCreationDto {
 export class ChannelPasswordDto {
 	@IsString()
 	@IsOptional()
+	@Length(3, 32, { message: 'Password must be between 3 and 32 characters' })
 	password: string;
 
 	@IsString()

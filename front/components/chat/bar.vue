@@ -51,7 +51,6 @@ export default defineNuxtComponent({
       });
         if (res)
         {
-        
           this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role);
           this.$channel.clearMessages();
           this.$userChat.currentConnections();
@@ -65,7 +64,7 @@ export default defineNuxtComponent({
           socketId: this.socket.id,
           password: this.protectedPassword
         }
-      }) ;
+      });
         if (res)
           this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role);
           this.$channel.clearMessages();
@@ -92,7 +91,6 @@ export default defineNuxtComponent({
           return 'mdi-lock';
       }
     }
-
   },
     watch: {
     drawer: {

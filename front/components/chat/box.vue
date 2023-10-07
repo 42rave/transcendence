@@ -14,6 +14,8 @@ export default defineNuxtComponent({
   }),
 
   mounted() {
+    const {$event} = useNuxtApp();
+
     this.$userChat.currentConnections();
     this.$userChat.currentRelationships();
     this.socket.on('relation:update', (data: Relationship) => {
@@ -28,13 +30,37 @@ export default defineNuxtComponent({
     the current channel state is reset 
     and the user is redirected to channel 0 */
     this.socket?.on('chat:kicked', (data: any) => {
-		  this.$userChat.removeConnection(this.$channel.id);
-     	this.$router.push('/chat');
-		  this.$channel.$reset();
+		  this.$userChat.removeConnection(data.id);
+      $event('alert:error', {message: `You are kicked from ${data.name}`});
+      if (data.id === this.$channel.id)
+      {
+        this.$router.push('/chat');
+		    this.$channel.$reset();
+      }
     });
 
     /*  if a user is kicked from the channel, his connection is removed from the channel */
     this.socket?.on('chat:kicking', (data: number) => {
+		  this.$channel.removeUser(data);     
+    });
+
+    /*  if the user is banned from the channel, his connection is removed from the channel, 
+    the current channel state is reset 
+    and the user is redirected to channel 0 */
+    this.socket?.on('chat:ban', (data: any) => {
+      console.log(data);
+      
+		  this.$userChat.removeConnection(data.id);
+      $event('alert:error', {message: `You are banned from ${data.name}`});
+      if (data.id === this.$channel.id)
+      {
+        this.$router.push('/chat');
+		    this.$channel.$reset();
+      }
+    });
+
+    /*  if a user is banned from the channel, his connection is removed from the channel */
+    this.socket?.on('chat:banning', (data: number) => {
 		  this.$channel.removeUser(data);     
     });
   },
@@ -44,6 +70,8 @@ export default defineNuxtComponent({
     this.socket.off('relation:remove');
     this.socket.off('chat:kicked');
     this.socket.off('chat:kicking');
+    this.socket.off('chat:ban');
+    this.socket.off('chat:banning');
   },
 
   methods: {

@@ -17,19 +17,21 @@ export default defineNuxtComponent({
     },
 
     async kickBTN(targetUserId: number) {
-      const res = await this.$api.post(`chat/channel/${this.$channel.id}/kick/${targetUserId}`);
+      await this.$api.post(`chat/channel/${this.$channel.id}/kick/${targetUserId}`);
     },
 
-    banBTN() {
-      console.log("go back to the shadows");
+    async banBTN(targetUserId: number) {
+      const res = await this.$api.post(`chat/channel/${this.$channel.id}/ban/${targetUserId}`);
+      console.log(res);
+      
     },
 
     muteBTN() {
       console.log("suuuushhhhh");
     },
 
-    profileBTN() {
-      console.log("Frrrriiiiiiiend");
+    profileBTN(targetUserId: number) {
+      this.$router.push(`/profile/${targetUserId}`);
     },
 
 // if the user is not the owner or an admin, some actions will not appear for them
@@ -49,14 +51,14 @@ export default defineNuxtComponent({
     <v-card max-width="10rem">
       <v-btn @click="inviteBTN" size="small" block>Let's play !</v-btn>
       <v-divider></v-divider>
-      <v-btn @click="blockBTN" size="small" block>block</v-btn>
+      <v-btn @click="blockBTN(message.userId)" size="small" block>block</v-btn>
       <v-divider></v-divider>
-      <v-btn @click="profileBTN" size="small" block>Profile</v-btn>
+      <v-btn @click="profileBTN(message.userId)" size="small" block>Profile</v-btn>
       <v-list class="allowed_actions" v-if="allowedActions()">
         <v-divider></v-divider>
         <v-btn  @click="kickBTN(message.userId)" size="small" block>kick</v-btn>
         <v-divider></v-divider>
-        <v-btn @click="banBTN" size="small" block>ban</v-btn>
+        <v-btn @click="banBTN(message.userId)" size="small" block>ban</v-btn>
         <v-divider></v-divider>
         <v-btn @click="muteBTN" size="small" block>mute</v-btn>
       </v-list>

@@ -239,11 +239,19 @@ export class ChannelService {
 				description: 'Password of protected channel cannot be empty'
 			});
 		}
+		let hash;
+		if (data.password) {
+			hash = await this.hashPassword(data.password).catch(() => {
+				throw new BadRequestException('Cannot hash password', {
+					description: 'Something went wrong: try another password'
+				});
+			});
+		}
 		const channel = await this.prisma.channel
 			.create({
 				data: {
 					name: 'channel: ' + data.name,
-					password: (data.password) ? await this.hashPassword(data.password) : null,
+					password: data.password ? hash : null,
 					kind: data.kind,
 					channelConnection: {
 						create: {
@@ -562,13 +570,22 @@ export class ChannelService {
 				description: 'A protected channel needs a password'
 			});
 		}
+		let hash;
+		if (data.password) {
+			hash = await this.hashPassword(data.password).catch(() => {
+				throw new BadRequestException('Cannot hash password', {
+					description: 'Something went wrong: try another password'
+				});
+			});
+		}
+
 		const channel = await this.prisma.channel
 			.update({
 				where: { id: targetChannelId },
 				data: {
 					name: 'channel: ' + data.name,
 					kind: data.kind,
-					password: await this.hashPassword(data.password)
+					password: data.password ? hash : null
 				}
 			})
 			.catch(() => {

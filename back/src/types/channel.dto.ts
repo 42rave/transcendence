@@ -1,4 +1,14 @@
-import { IsNumber, IsString, IsNotEmpty, IsOptional, IsEnum, NotEquals, Equals, ValidateIf, Length } from 'class-validator';
+import {
+	IsNumber,
+	IsString,
+	IsNotEmpty,
+	IsOptional,
+	IsEnum,
+	NotEquals,
+	Equals,
+	ValidateIf,
+	Length
+} from 'class-validator';
 
 import { ChannelKind } from '@prisma/client';
 

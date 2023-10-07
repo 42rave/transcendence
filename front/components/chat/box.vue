@@ -9,7 +9,7 @@ export default defineNuxtComponent({
   name: 'ChatBox',
   props: ['socket'],
   data: () => ({
-    drawer: false,
+    drawer: true,
     
   }),
 

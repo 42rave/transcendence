@@ -11,4 +11,8 @@ export class StatusService {
 		const status = socketIds.length > 0 ? 'online' : 'offline';
 		return { status };
 	}
+
+	async getByUserIds(ids: number[]) {
+		return await Promise.all(ids.map((id: number) => this.getByUserId(id)));
+	}
 }

@@ -1,4 +1,6 @@
 <script lang="ts">
+import { Relationship } from "~/types/relation";
+
 interface IMessage {
   size: number;
   message: string;
@@ -14,6 +16,17 @@ export default defineNuxtComponent({
   mounted() {
     this.$chat.currentConnections();
     this.$chat.currentRelationships();
+    this.socket.on('relation:update', (data: Relationship) => {
+      this.$chat.updateRelationship(data);
+    });
+    this.socket.on('relation:remove', (data: Relationship) => {
+      this.$chat.removeRelationship(data);
+    });
+  },
+
+  unmounted() {
+    this.socket.off('relation:update');
+    this.socket.off('relation:remove');
   },
 
   methods: {
@@ -46,7 +59,7 @@ h2 {
 .chatBox {
   width: 100%;
   height: 100%;
-  gap: 0.rem;
+  gap: 0.1rem;
   max-height: calc(100vh - 4rem);
   overflow: hidden;
   display: flex;

@@ -10,8 +10,9 @@ enum Status {
 export default defineNuxtComponent({
   props: ['id', 'socket'],
   data: () => ({
-    user: null as User | null,
-    status: Status.OFFLINE
+    user: null as User & { status: Status } | null,
+    status: Status.OFFLINE,
+    tab: 0,
   }),
   async beforeMount() {
     const data = await this.$api.get(`/user/${this.id}`);
@@ -21,7 +22,7 @@ export default defineNuxtComponent({
       return ;
     }
     this.user = data;
-    this.status = this.user.status;
+    this.status = this.user!.status;
     this.socket.on(`user:${this.id}:status`, (data: { status: Status }) => {
       this.status = data.status;
     });
@@ -33,7 +34,7 @@ export default defineNuxtComponent({
     editable() {
       return this.user && this.user.id === this.$auth.user.id;
     },
-    onUpdateUser(user: User) {
+    onUpdateUser(user: User & { status: Status }) {
       this.user = user;
     },
     getStatusColor() {
@@ -56,6 +57,28 @@ export default defineNuxtComponent({
         <ProfileAvatar :user="this.user" :editable="this.editable()" @user:updated="this.onUpdateUser" />
         <ProfileUsername :user="this.user" :editable="this.editable()" @user:updated="this.onUpdateUser" />
         <p :style="{'color': this.getStatusColor()}">{{ this.status }}</p>
+        <v-divider thickness="3" class='my-5 w-100'></v-divider>
+        <div class="d-flex w-100" style="flex-direction: column">
+          <v-tabs v-model="tab" class="w-100">
+            <v-tab>Social</v-tab>
+            <v-tab>Stats</v-tab>
+            <v-tab>Games</v-tab>
+          </v-tabs>
+          <v-window v-model="tab" class="my-4">
+            <v-window-item>
+              <div v-if="!this.editable()">
+                <ProfileSocial :socket="this.socket" :user="this.user" />
+              </div>
+              <div v-else class="d-flex flex-row flex-wrap" style="gap: 1rem;">
+                <ProfileRelations :socket="this.socket" kind="Friends" class="flex-grow-1" style="flex-basis: 325px;" />
+                <ProfileRelations :socket="this.socket" kind="Blocked" class="flex-grow-1" style="flex-basis: 325px;" />
+              </div>
+            </v-window-item>
+            <v-window-item> Stats </v-window-item>
+            <v-window-item> Games </v-window-item>
+          </v-window>
+        </div>
+
       </div>
     </div>
     <div v-else class="d-flex w-100 h-100">

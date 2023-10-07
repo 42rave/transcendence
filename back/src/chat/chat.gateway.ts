@@ -6,7 +6,7 @@ import {
 	WebSocketServer
 } from '@nestjs/websockets';
 import { AuthService } from '@auth/auth.service';
-import { ChatService } from './chat.service';
+import { SocialService } from './social.service';
 import authConfig from '@config/auth.config';
 import Socket from '@type/socket';
 import type { Server } from '@type/server';
@@ -23,13 +23,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@WebSocketServer() server: Server;
 
 	constructor(
-		private chatService: ChatService,
+		private socialService: SocialService,
 		private authService: AuthService,
 		private statusService: StatusService
 	) {}
 
 	afterInit(): void {
-		this.chatService.server = this.server;
+		this.socialService.server = this.server;
 	}
 
 	async handleConnection(socket: Socket): Promise<void> {
@@ -37,12 +37,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (!user) {
 			socket.disconnect(true);
 			return;
-		} else await this.chatService.onConnection(socket);
-		this.chatService.emit(`user:${user.id}:status`, await this.statusService.getByUserId(user.id));
+		}
+		await this.socialService.onConnection(socket);
+		const { status, count } = await this.statusService.getByUserId(user.id);
+		if (count === 1) this.socialService.emit(`user:${user.id}:status`, { status });
 	}
 
 	async handleDisconnect(socket: Socket): Promise<void> {
 		if (!socket.user) return;
-		this.chatService.emit(`user:${socket.user.id}:status`, await this.statusService.getByUserId(socket.user.id));
+		const { status, count } = await this.statusService.getByUserId(socket.user.id);
+		if (count === 0) this.socialService.emit(`user:${socket.user.id}:status`, { status });
+		await this.socialService.onDisconnection(socket);
 	}
 }

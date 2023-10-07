@@ -4,14 +4,14 @@ import { Channel, User, ChannelConnection, ChannelKind, ChannelRole } from '@pri
 
 import { PrismaService } from '@prisma/prisma.service';
 import { ChannelCreationDto, ChannelDto } from '@type/channel.dto';
-import { ChatService } from '@chat/chat.service';
+import { SocialService } from '@chat/social.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChannelService {
 	constructor(
 		private readonly prisma: PrismaService,
-		private readonly chatService: ChatService
+		private readonly socialService: SocialService
 	) {}
 
 	async getAll(): Promise<Channel[]> {
@@ -53,13 +53,6 @@ export class ChannelService {
 				]
 			}
 		}));
-
-		const channelConnection = await this.getChannelConnection(userId, channelId);
-		return !(
-			!channelConnection ||
-			channelConnection.role === ChannelRole.INVITED ||
-			channelConnection.role === ChannelRole.BANNED
-		);
 	}
 
 	async isUserOwnerInChannel(targetUserId: number, targetChannelId: number): Promise<boolean> {
@@ -178,7 +171,7 @@ export class ChannelService {
 			}
 		});
 
-		let channelConnection = foundChannel.channelConnection[0];
+		let channelConnection = foundChannel.channelConnection![0];
 		if (!channelConnection) {
 			return await this.joinChannel(user, foundChannel, socketId, password);
 		}
@@ -193,8 +186,8 @@ export class ChannelService {
 				break;
 		}
 
-		this.chatService.joinRoom(socketId, targetChannelId.toString());
-		this.chatService.emit('chat:join', channelConnection, targetChannelId.toString());
+		this.socialService.joinRoom(socketId, targetChannelId.toString());
+		this.socialService.emit('chat:join', channelConnection, targetChannelId.toString());
 		return channelConnection;
 	}
 
@@ -229,8 +222,7 @@ export class ChannelService {
 	}
 
 	async hashPassword(password: string): Promise<string> {
-		const hash = await bcrypt.hash(password, 10);
-		return hash;
+		return await bcrypt.hash(password, 10);
 	}
 
 	async createChannel(user: User, data: ChannelCreationDto) {
@@ -267,7 +259,7 @@ export class ChannelService {
 					description: 'Channel already exists'
 				});
 			});
-		this.chatService.emit('chat:create', channel);
+		this.socialService.emit('chat:create', channel);
 		return channel;
 	}
 
@@ -277,7 +269,6 @@ export class ChannelService {
 				throw new ForbiddenException('Cannot join channel', {
 					description: 'This channel is private'
 				});
-				break;
 			case ChannelKind.PROTECTED:
 				if (!(await this.checkPassword(channel, password)))
 					throw new ForbiddenException('Cannot join channel', {
@@ -303,8 +294,8 @@ export class ChannelService {
 					description: 'Something went terribly wrong.'
 				});
 			});
-		this.chatService.joinRoom(socketId, channel.id.toString());
-		this.chatService.emit('chat:join', channelConnection, channel.id.toString());
+		this.socialService.joinRoom(socketId, channel.id.toString());
+		this.socialService.emit('chat:join', channelConnection, channel.id.toString());
 		return channelConnection;
 	}
 
@@ -357,7 +348,7 @@ export class ChannelService {
 				await this.prisma.channelConnection.deleteMany({
 					where: { channelId: targetChannelId }
 				});
-				this.chatService.emit('chat:delete', targetChannelId);
+				this.socialService.emit('chat:delete', targetChannelId);
 				await this.prisma.channel.delete({ where: { id: targetChannelId } });
 				return;
 			}
@@ -365,12 +356,12 @@ export class ChannelService {
 				where: { connectionId: { userId: newOwner.userId, channelId: newOwner.channelId } },
 				data: { role: ChannelRole.OWNER }
 			});
-			this.chatService.emit('chat:promote', promotedOwner, targetChannelId.toString());
+			this.socialService.emit('chat:promote', promotedOwner, targetChannelId.toString());
 			await this.prisma.channelConnection.delete({
 				where: { connectionId: { userId: user.id, channelId: targetChannelId } }
 			});
-			this.chatService.emit('chat:quit', user.id, targetChannelId.toString());
-			await this.chatService.quitRoom(user.id, targetChannelId.toString());
+			this.socialService.emit('chat:quit', user.id, targetChannelId.toString());
+			await this.socialService.quitRoom(user.id, targetChannelId.toString());
 		} else {
 			await this.prisma.channelConnection.deleteMany({
 				where: {
@@ -383,10 +374,10 @@ export class ChannelService {
 					]
 				}
 			});
-			this.chatService.emit('chat:quit', user.id, targetChannelId.toString());
-			await this.chatService.quitRoom(user.id, targetChannelId.toString());
+			this.socialService.emit('chat:quit', user.id, targetChannelId.toString());
+			await this.socialService.quitRoom(user.id, targetChannelId.toString());
 			if (foundChannel.channelConnection.length === 1) {
-				this.chatService.emit('chat:delete', targetChannelId);
+				this.socialService.emit('chat:delete', targetChannelId);
 				await this.prisma.channel.delete({ where: { id: targetChannelId } });
 			}
 		}
@@ -413,8 +404,8 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.emitToUser('chat:invite', invite, targetUserId);
-		this.chatService.emit('chat:invite', invite, targetChannelId.toString());
+		this.socialService.emitToUser('chat:invite', invite, targetUserId);
+		this.socialService.emit('chat:invite', invite, targetChannelId.toString());
 		return invite;
 	}
 
@@ -435,8 +426,8 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		this.chatService.emitToUser('chat:uninvite', targetChannelId, targetUserId);
-		this.chatService.emit('chat:uninvite', targetUserId, targetChannelId.toString());
+		this.socialService.emitToUser('chat:uninvite', targetChannelId, targetUserId);
+		this.socialService.emit('chat:uninvite', targetUserId, targetChannelId.toString());
 	}
 
 	async kick(user: User, targetChannelId: number, targetUserId: number) {
@@ -468,9 +459,9 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
-		this.chatService.emit('chat:kicking', targetUserId, targetChannelId.toString());
-		this.chatService.emitToUser('chat:kicked', channel, targetUserId);
+		await this.socialService.quitRoom(targetUserId, targetChannelId.toString());
+		this.socialService.emit('chat:kicking', targetUserId, targetChannelId.toString());
+		this.socialService.emitToUser('chat:kicked', channel, targetUserId);
 		return null;
 	}
 
@@ -510,9 +501,9 @@ export class ChannelService {
 					description: 'user does not exist'
 				});
 			});
-		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
-		this.chatService.emit('chat:banning', targetUserId, targetChannelId.toString());
-		this.chatService.emitToUser('chat:banned', banned, targetUserId);
+		await this.socialService.quitRoom(targetUserId, targetChannelId.toString());
+		this.socialService.emit('chat:banning', targetUserId, targetChannelId.toString());
+		this.socialService.emitToUser('chat:banned', banned, targetUserId);
 		return banned;
 	}
 
@@ -547,9 +538,9 @@ export class ChannelService {
 					description: 'User does not exist or is not banned'
 				});
 			});
-		await this.chatService.quitRoom(targetUserId, targetChannelId.toString());
-		this.chatService.emit('chat:unbanning', targetUserId, targetChannelId.toString());
-		this.chatService.emitToUser('chat:unbanned', targetChannelId, targetUserId);
+		await this.socialService.quitRoom(targetUserId, targetChannelId.toString());
+		this.socialService.emit('chat:unbanning', targetUserId, targetChannelId.toString());
+		this.socialService.emitToUser('chat:unbanned', targetChannelId, targetUserId);
 	}
 	async updateChannel(userId: number, targetChannelId: number, data: ChannelDto): Promise<Channel> {
 		if (data.kind === ChannelKind.PROTECTED && data.password === null) {
@@ -594,14 +585,14 @@ export class ChannelService {
 					description: 'Something went horribly wrong'
 				});
 			});
-		this.chatService.emit('chat:update', channel);
+		this.socialService.emit('chat:update', channel);
 		return channel;
 	}
 
 	async transfer(user: User, targetChannelId: number, targetUserId: number): Promise<ChannelConnection> {
 		this.updateChannelRole(ChannelRole.ADMIN, targetChannelId, user.id);
 		const newOwner = await this.updateChannelRole(ChannelRole.OWNER, targetChannelId, targetUserId);
-		this.chatService.emit('chat:transfer', newOwner.channel, targetChannelId.toString());
+		this.socialService.emit('chat:transfer', newOwner.channel, targetChannelId.toString());
 		return newOwner;
 	}
 
@@ -612,7 +603,7 @@ export class ChannelService {
 			});
 		}
 		const promotedUser = await this.updateChannelRole(ChannelRole.ADMIN, targetChannelId, targetUserId);
-		this.chatService.emit('chat:promote', promotedUser, targetChannelId.toString());
+		this.socialService.emit('chat:promote', promotedUser, targetChannelId.toString());
 		return promotedUser;
 	}
 
@@ -623,7 +614,7 @@ export class ChannelService {
 			});
 		}
 		const demotedUser = await this.updateChannelRole(ChannelRole.DEFAULT, targetChannelId, targetUserId);
-		this.chatService.emit('chat:demote', demotedUser, targetChannelId.toString());
+		this.socialService.emit('chat:demote', demotedUser, targetChannelId.toString());
 		return demotedUser;
 	}
 
@@ -650,7 +641,7 @@ export class ChannelService {
 					description: 'Something went wrong, channel or user do no exist'
 				});
 			});
-		this.chatService.emit('chat:mute', mutedUser, targetChannelId.toString());
+		this.socialService.emit('chat:mute', mutedUser, targetChannelId.toString());
 		return mutedUser;
 	}
 
@@ -672,7 +663,7 @@ export class ChannelService {
 					description: 'Something went wrong, user does not exist'
 				});
 			});
-		this.chatService.emit('chat:unmute', unmutedUser, targetChannelId.toString());
+		this.socialService.emit('chat:unmute', unmutedUser, targetChannelId.toString());
 		return unmutedUser;
 	}
 }

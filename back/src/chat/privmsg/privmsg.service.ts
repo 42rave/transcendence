@@ -1,17 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { Channel, User, Relationship, RelationKind, ChannelRole, ChannelKind } from '@prisma/client';
-import { ChatService } from '@chat/chat.service';
 
 @Injectable()
 export class PrivmsgService {
-	constructor(
-		private readonly prisma: PrismaService,
-		private readonly chatService: ChatService
-	) {}
+	constructor(private readonly prisma: PrismaService) {}
 
 	async getAll(userId: number): Promise<Channel[]> {
-		return await this.prisma.channel.findMany({
+		return this.prisma.channel.findMany({
 			where: {
 				AND: [{ kind: ChannelKind.DIRECT }, { channelConnection: { some: { userId: userId } } }]
 			}
@@ -42,13 +38,13 @@ export class PrivmsgService {
 				});
 			});
 
-		//TODO: Define a new even for privmsg
 		void socketId;
-		return null;
+		//TODO: Define a new even for privmsg
+		// return null;
 	}
 
 	async getBlockedRelation(userdId: number, privmsgId: number): Promise<Relationship> {
-		const relationship = await this.prisma.relationship.findFirst({
+		return this.prisma.relationship.findFirst({
 			where: {
 				AND: [
 					{
@@ -61,7 +57,6 @@ export class PrivmsgService {
 				]
 			}
 		});
-		return relationship;
 	}
 
 	async isPossiblePrivmsg(userId: number, privmsgId: number): Promise<boolean> {

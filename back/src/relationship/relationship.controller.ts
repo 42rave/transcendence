@@ -15,7 +15,7 @@ import { RelationshipService } from './relationship.service';
 import type { Request } from '@type/request';
 import { Relationship } from '@prisma/client';
 import { StatusService } from '@user/status/status.service';
-import { ChatService } from '@chat/chat.service';
+import { SocialService } from '@chat/social.service';
 
 @Controller('relationship')
 @UseGuards(...AuthenticatedGuard)
@@ -23,7 +23,7 @@ export class RelationshipController {
 	constructor(
 		private readonly relationshipService: RelationshipService,
 		private readonly statusService: StatusService,
-		private readonly chatService: ChatService
+		private readonly socialService: SocialService
 	) {}
 
 	@Get()
@@ -67,7 +67,7 @@ export class RelationshipController {
 	async add(@Req() req: Request, @Param('id', ParseIntPipe) targetId: number) {
 		const relation = await this.relationshipService.add(req.user.id, targetId);
 		const status = await this.statusService.getByUserId(targetId);
-		this.chatService.emitToUser('relation:update', { ...relation, ...status }, req.user.id);
+		this.socialService.emitToUser('relation:update', { ...relation, ...status }, req.user.id);
 		return relation;
 	}
 
@@ -76,7 +76,7 @@ export class RelationshipController {
 	async block(@Req() req: Request, @Param('id', ParseIntPipe) targetId: number) {
 		const relation = await this.relationshipService.block(req.user.id, targetId);
 		const status = await this.statusService.getByUserId(targetId);
-		this.chatService.emitToUser('relation:update', { ...relation, ...status }, req.user.id);
+		this.socialService.emitToUser('relation:update', { ...relation, ...status }, req.user.id);
 		return relation;
 	}
 
@@ -84,7 +84,7 @@ export class RelationshipController {
 	@UseGuards(...AuthenticatedGuard)
 	async remove(@Req() req: Request, @Param('id', ParseIntPipe) targetId: number) {
 		const relation = await this.relationshipService.remove(req.user.id, targetId);
-		this.chatService.emitToUser('relation:remove', relation, req.user.id);
+		this.socialService.emitToUser('relation:remove', relation, req.user.id);
 		return relation;
 	}
 }

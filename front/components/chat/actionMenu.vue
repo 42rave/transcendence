@@ -7,8 +7,6 @@ export default defineNuxtComponent({
    	config: useRuntimeConfig()
  }),
 
-
-
   methods: {
     inviteBTN() {
       console.log("invite to play");
@@ -28,17 +26,15 @@ export default defineNuxtComponent({
 
     muteBTN() {
       console.log("suuuushhhhh");
-
     },
 
     profileBTN() {
       console.log("Frrrriiiiiiiend");
-      this.allowedActions();
     },
 
 // if the user is not the owner or an admin, some actions will not appear for them
     allowedActions() {
-      if (this.$channel.role === "ADMIN" || this.$channel.role === "OWNER")
+      if (this.$channel.userRole === "ADMIN" || this.$channel.userRole === "OWNER")
         return true;
       return false;
     }
@@ -59,7 +55,7 @@ export default defineNuxtComponent({
                 <v-btn @click="profileBTN" size="small" block>Profile</v-btn>
                 <v-list class="allowed_actions" v-if="allowedActions()">
                   <v-divider></v-divider>
-                  <v-btn  @click="kickBTN" size="small" block>kick</v-btn>
+                  <v-btn  @click="kickBTN(message.userId)" size="small" block>kick</v-btn>
                   <v-divider></v-divider>
                   <v-btn @click="banBTN" size="small" block>ban</v-btn>
                   <v-divider></v-divider>

@@ -14,11 +14,12 @@ export default defineNuxtComponent({
   }),
 
   mounted() {
-    this.$chat.currentConnections();
-    this.$chat.currentRelationships();
+    this.$userChat.currentConnections();
+    this.$userChat.currentRelationships();
     this.socket.on('relation:update', (data: Relationship) => {
-      this.$chat.updateRelationship(data);
+      this.$userChat.updateRelationship(data);
     });
+
     this.socket.on('relation:remove', (data: Relationship) => {
       this.$chat.removeRelationship(data);
     });

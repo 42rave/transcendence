@@ -24,7 +24,6 @@ export default defineNuxtComponent({
 </script>
 
 
-
 <template>
     <v-container class="fill-height" style="max-width: 100%; flex-direction: column-reverse; overflow: auto">
       <v-row class="d-flex flex-column w-100">

@@ -51,9 +51,11 @@ export default defineNuxtComponent({
       });
         if (res)
         {
+        
           this.$channel.currentChannel(res.channel.name, res.channel.id, res.role);
           this.$channel.clearMessages();
-          this.$chat.currentConnections();
+          this.$userChat.currentConnections();
+          this.$channel.getCurrentConnections();      
         }
     },
 
@@ -68,11 +70,11 @@ export default defineNuxtComponent({
           this.$channel.currentChannel(res.channel.name, res.channel.id, res.role);
           this.$channel.clearMessages();
           this.$refs.form.reset();
-          this.$chat.currentConnections();
+          this.$userChat.currentConnections();
     },
 
     isInChannel(id: number) {
-      return this.$chat.channelConnections.has(id);
+      return this.$userChat.channelConnections.has(id);
     },
 
     channelIconUpdate(channel) {

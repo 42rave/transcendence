@@ -16,8 +16,8 @@ export default defineNuxtComponent({
       console.log("can't stand you prick");
     },
 
-    kickBTN() {
-      console.log("kick your butt");
+    async kickBTN(targetUserId: number) {
+      const res = await this.$api.post(`chat/channel/${this.$channel.id}/kick/${targetUserId}`);
     },
 
     banBTN() {

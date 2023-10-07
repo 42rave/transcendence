@@ -47,7 +47,8 @@ export class RelationshipService {
 					receiverId: targetId,
 					kind: RelationKind.FRIEND
 				},
-				update: { kind: RelationKind.FRIEND }
+				update: { kind: RelationKind.FRIEND },
+				include: { receiver: true }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot add user as friend', {
@@ -67,7 +68,8 @@ export class RelationshipService {
 					receiverId: targetId,
 					kind: RelationKind.BLOCKED
 				},
-				update: { kind: RelationKind.BLOCKED }
+				update: { kind: RelationKind.BLOCKED },
+				include: { receiver: true }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot block user', {
@@ -81,7 +83,8 @@ export class RelationshipService {
 			.delete({
 				where: {
 					relationshipId: { senderId: userId, receiverId: targetId }
-				}
+				},
+				include: { receiver: true }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot remove relationship', {

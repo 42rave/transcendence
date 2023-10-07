@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { User } from '~/types/user';
+import { Relationship } from "~/types/relation";
 
 enum Status {
   OFFLINE = 'offline',
@@ -73,7 +74,7 @@ export default defineNuxtComponent({
               </div>
               <div v-else class="d-flex flex-row flex-wrap" style="gap: 1rem;">
                 <ProfileRelations :socket="this.socket" kind="Friends" class="flex-grow-1" style="flex-basis: 325px;" />
-                <ProfileRelations kind="Blocked" class="flex-grow-1" style="flex-basis: 325px;" />
+                <ProfileRelations :socket="this.socket" kind="Blocked" class="flex-grow-1" style="flex-basis: 325px;" />
               </div>
             </v-window-item>
           </v-window>

@@ -9,11 +9,25 @@ export default defineNuxtComponent({
   }),
   async beforeMount() {
     await this.fetchRelations();
+    if (this.socket) {
+      this.socket.on('relation:update', (data: Relationship) => {
+        if (data.kind === this.getKind())
+          this.addRelation(data);
+        else
+          this.removeRelation(data);
+      });
+      this.socket.on(['relation:remove'], (data: { receiverId: number }) => {
+        this.removeRelation(data);
+      });
+    }
   },
   unmounted() {
     for (const connection of this.connectionsList!) {
       this.removeWsHook(connection);
     }
+    if (!this.socket) return;
+    this.socket.off('relation:update');
+    this.socket.off('relation:remove');
   },
   methods: {
     getIcon() {
@@ -21,6 +35,9 @@ export default defineNuxtComponent({
     },
     getInfoMessage() {
       return this.kind === 'Blocked' ? 'You have no blocked users' : 'You have no friends';
+    },
+    getKind() {
+      return this.kind === 'Friends' ? 'FRIEND' : 'BLOCKED';
     },
     async fetchRelations() {
       this.loading = true;
@@ -30,12 +47,24 @@ export default defineNuxtComponent({
       }
       this.loading = false;
     },
-    async onDelete(connectionId: number) {
-      const _i = this.connectionsList!.findIndex((connection: Relationship) => connection.receiverId === connectionId);
+    addRelation(connection: Relationship) {
+      const _i = this.connectionsList!.findIndex((c: Relationship) => c.receiverId === connection.receiverId);
+      if (_i !== -1) {
+        this.connectionsList[_i] = connection;
+        return ;
+      }
+      this.connectionsList!.push(connection);
+      this.connectionsList = this.sortConnections(this.connectionsList!);
+      this.addWsHook(connection);
+    },
+    removeRelation(connection: Relationship) {
+      const _i =this.connectionsList?.findIndex((c: Relationship) => c.receiverId === connection.receiverId)
       if (_i === -1) return ;
       this.removeWsHook(this.connectionsList![_i]);
-      this.$api.delete(`/relationship/${connectionId}`);
       this.connectionsList!.splice(_i, 1);
+    },
+    async onDelete(connectionId: number) {
+      this.$api.delete(`/relationship/${connectionId}`);
     },
     sortConnections(connections: Relationship[]) {
       if (this.kind === 'Friends') {
@@ -86,7 +115,7 @@ export default defineNuxtComponent({
         </v-alert>
       </div>
       <v-list v-else>
-        <v-list-item v-for="connection of this.connectionsList" :key="connection.receiverId">
+        <v-list-item v-for="(connection, i) in this.connectionsList" :list="connection">
           <template v-slot:prepend>
             <v-avatar :image="connection.receiver.avatar" />
           </template>

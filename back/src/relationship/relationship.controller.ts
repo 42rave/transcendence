@@ -15,13 +15,15 @@ import { RelationshipService } from './relationship.service';
 import type { Request } from '@type/request';
 import { Relationship } from '@prisma/client';
 import { StatusService } from '@user/status/status.service';
+import { ChatService } from '@chat/chat.service';
 
 @Controller('relationship')
 @UseGuards(...AuthenticatedGuard)
 export class RelationshipController {
 	constructor(
 		private readonly relationshipService: RelationshipService,
-		private statusService: StatusService
+		private readonly statusService: StatusService,
+		private readonly chatService: ChatService
 	) {}
 
 	@Get()
@@ -55,11 +57,7 @@ export class RelationshipController {
 	}
 
 	@Get(':id')
-	async getRelationShip(
-		@Req() req: Request,
-		@Param('id', ParseIntPipe) targetId: number
-		//@Req() req: Request,
-	): Promise<Relationship> {
+	async getRelationShip(@Req() req: Request, @Param('id', ParseIntPipe) targetId: number): Promise<Relationship> {
 		return await this.relationshipService.getStatus(req.user.id, targetId);
 	}
 
@@ -67,18 +65,26 @@ export class RelationshipController {
 	@UseGuards(...AuthenticatedGuard)
 	@UsePipes(new ValidationPipe())
 	async add(@Req() req: Request, @Param('id', ParseIntPipe) targetId: number) {
-		return await this.relationshipService.add(req.user.id, targetId);
+		const relation = await this.relationshipService.add(req.user.id, targetId);
+		const status = await this.statusService.getByUserId(targetId);
+		this.chatService.emitToUser('relation:update', { ...relation, ...status }, req.user.id);
+		return relation;
 	}
 
 	@Post(':id/block')
 	@UseGuards(...AuthenticatedGuard)
 	async block(@Req() req: Request, @Param('id', ParseIntPipe) targetId: number) {
-		return await this.relationshipService.block(req.user.id, targetId);
+		const relation = await this.relationshipService.block(req.user.id, targetId);
+		const status = await this.statusService.getByUserId(targetId);
+		this.chatService.emitToUser('relation:update', { ...relation, ...status }, req.user.id);
+		return relation;
 	}
 
 	@Delete(':id')
 	@UseGuards(...AuthenticatedGuard)
 	async remove(@Req() req: Request, @Param('id', ParseIntPipe) targetId: number) {
-		return await this.relationshipService.remove(req.user.id, targetId);
+		const relation = await this.relationshipService.remove(req.user.id, targetId);
+		this.chatService.emitToUser('relation:remove', relation, req.user.id);
+		return relation;
 	}
 }

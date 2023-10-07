@@ -26,9 +26,12 @@ export default defineNuxtComponent({
     this.socket.on(`user:${this.id}:status`, (data: { status: Status }) => {
       this.status = data.status;
     });
+    const tab = localStorage.getItem(`profile:${this.id}:tab`);
+    if (tab) this.tab = parseInt(tab);
   },
   async unmounted() {
     this.socket.off(`user:${this.id}:status`);
+    localStorage.setItem(`profile:${this.id}:tab`, this.tab.toString());
   },
   methods: {
     editable() {
@@ -44,7 +47,7 @@ export default defineNuxtComponent({
         return '#62de62';
       if (this.status === Status.IN_GAME)
         return '#6161c9';
-    }
+    },
   }
 })
 </script>
@@ -75,7 +78,9 @@ export default defineNuxtComponent({
               </div>
             </v-window-item>
             <v-window-item> Stats </v-window-item>
-            <v-window-item> Games </v-window-item>
+            <v-window-item>
+              <ProfileMatchs :user="this.user" />
+            </v-window-item>
           </v-window>
         </div>
 

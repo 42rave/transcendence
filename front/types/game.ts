@@ -1,16 +1,20 @@
-import { GameState } from '@prisma/client';
+export enum GameState {
+	WON = 'WON',
+	LOST = 'LOST',
+	DRAW = 'DRAW'
+};
 
 export declare type LadderDisplay = {
-	id: number,
-	username: string,
-	winNb: number,
+	id: number;
+	username: string;
+	winNb: number;
 }
 
 export declare type HistoryDisplay = {
-	date: Date,
-	player_1: { id: number, username: string, score: number },
-	player_2: { id: number, username: string, score: number },
-	state: GameState,
+	date: Date;
+	player_1: { id: number, username: string, score: number };
+	player_2: { id: number, username: string, score: number };
+	state: GameState;
 }
 
 export declare type GameStats = {

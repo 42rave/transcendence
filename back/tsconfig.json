@@ -20,15 +20,19 @@
     "paths": {
       "@/*": ["src/*"],
       "@auth/*": ["src/auth/*"],
+      "@broadcast/*": ["src/broadcast/*"],
       "@chat/*": ["src/chat/*"],
       "@config/*": ["src/config/*"],
+      "@filter/*": ["src/filters/*"],
       "@game/*": ["src/game/*"],
       "@guard/*": ["src/guards/*"],
       "@middleware/*": ["src/middleware/*"],
       "@prisma/*": ["src/prisma/*"],
+      "@relationship/*": ["src/relationship/*"],
       "@strategy/*": ["src/auth/strategies/*"],
       "@type/*": ["src/types/*"],
       "@user/*": ["src/user/*"],
+      "@utils/*": ["src/utils/*"],
     }
   }
 }

@@ -26,6 +26,7 @@ export default defineNuxtComponent({
       },
       loading: true,
       socket: null as NuxtSocket | null,
+      gameSocket: null as NuxtSocket | null,
     }
   },
   head() {
@@ -52,6 +53,18 @@ export default defineNuxtComponent({
     this.socket.on('disconnect', () => {
       this.$sockets.chatConnected = false;
     });
+    this.gameSocket = this.$nuxtSocket({
+      name: 'game',
+      channel: 'game',
+      withCredentials: true,
+      persist: 'gameSocket',
+    });
+    this.gameSocket.on('connect', () => {
+      this.$sockets.gameConnected = true;
+    });
+    this.gameSocket.on('disconnect', () => {
+      this.$sockets.gameConnected = false;
+    });
   },
 })
 </script>
@@ -66,7 +79,7 @@ export default defineNuxtComponent({
       <LayoutNavBar @drawer:update="(v: boolean) => drawer = v" :drawer="drawer" :routes="routes" />
       <v-main>
         <v-container fluid>
-          <NuxtPage :socket="socket"/>
+          <NuxtPage :socket="socket" :gameSocket="gameSocket"/>
         </v-container>
       </v-main>
     </div>

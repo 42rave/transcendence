@@ -1,10 +1,12 @@
-<script setup lang='ts'>
-
+<script lang='ts'>
+export default defineNuxtComponent({
+  props: ['gameSocket'],
+})
 </script>
 
 <template>
   <div id="game-container">
-    <GamePlay />
+    <GamePlay :gameSocket='this.gameSocket' />
   </div>
 </template>
 

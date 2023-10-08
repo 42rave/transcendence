@@ -539,7 +539,6 @@ export class ChannelService {
 					description: 'User does not exist or is not banned'
 				});
 			});
-		await this.socialService.quitRoom(targetUserId, targetChannelId.toString());
 		this.socialService.emit('chat:unbanning', targetUserId, targetChannelId.toString());
 		this.socialService.emitToUser('chat:unbanned', targetChannelId, targetUserId);
 	}

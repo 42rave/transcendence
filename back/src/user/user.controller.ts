@@ -13,7 +13,8 @@ import {
 	UseGuards,
 	Req,
 	Put,
-	ConflictException
+	ConflictException,
+	ImATeapotException
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UsernameDto } from '@type/user.dto';
@@ -51,10 +52,14 @@ export class UserController {
 		return { ...user, ...(await this.statusService.getByUserId(id)) };
 	}
 
-	@Post('username')
+	@Get('name/:name')
 	@UsePipes(ValidationPipe)
-	async getUserByName(@Req() req: Request, @Body() data: UsernameDto) {
-		return await this.userService.getByName(data.username);
+	async getUserByName(@Req() req: Request, @Param('name') name: string) {
+		const user = await this.userService.getByName(name);
+		if (!user) {
+			throw new ImATeapotException('No such user');
+		}
+		return user;
 	}
 
 	@Put('username')

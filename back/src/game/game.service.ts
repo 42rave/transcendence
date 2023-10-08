@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
-import { ChatService } from '@chat/chat.service';
+import { SocialService } from '@chat/social.service';
+import { BroadcastService } from '@broadcast/broadcast.service';
 import type { LadderDisplay, HistoryDisplay, GameStats } from '@type/game';
 import { GameState } from '@prisma/client';
 
 @Injectable()
-export class GameService {
+export class GameService extends BroadcastService {
 	constructor(
 		private readonly prisma: PrismaService,
-		private readonly chatService: ChatService
-	) {}
+		private readonly socialService: SocialService
+	) {
+		super('BroadcastService');
+	}
 
 	/* This returns a LadderDisplay array.
 	   LadderDisplay {
@@ -76,7 +79,7 @@ export class GameService {
 	}
 
 	async getGameNbByResult(userId: number, result: GameState): Promise<number> {
-		const gameWon = await this.prisma.game.count({
+		return this.prisma.game.count({
 			where: {
 				records: {
 					some: {
@@ -85,8 +88,6 @@ export class GameService {
 				}
 			}
 		});
-
-		return gameWon;
 	}
 
 	async getGoalTaken(userId: number): Promise<number> {
@@ -132,7 +133,7 @@ export class GameService {
 		const goalTaken = await this.getGoalTaken(userId);
 		const goalScored = await this.getGoalScored(userId);
 
-		const gameStats: GameStats = {
+		return {
 			gameNb: gameNb,
 			wonNb: gameWon,
 			lostNb: gameLost,
@@ -142,6 +143,5 @@ export class GameService {
 			goalTaken: 0,
 			goalRatio: goalTaken === 0 ? goalScored : parseFloat(((goalScored / goalTaken) * 100).toFixed(2))
 		};
-		return gameStats;
 	}
 }

@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { MessageDto } from '@type/message.dto';
 import { Message } from '@prisma/client';
-import { ChatService } from '@chat/chat.service';
+import { SocialService } from '@chat/social.service';
 
 @Injectable()
 export class MessageService {
 	constructor(
 		private readonly prismaService: PrismaService,
-		private readonly chatService: ChatService
+		private readonly socialService: SocialService
 	) {}
 
 	async getMessages(channelId: number) {
@@ -26,7 +26,7 @@ export class MessageService {
 				channelId
 			}
 		});
-		this.chatService.emit('chat:message', message, `${channelId}`);
+		this.socialService.emit('chat:message', message, `${channelId}`);
 		return message;
 	}
 }

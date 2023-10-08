@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ChatController } from './chat.controller';
 import { PrismaModule } from '@prisma/prisma.module';
-import { ChatService } from './chat.service';
+import { SocialService } from './social.service';
 import { ChatGateway } from './chat.gateway';
 import { AuthModule } from '@auth/auth.module';
 import { ChannelController } from '@chat/channel/channel.controller';
@@ -15,7 +15,7 @@ import { StatusModule } from '@user/status/status.module';
 @Module({
 	imports: [AuthModule, PrismaModule, StatusModule],
 	controllers: [ChatController, ChannelController, MessageController, PrivmsgController],
-	providers: [ChatGateway, ChatService, ChannelService, MessageService, PrivmsgService],
-	exports: [ChatService]
+	providers: [ChatGateway, SocialService, ChannelService, MessageService, PrivmsgService],
+	exports: [SocialService]
 })
 export class ChatModule {}

@@ -52,7 +52,7 @@ export interface Ball {
 	colour: Colour;
 	coord: Coord;
 	vect: Coord; // Contains the ball directional vector
-	diameter: number;
+	radius: number;
 };
 
 export interface Paddle {

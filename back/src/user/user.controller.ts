@@ -2,9 +2,7 @@ import {
 	BadRequestException,
 	Body,
 	Controller,
-	Delete,
 	Get,
-	HttpCode,
 	Param,
 	ParseIntPipe,
 	Post,
@@ -18,7 +16,7 @@ import {
 	ConflictException
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserDto, UsernameDto } from '@type/user.dto';
+import { UsernameDto } from '@type/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { diskStorage } from 'multer';
@@ -106,20 +104,5 @@ export class UserController {
 			avatar: `${appConfig.BASE_URL}/${file.path}`
 		});
 		return { file, user };
-	}
-
-	/*
-	 ** TODO: Add a 'development' Guard for these routes, so that they can only be accessed in development mode.
-	 */
-	@Post()
-	@HttpCode(200)
-	@UsePipes(new ValidationPipe())
-	async createOrUpdateUser(@Body() data: UserDto) {
-		return await this.userService.createOrUpdate(data);
-	}
-
-	@Delete(':id')
-	async deleteUserById(@Param('id', ParseIntPipe) id: number) {
-		return await this.userService.delete(id);
 	}
 }

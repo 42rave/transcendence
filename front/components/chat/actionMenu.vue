@@ -4,7 +4,8 @@ export default defineNuxtComponent({
   name: 'ChatActionMenu',
   props: ['socket', 'message', 'id'],
   data: () => ({
-   	config: useRuntimeConfig()
+   	config: useRuntimeConfig(),
+    timer: 1,
  }),
 
   methods: {
@@ -51,8 +52,13 @@ export default defineNuxtComponent({
       );
     },
 
-    muteBTN() {
-      console.log("suuuushhhhh");
+    async muteBTN(targetUserId: number) {
+      await this.$api.post(`chat/channel/${this.$channel.id}/mute/${targetUserId}`, {
+        body: {
+          time: parseInt(this.timer),
+        }
+      });
+      this.$refs.timer.reset();
     },
 
     profileBTN(targetUserId: number) {
@@ -91,7 +97,7 @@ export default defineNuxtComponent({
 
 
 <template>
-  <v-menu v-if="this.$auth.user.id != message.userId" :activator="`#author-${id}`">
+  <v-menu v-if="this.$auth.user.id != message.userId" :activator="`#author-${id}`" :close-on-content-click=false>
     <v-card max-width="10rem">
       <v-btn @click="inviteBTN" size="small" block>Let's play !</v-btn>
       <v-divider></v-divider>
@@ -106,7 +112,13 @@ export default defineNuxtComponent({
         <v-btn v-if="isUserBanned(message.userId)" @click="unbanBTN(message.userId)" size="small" block>unban</v-btn>
         <v-btn v-else @click="banBTN(message.userId)" size="small" block>ban</v-btn>
         <v-divider></v-divider>
-        <v-btn @click="muteBTN" size="small" block>mute</v-btn>
+        <v-menu open-on-hover :close-on-content-click=false>
+          <template v-slot:activator="{ props }">
+            <v-btn :active=false size="small" block v-bind="props">mute</v-btn>
+          </template>
+          <v-text-field ref=timer v-model="timer" label="minutes" hide-details type="number" :focused="true" style="width: 10rem; background: #1b1b1b;" density="compact" @keyup.enter="muteBTN(message.userId)">
+          </v-text-field>
+        </v-menu>
       </v-list>
     </v-card>
   </v-menu>

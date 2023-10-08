@@ -67,6 +67,7 @@ export default defineNuxtComponent({
 
     this.socket?.on('chat:unbanning', (data: number) => {
     });
+
   },
 
   unmounted() {

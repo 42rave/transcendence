@@ -120,20 +120,20 @@ export class GameService extends BroadcastService {
 	   }
 	*/
 	async getStats(userId: number): Promise<GameStats> {
-		const gameWon = await this.getGameNbByResult(userId, GameState.WON);
-		const gameLost = await this.getGameNbByResult(userId, GameState.LOST);
-		const gameDrawn = await this.getGameNbByResult(userId, GameState.DRAW);
-		const gameNb = gameWon + gameLost + gameDrawn;
+		const gameWon: number = await this.getGameNbByResult(userId, GameState.WON);
+		const gameLost: number = await this.getGameNbByResult(userId, GameState.LOST);
+		const gameDrawn: number = await this.getGameNbByResult(userId, GameState.DRAW);
+		const gameNb: number = gameWon + gameLost + gameDrawn;
 
-		const goalTaken = await this.getGoalTaken(userId);
-		const goalScored = await this.getGoalScored(userId);
+		const goalTaken: number = await this.getGoalTaken(userId);
+		const goalScored: number = await this.getGoalScored(userId);
 
 		return {
 			gameNb: gameNb,
 			wonNb: gameWon,
 			lostNb: gameLost,
 			drawNb: gameDrawn,
-			winRatio: gameNb === 0 ? 0 : (gameWon / gameNb) * 100,
+			winRatio: gameNb === 0 ? 0 : Math.round((gameWon / gameNb) * 100),
 			goalScored: 0,
 			goalTaken: 0,
 			goalRatio: goalTaken === 0 ? goalScored : parseFloat(((goalScored / goalTaken) * 100).toFixed(2))

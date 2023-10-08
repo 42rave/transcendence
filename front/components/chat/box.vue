@@ -62,7 +62,7 @@ export default defineNuxtComponent({
     });
 
     this.socket?.on('chat:unbanned', (data: any) => {
-      $event('alert:success', {message: `You are unbanned from ${data.channel.name}`});
+      $event('alert:success', {message: `You are unbanned from ${data}`});
     });
 
     this.socket?.on('chat:unbanning', (data: number) => {

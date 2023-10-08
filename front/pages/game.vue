@@ -6,7 +6,7 @@ export default defineNuxtComponent({
 
 <template>
   <div id="game-container">
-    <GamePlay :gameSocket='this.gameSocket' />
+    <GamePlay :socket='this.gameSocket' :left='true' />
   </div>
 </template>
 

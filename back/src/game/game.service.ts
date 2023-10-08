@@ -20,23 +20,21 @@ export class GameService extends BroadcastService {
 	     username: string;
 	     winNb: number;
 	   }
-	  
-	   This needs to be sorted in descending order by the front based on winNb */
-	async getLadder(): Promise<LadderDisplay[]> {
-		const ladder: Array<LadderDisplay> = [];
+	 */
 
-		const allUsers = await this.prisma.user.findMany({
-			where: { gameRecords: { some: {} } },
-			include: {
-				_count: {
-					select: { gameRecords: { where: { result: GameState.WON } } }
+	async getLadder(): Promise<LadderDisplay[]> {
+		return (
+			await this.prisma.user.findMany({
+				where: { gameRecords: { some: {} } },
+				include: {
+					_count: {
+						select: { gameRecords: { where: { result: GameState.WON } } }
+					}
 				}
-			}
-		});
-		for (let i = 0; i < allUsers.length; i++) {
-			ladder.push({ id: allUsers[i].id, username: allUsers[i].username, winNb: allUsers[i]._count.gameRecords });
-		}
-		return ladder;
+			})
+		)
+			.map((users) => ({ id: users.id, username: users.username, winNb: users._count.gameRecords }))
+			.sort((a, b) => (a.winNb < b.winNb ? 1 : -1));
 	}
 
 	/* This returns a HistoryDisplay array

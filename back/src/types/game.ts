@@ -31,6 +31,12 @@ export enum Colour {
 	BLACK = "BLACK",
 };
 
+export enum Move {
+	UP,
+	DOWN,
+	NONE,	
+};
+
 export interface Coord {
 	x: number;
 	y: number;
@@ -45,12 +51,14 @@ export interface Rectangle {
 export interface Ball {
 	colour: Colour;
 	coord: Coord;
+	vect: Coord; // Contains the ball directional vector
 	diameter: number;
 };
 
 export interface Paddle {
-	coord: Coord;
+	coord: Coord; // Center of the paddle
 	obj: Rectangle;
+	move: Move;
 };
 
 export interface GameField {
@@ -62,12 +70,11 @@ export interface GameField {
 
 export interface Player {
 	userId: number;
-	socketId: Socket; //Handled by Socket IO
+	socketId: Socket; // Handled by Socket IO
 	score: number;
 };
 
 export interface GameResult {
-	player1: Player;
-	player2: Player;
-	winnerId: number;
+	winner: Player;
+	looser: Player;
 }

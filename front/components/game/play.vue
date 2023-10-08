@@ -3,21 +3,14 @@
 </template>
 
 <script lang='ts'>
-const backendRes = {x: 16, y: 9};
-const backendPlayerRes = {x: 0.25, y: 1.5};
-const backendBallRes = {x: 0.25, y: 0.25};
+import { Vector2, Player, Ball } from '~/types/game';
+
+const backendRes = new Vector2(16, 9);
+const backendPlayerRes = new Vector2(0.25, 1.5);
+const backendBallRes = new Vector2(0.25, 0.25);
 const mapRatio = backendRes.x / backendRes.y;
-const speed = 0.1;
-
-class Player {
-  constructor (public x: number = 0, public y: number = 0) {}
-  speed: number = 0;
-}
-
-class Ball {
-  constructor (public x: number = backendRes.x / 2, public y: number = backendRes.y / 2) {}
-  speed: { x: number, y: number } = { x: 0, y: 0 };
-}
+const speed = 0.005;
+const maxFps = 30;
 
 export default defineNuxtComponent({
   name: 'Game',
@@ -27,18 +20,30 @@ export default defineNuxtComponent({
     container_observer: null as ResizeObserver | null,
     canvas: null as HTMLCanvasElement | null,
     ctx: null as CanvasRenderingContext2D | null,
-    ratio: { x: 1, y: 1 },
-    playerLeft: new Player(0.5, backendRes.y / 2),
-    playerRight: new Player(backendRes.x - 0.5, backendRes.y / 2),
-    ball: new Ball(),
+    ratio: new Vector2(1),
+    playerLeft: new Player({
+      position: new Vector2(0.5, backendRes.y / 2),
+      size: backendPlayerRes.clone(),
+      color: 'white'
+    }),
+    playerRight: new Player({
+      position: new Vector2(backendRes.x - 0.5, backendRes.y / 2),
+      size: backendPlayerRes.clone(),
+      color: 'white'
+    }),
+    ball: new Ball({
+      position: backendRes.div(2),
+      size: backendBallRes.clone(),
+      color: 'white'
+    }),
     inputs: {
       ArrowDown: false,
       ArrowUp: false,
       speed: 0,
     },
     eventListeners: {
-      'keydown': null as ((e: KeyboardEvent) => void) | null,
-      'keyup': null as ((e: KeyboardEvent) => void) | null,
+      keydown: null as EventListenerOrEventListenerObject | null,
+      keyup: null as EventListenerOrEventListenerObject | null,
     },
     frames: {
       fps: 0,
@@ -53,7 +58,7 @@ export default defineNuxtComponent({
       this.resizeCanvas();
     });
     this.bindEvents();
-    this.container_observer.observe(this.container);
+    this.container_observer.observe(this.container!);
     this.canvas = document.getElementById('game-renderer') as HTMLCanvasElement;
     this.ctx = this.canvas.getContext('2d');
     this.resizeCanvas();
@@ -63,53 +68,35 @@ export default defineNuxtComponent({
       this.frames.fps = Math.round(1000 / this.frames.delta);
     }, 1000);
 
-    this.drawLoop();
+    this.drawLoop(0);
   },
   unmounted() {
     this.container_observer?.disconnect();
     this.unbindEvents()
   },
   methods: {
-    drawLoop(timestamp: number) {
+    async drawLoop(timestamp: number) {
       if (!this.ctx) return ;
-      this.playerLeft.y += this.playerLeft.speed;
-      this.playerRight.y += this.playerRight.speed;
-      this.ball.x += this.ball.speed.x;
-      this.ball.y += this.ball.speed.y;
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.fillStyle = 'black';
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      this.displayPlayer(this.playerLeft);
-      this.displayPlayer(this.playerRight);
-      if (this.left)
-        this.updatePlayerSpeed(this.playerLeft, this.inputs.speed);
-      else
-        this.updatePlayerSpeed(this.playerRight, this.inputs.speed);
-      this.displayBall(this.ball);
+
+      if (this.frames.last == 0) this.frames.last = timestamp;
       this.frames.delta = timestamp - this.frames.last;
       this.frames.last = timestamp;
+
+      this.ctx.fillStyle = 'black';
+      this.ctx.fillRect(0, 0, this.canvas!.width, this.canvas!.height);
+
+      this.playerLeft.display(this.ctx, this.ratio);
+      this.playerRight.display(this.ctx, this.ratio);
+      this.ball.display(this.ctx, this.ratio);
+
+      (this.left ? this.playerLeft : this.playerRight).update(this.frames.delta, backendRes);
+      (this.left ? this.playerLeft : this.playerRight).setSpeed(Vector2.down().mul(this.inputs.speed));
+
       this.displayFps();
-      requestAnimationFrame(this.drawLoop);
-    },
-    displayPlayer(player: Player) {
-      if (!this.ctx) return ;
-      this.ctx.fillStyle = 'white';
-      this.ctx.fillRect(
-        player.x * this.ratio.x - backendPlayerRes.x * this.ratio.x / 2,
-        player.y * this.ratio.y - backendPlayerRes.y * this.ratio.y / 2,
-        backendPlayerRes.x * this.ratio.x,
-        backendPlayerRes.y * this.ratio.y,
-      );
-    },
-    displayBall() {
-      if (!this.ctx) return ;
-      this.ctx.fillStyle = 'white';
-      this.ctx.fillRect(
-        this.ball.x * this.ratio.x - backendBallRes.x * this.ratio.x / 2,
-        this.ball.y * this.ratio.y - backendBallRes.y * this.ratio.y / 2,
-        backendBallRes.x * this.ratio.x,
-        backendBallRes.y * this.ratio.y,
-      );
+      setTimeout(() => {
+        window.requestAnimationFrame(this.drawLoop);
+      }, 1000 / maxFps);
+      return ;
     },
     displayFps() {
       if (!this.ctx) return ;
@@ -117,28 +104,9 @@ export default defineNuxtComponent({
       this.ctx.font = '0.75rem Arial';
       this.ctx.fillText(`fps: ${this.frames.fps} (${this.frames.delta.toFixed(2)}ms)`, 10, 20);
     },
-    updatePlayerSpeed(player: Player, speed: number) {
-      player.speed = speed;
-    },
-    setPlayerPosition(player: Player, position: {x: number, y: number}) {
-      // TODO: register this function to a socket event
-      player.x = position.x;
-      player.y = position.y;
-    },
-    setBallSpeed(speed: {x: number, y: number}) {
-      this.ball.x = speed.x;
-      this.ball.y = speed.y;
-    },
-    setBallPosition(position: {x: number, y: number}) {
-      this.ball.x = position.x;
-      this.ball.y = position.y;
-    },
     resizeCanvas() {
-      const containerWidth = this.container.clientWidth;
-      const containerHeight = this.container.clientHeight;
-
-      let canvasWidth = containerWidth;
-      let canvasHeight = containerHeight;
+      let canvasWidth = this.container!.clientWidth;
+      let canvasHeight = this.container!.clientHeight;
 
       if (canvasWidth / canvasHeight > mapRatio) {
         canvasWidth = canvasHeight * mapRatio;
@@ -146,16 +114,13 @@ export default defineNuxtComponent({
         canvasHeight = canvasWidth / mapRatio;
       }
 
-      this.canvas.width = canvasWidth;
-      this.canvas.height = canvasHeight;
+      this.canvas!.width = canvasWidth;
+      this.canvas!.height = canvasHeight;
 
-      this.ratio = {
-        x: canvasWidth / backendRes.x,
-        y: canvasHeight / backendRes.y,
-      };
+      this.ratio = new Vector2(canvasWidth / backendRes.x, canvasHeight / backendRes.y);
     },
     bindEvents() {
-      this.eventListeners.keydown = (e: KeyboardEvent) => {
+      this.eventListeners.keydown = ((e: KeyboardEvent) => {
         let _speed = 0;
 
         if (e.key == 'ArrowDown') {
@@ -173,9 +138,10 @@ export default defineNuxtComponent({
           }
         }
         this.inputs.speed += _speed;
-      };
+      }) as EventListenerOrEventListenerObject;
       document.addEventListener('keydown', this.eventListeners.keydown);
-      this.eventListeners.keyup = (e: KeyboardEvent) => {
+
+      this.eventListeners.keyup = ((e: KeyboardEvent) => {
         let _speed = 0;
 
         if (e.key == 'ArrowDown') {
@@ -193,12 +159,12 @@ export default defineNuxtComponent({
           }
         }
         this.inputs.speed += _speed;
-      }
-      document.addEventListener('keyup', this.eventListeners.keyup);
+      }) as EventListenerOrEventListenerObject;
+      document.addEventListener('keyup', this.eventListeners.keyup!);
     },
     unbindEvents() {
-      document.removeEventListener('keydown', this.eventListeners.keydown);
-      document.removeEventListener('keyup', this.eventListeners.keyup);
+      document.removeEventListener('keydown', this.eventListeners.keydown!);
+      document.removeEventListener('keyup' , this.eventListeners.keyup!);
     },
   }
 })

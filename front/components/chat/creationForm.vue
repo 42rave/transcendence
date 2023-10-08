@@ -22,7 +22,7 @@ export default defineNuxtComponent({
         body: {
           name: this.channelName,
           kind: this.channelKind,
-          password: this.protectedPassword,
+          password: this.channelKind === 'PROTECTED' ? this.protectedPassword : null,
         }
       });
         if (res) {
@@ -30,6 +30,7 @@ export default defineNuxtComponent({
           this.$event('alert:success', {title: 'Channel successfully created', message: 'chat away'})
           this.$refs.form.reset();
           this.channelKind = 'PUBLIC';
+          this.protectedPassword = '';
         }
     },
 
@@ -63,7 +64,7 @@ export default defineNuxtComponent({
                     </v-radio-group>
                   </v-col>
 
-                  <v-col cols="12" >
+                  <v-col cols="12" v-if="this.channelKind === 'PROTECTED'" >
                     <v-text-field v-model="protectedPassword"
                       label="Password (optional)"
                       hide-details

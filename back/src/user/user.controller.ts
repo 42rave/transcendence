@@ -51,6 +51,12 @@ export class UserController {
 		return { ...user, ...(await this.statusService.getByUserId(id)) };
 	}
 
+	@Post('username')
+	@UsePipes(ValidationPipe)
+	async getUserByName(@Req() req: Request, @Body() data: UsernameDto) {
+		return await this.userService.getByName(data.username);
+	}
+
 	@Put('username')
 	@UsePipes(new ValidationPipe())
 	async updateUser(@Req() req: Request, @Body() data: UsernameDto) {

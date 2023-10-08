@@ -110,7 +110,7 @@ export default defineNuxtComponent({
       </v-alert>
     </div>
     <div v-else class="relations-content overflow-auto">
-      <div v-if="this.connectionsList.length === 0" class="d-flex flex-column w-100">
+      <div v-if="!this.connectionsList || this.connectionsList.length === 0" class="d-flex flex-column w-100">
         <v-alert type="info" color="blue" icon="mdi-information">
           <span class="mx-auto">{{ this.getInfoMessage() }}</span>
         </v-alert>

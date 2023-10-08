@@ -84,6 +84,10 @@ export const useChannelStore = defineStore('channel', {
 			this.userList.delete(newUser.userId);
 		},
 
+		async updateUserRole(userToUpdate: IUser) {
+			this.userList.set(userToUpdate.userId, userToUpdate);
+		},
+
 		addMessage(input: IMessage) {
 			this.messages.set(input.id, input);
 		},

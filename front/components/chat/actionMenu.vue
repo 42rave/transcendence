@@ -21,9 +21,23 @@ export default defineNuxtComponent({
     },
 
     async banBTN(targetUserId: number) {
-      const res = await this.$api.post(`chat/channel/${this.$channel.id}/ban/${targetUserId}`);
-      console.log(res);
-      
+    await this.$api.post(`chat/channel/${this.$channel.id}/ban/${targetUserId}`);
+      this.$channel.updateUserRole(
+        {
+          userId: targetUserId,
+          role: 'BANNED'
+        }
+      );
+    },
+
+    async unbanBTN(targetUserId: number) {
+    await this.$api.post(`chat/channel/${this.$channel.id}/unban/${targetUserId}`);
+      this.$channel.updateUserRole(
+      {
+          userId: targetUserId,
+          role: 'DEFAULT'
+      }
+      );
     },
 
     muteBTN() {
@@ -39,7 +53,17 @@ export default defineNuxtComponent({
       if (this.$channel.userRole === "ADMIN" || this.$channel.userRole === "OWNER")
         return true;
       return false;
-    }
+    },
+
+    isUserBanned(targetUserId: number) {
+      const user = this.$channel.userList.get(targetUserId);
+      if (user && user.role === 'BANNED')
+      {
+        return true;
+      }
+      return false;
+    },
+
   }
 })
 </script>
@@ -56,9 +80,10 @@ export default defineNuxtComponent({
       <v-btn @click="profileBTN(message.userId)" size="small" block>Profile</v-btn>
       <v-list class="allowed_actions" v-if="allowedActions()">
         <v-divider></v-divider>
-        <v-btn  @click="kickBTN(message.userId)" size="small" block>kick</v-btn>
+        <v-btn @click="kickBTN(message.userId)" size="small" block>kick</v-btn>
         <v-divider></v-divider>
-        <v-btn @click="banBTN(message.userId)" size="small" block>ban</v-btn>
+        <v-btn v-if="isUserBanned(message.userId)" @click="unbanBTN(message.userId)" size="small" block>unban</v-btn>
+        <v-btn v-else @click="banBTN(message.userId)" size="small" block>ban</v-btn>
         <v-divider></v-divider>
         <v-btn @click="muteBTN" size="small" block>mute</v-btn>
       </v-list>

@@ -47,12 +47,10 @@ export default defineNuxtComponent({
     /*  if the user is banned from the channel, his connection is removed from the channel, 
     the current channel state is reset 
     and the user is redirected to channel 0 */
-    this.socket?.on('chat:ban', (data: any) => {
-      console.log(data);
-      
-		  this.$userChat.removeConnection(data.id);
-      $event('alert:error', {message: `You are banned from ${data.name}`});
-      if (data.id === this.$channel.id)
+    this.socket?.on('chat:banned', (data: any) => {
+		  this.$userChat.removeConnection(data);
+      $event('alert:error', {message: `You are banned from ${data.channel.name}`});
+      if (data.channel.id === this.$channel.id)
       {
         this.$router.push('/chat');
 		    this.$channel.$reset();
@@ -70,7 +68,7 @@ export default defineNuxtComponent({
     this.socket.off('relation:remove');
     this.socket.off('chat:kicked');
     this.socket.off('chat:kicking');
-    this.socket.off('chat:ban');
+    this.socket.off('chat:banned');
     this.socket.off('chat:banning');
   },
 

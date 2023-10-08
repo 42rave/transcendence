@@ -40,9 +40,9 @@ export default defineNuxtComponent({
     getPlayerState(match: HistoryDisplay, id: number) {
       switch (match.state) {
         case 'WON':
-          return id === match.player_1.id ? 'won' : 'lost';
+          return id === this.user.id ? 'won' : 'lost';
         case 'LOST':
-          return id === match.player_1.id ? 'lost' : 'won';
+          return id === this.user.id ? 'lost' : 'won';
         default:
           return 'draw';
       }
@@ -93,7 +93,7 @@ export default defineNuxtComponent({
                   <span class="score">{{ match.player_1.score }}</span>
                 </span>
               </div>
-              <p style="color: gainsboro">-VS-</p>
+              <p style="color: gainsboro; margin: auto; min-width: fit-content">-VS-</p>
               <div class="player right" :class="getPlayerState(match, match.player_2.id)"  @click="this.showProfile(match.player_2.id)">
                 <span class="mr-auto">
                   <span class="score">{{ match.player_2.score }}</span>
@@ -126,6 +126,7 @@ export default defineNuxtComponent({
   margin: auto;
   color: white;
   font-weight: 600;
+  min-width: fit-content;
   background-color: rgba(91, 84, 84, 0.37);
   border-radius: 0.5rem;
 }

@@ -79,7 +79,7 @@ export default defineNuxtComponent({
             </v-window-item>
             <v-window-item> Stats </v-window-item>
             <v-window-item>
-              <ProfileMatchs :user="this.user" />
+              <ProfileMatch :user="this.user" />
             </v-window-item>
           </v-window>
         </div>

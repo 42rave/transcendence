@@ -29,7 +29,7 @@ export class MessageController {
 		@Req() req: Request,
 		@Param('targetChannelId', ParseIntPipe) channelId: number
 	): Promise<Message[]> {
-		return await this.messageService.getMessages(req.user, channelId);
+		return this.messageService.getMessages(req.user, channelId);
 	}
 
 	@Post()

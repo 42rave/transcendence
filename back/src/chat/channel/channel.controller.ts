@@ -12,7 +12,7 @@ import {
 	UsePipes
 } from '@nestjs/common';
 
-import { ChannelCreationDto, ChannelDto, ChannelPasswordDto } from '@type/channel.dto';
+import { ChannelCreationDto, ChannelDto, ChannelPasswordDto, MuteTimeDto } from '@type/channel.dto';
 import type { Request } from '@type/request';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { ChannelService } from './channel.service';
@@ -169,9 +169,9 @@ export class ChannelController {
 		@Param('targetChannelId', ParseIntPipe) channelId: number,
 		@Req() req: Request,
 		@Param('targetUserId', ParseIntPipe) targetUserId: number,
-		@Body() muteTime: Date
+		@Body() muteTime: MuteTimeDto
 	) {
-		return await this.channelService.mute(req.user, channelId, targetUserId, muteTime);
+		return await this.channelService.mute(req.user, channelId, targetUserId, muteTime.time);
 	}
 
 	@Post(':targetChannelId/mute/:targetUserId')

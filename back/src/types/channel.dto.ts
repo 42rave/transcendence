@@ -7,7 +7,9 @@ import {
 	NotEquals,
 	Equals,
 	ValidateIf,
-	Length
+	Length,
+	Min,
+	Max
 } from 'class-validator';
 
 import { ChannelKind } from '@prisma/client';
@@ -78,4 +80,12 @@ export class ChannelPasswordDto {
 
 	@IsString()
 	socketId: string;
+}
+
+export class MuteTimeDto {
+	@IsNotEmpty()
+	@IsNumber()
+	@Min(0)
+	@Max(1728)
+	time: number;
 }

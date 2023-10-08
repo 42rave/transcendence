@@ -618,7 +618,7 @@ export class ChannelService {
 		return demotedUser;
 	}
 
-	async mute(user: User, targetChannelId: number, targetUserId: number, time: Date): Promise<ChannelConnection> {
+	async mute(user: User, targetChannelId: number, targetUserId: number, time: number): Promise<ChannelConnection> {
 		if (await this.isUserOwnerInChannel(targetUserId, targetChannelId)) {
 			throw new ForbiddenException('Cannot mute user', {
 				description: 'Cannot mute the owner'
@@ -629,12 +629,14 @@ export class ChannelService {
 				description: 'You did not specify a time'
 			});
 		}
+		let date = new Date();
+		date = new Date(date.setMinutes(date.getMinutes() + time));
 		const mutedUser = await this.prisma.channelConnection
 			.update({
 				where: {
 					connectionId: { userId: targetUserId, channelId: targetChannelId }
 				},
-				data: { muted: time }
+				data: { muted: date }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot mute user', {

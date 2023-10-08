@@ -31,9 +31,10 @@ export default defineNuxtComponent({
     playerLeft: new Player(0.5, backendRes.y / 2),
     playerRight: new Player(backendRes.x - 0.5, backendRes.y / 2),
     ball: new Ball(),
-    keyState: {
+    inputs: {
       ArrowDown: false,
       ArrowUp: false,
+      speed: 0,
     },
     eventListeners: {
       'keydown': null as ((e: KeyboardEvent) => void) | null,
@@ -78,6 +79,10 @@ export default defineNuxtComponent({
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.displayPlayer(this.playerLeft);
       this.displayPlayer(this.playerRight);
+      if (this.left)
+        this.updatePlayerSpeed(this.playerLeft, this.inputs.speed);
+      else
+        this.updatePlayerSpeed(this.playerRight, this.inputs.speed);
       this.displayBall(this.ball);
       this.frames.delta = timestamp - this.frames.last;
       this.frames.last = timestamp;
@@ -110,6 +115,14 @@ export default defineNuxtComponent({
       this.ctx.font = '0.75rem Arial';
       this.ctx.fillText(`fps: ${this.frames.fps} (${this.frames.delta.toFixed(2)}ms)`, 10, 20);
     },
+    updatePlayerSpeed(player: Player, speed: number) {
+      player.speed = speed;
+    },
+    setPlayerPosition(player: Player, position: {x: number, y: number}) {
+      // TODO: register this function to a socket event
+      player.x = position.x;
+      player.y = position.y;
+    },
     resizeCanvas() {
       const containerWidth = this.container.clientWidth;
       const containerHeight = this.container.clientHeight;
@@ -132,42 +145,44 @@ export default defineNuxtComponent({
       };
     },
     bindEvents() {
-      this.eventListeners.keydown = (e) => {
-        if (e.key === 'ArrowDown' && !this.keyState.ArrowDown) {
-          this.keyState.ArrowDown = true;
-          if (this.left)
-            this.playerLeft.speed += speed;
-          else
-            this.playerRight.speed += speed;
-          console.log(`keydown: ${e.key}`);
+      this.eventListeners.keydown = (e: KeyboardEvent) => {
+        let _speed = 0;
+
+        if (e.key == 'ArrowDown') {
+          if (!this.inputs.ArrowDown) {
+            this.inputs.ArrowDown = true;
+            _speed += speed;
+            // TODO: emit to backend
+          }
         }
-        if (e.key === 'ArrowUp' && !this.keyState.ArrowUp) {
-          this.keyState.ArrowUp = true;
-          if (this.left)
-            this.playerLeft.speed -= speed;
-          else
-            this.playerRight.speed -= speed;
-          console.log(`keydown: ${e.key}`);
+        if (e.key == 'ArrowUp') {
+          if (!this.inputs.ArrowUp) {
+            this.inputs.ArrowUp = true;
+            _speed -= speed;
+            // TODO: emit to backend
+          }
         }
+        this.inputs.speed += _speed;
       };
       document.addEventListener('keydown', this.eventListeners.keydown);
-      this.eventListeners.keyup = (e) => {
-        if (e.key === 'ArrowDown' && this.keyState.ArrowDown) {
-          this.keyState.ArrowDown = false;
-          if (this.left)
-            this.playerLeft.speed -= speed;
-          else
-            this.playerRight.speed -= speed;
-          console.log(`keydown: ${e.key}`);
+      this.eventListeners.keyup = (e: KeyboardEvent) => {
+        let _speed = 0;
+
+        if (e.key == 'ArrowDown') {
+          if (this.inputs.ArrowDown) {
+            this.inputs.ArrowDown = false;
+            _speed -= speed;
+            // TODO: emit to backend
+          }
         }
-        if (e.key === 'ArrowUp' && this.keyState.ArrowUp) {
-          this.keyState.ArrowUp = false;
-          if (this.left)
-            this.playerLeft.speed += speed;
-          else
-            this.playerRight.speed += speed;
-          console.log(`keydown: ${e.key}`);
+        if (e.key == 'ArrowUp') {
+          if (this.inputs.ArrowUp) {
+            this.inputs.ArrowUp = false;
+            _speed += speed;
+            // TODO: emit to backend
+          }
         }
+        this.inputs.speed += _speed;
       }
       document.addEventListener('keyup', this.eventListeners.keyup);
     },

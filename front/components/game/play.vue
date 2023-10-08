@@ -74,6 +74,8 @@ export default defineNuxtComponent({
       if (!this.ctx) return ;
       this.playerLeft.y += this.playerLeft.speed;
       this.playerRight.y += this.playerRight.speed;
+      this.ball.x += this.ball.speed.x;
+      this.ball.y += this.ball.speed.y;
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.fillStyle = 'black';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -122,6 +124,14 @@ export default defineNuxtComponent({
       // TODO: register this function to a socket event
       player.x = position.x;
       player.y = position.y;
+    },
+    setBallSpeed(speed: {x: number, y: number}) {
+      this.ball.x = speed.x;
+      this.ball.y = speed.y;
+    },
+    setBallPosition(position: {x: number, y: number}) {
+      this.ball.x = position.x;
+      this.ball.y = position.y;
     },
     resizeCanvas() {
       const containerWidth = this.container.clientWidth;

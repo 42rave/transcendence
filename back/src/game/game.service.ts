@@ -26,7 +26,7 @@ export class GameService extends BroadcastService {
 		this.player1 = { userId: 1, socketId: null, score: 0 };
 		this.player2 = { userId: 2, socketId: null, score: 0 };
 
-		let ball = { colour: Colour.RED, coord: null, vect: null, diameter: 0.5 };
+		let ball = { colour: Colour.RED, coord: null, vect: null, radius: 0.25 };
         let field = { colour: Colour.BLACK, width: 9, length: 16 };
 		let paddleWidth = 1.5;
 		let paddleLength = 0.5;
@@ -200,14 +200,14 @@ export class GameService extends BroadcastService {
 		if (paddle.move == Move.UP)
 		{
 			if (paddle.coord.y + paddle.obj.width / 2  + speed >= this.game.field.width)
-				paddle.coord.y = this.game.field.width;
+				paddle.coord.y = this.game.field.width - paddle.coord.y - paddle.obj.width / 2;
 			else
 				paddle.coord.y += speed;
 		}
 		else if (paddle.move == Move.DOWN)
 		{
 			if (paddle.coord.y - paddle.obj.width / 2 - speed <= 0)
-				paddle.coord.y = 0;
+				paddle.coord.y = 0 + paddle.obj.width / 2;
 			else
 				paddle.coord.y -= speed;
 		}
@@ -228,50 +228,51 @@ export class GameService extends BroadcastService {
 	*/
 	getIntersection(ball: Ball, paddle: Paddle): Coord | null
 	{
+
+		let nextMove = { x: ball.coord.x + ball.vect.x, y: ball.coord.y + ball.vect.y };
 		let half_width = paddle.obj.width / 2;
 		let half_length = paddle.obj.length / 2;
-		let radius = ball.diameter / 2;
 
-		if (ball.coord.x >= paddle.coord.x - half_length && ball.coord.x <= paddle.coord.x + half_length)
+		if (nextMove.x - ball.radius  >= paddle.coord.x - half_length && nextMove.x <= paddle.coord.x + half_length)
 		{
-			if (Math.abs(ball.coord.y - paddle.coord.y - half_width) <= radius)
-				return { x: ball.coord.x, y: paddle.coord.y - half_width };
-			if (Math.abs(ball.coord.y - paddle.coord.y + half_width) <= radius)
-				return { x: ball.coord.x, y: paddle.coord.y + half_width };
+			if (Math.abs(nextMove.y - paddle.coord.y - half_width) <= ball.radius)
+				return { x: nextMove.x, y: paddle.coord.y - half_width };
+			if (Math.abs(nextMove.y - paddle.coord.y + half_width) <= ball.radius)
+				return { x: nextMove.x, y: paddle.coord.y + half_width };
 		}
 		
-		else if (ball.coord.y >= paddle.coord.y - half_width && ball.coord.y <= paddle.coord.y + half_width)
+		else if (nextMove.y >= paddle.coord.y - half_width && nextMove.y <= paddle.coord.y + half_width)
 		{
-			if (Math.abs(ball.coord.x - paddle.coord.x - half_length) <= radius)
-				return { x: paddle.coord.x - half_length, y: ball.coord.y };
-			if (Math.abs(ball.coord.x - paddle.coord.x + half_length) <= radius)
-				return { x: paddle.coord.x + half_length, y: ball.coord.y };
+			if (Math.abs(nextMove.x - paddle.coord.x - half_length) <= ball.radius)
+				return { x: paddle.coord.x - half_length, y: nextMove.y };
+			if (Math.abs(nextMove.x - paddle.coord.x + half_length) <= ball.radius)
+				return { x: paddle.coord.x + half_length, y: nextMove.y };
 		}
 
 		// Closer to top right corner
-		else if (ball.coord.x >= paddle.coord.x + half_length && ball.coord.y <= paddle.coord.y - half_width
-			&& this.distanceBetweenPoints(ball.coord, { x: paddle.coord.x + half_length, y: paddle.coord.y - half_width}) <= radius)
+		else if (nextMove.x >= paddle.coord.x + half_length && nextMove.y <= paddle.coord.y - half_width
+			&& this.distanceBetweenPoints(nextMove, { x: paddle.coord.x + half_length, y: paddle.coord.y - half_width}) <= ball.radius)
 		{
 			return { x: paddle.coord.x + half_length, y: paddle.coord.y - half_width}
 		}
 
 		// Closer to bottom right corner
-		else if (ball.coord.x >= paddle.coord.x + half_length && ball.coord.y >= paddle.coord.y + half_width
-			&& this.distanceBetweenPoints(ball.coord, { x: paddle.coord.x + half_length, y: paddle.coord.y + half_width}) <= radius)
+		else if (nextMove.x >= paddle.coord.x + half_length && nextMove.y >= paddle.coord.y + half_width
+			&& this.distanceBetweenPoints(nextMove, { x: paddle.coord.x + half_length, y: paddle.coord.y + half_width}) <= ball.radius)
 		{
 			return { x: paddle.coord.x + half_length, y: paddle.coord.y + half_width}
 		}
 
 		// Closer to bottom left corner
-		else if (ball.coord.x <= paddle.coord.x - half_length && ball.coord.y >= paddle.coord.y + half_width
-			&& this.distanceBetweenPoints(ball.coord, { x: paddle.coord.x - half_length, y: paddle.coord.y + half_width}) <= radius)
+		else if (nextMove.x <= paddle.coord.x - half_length && nextMove.y >= paddle.coord.y + half_width
+			&& this.distanceBetweenPoints(nextMove, { x: paddle.coord.x - half_length, y: paddle.coord.y + half_width}) <= ball.radius)
 		{
 			return { x: paddle.coord.x - half_length, y: paddle.coord.y + half_width}
 		}
 
 		// Closer to top left corner
-		else if (ball.coord.x <= paddle.coord.x - half_length && ball.coord.y <= paddle.coord.y - half_width
-			&& this.distanceBetweenPoints(ball.coord, { x: paddle.coord.x - half_length, y: paddle.coord.y - half_width}) <= radius)
+		else if (nextMove.x <= paddle.coord.x - half_length && nextMove.y <= paddle.coord.y - half_width
+			&& this.distanceBetweenPoints(nextMove, { x: paddle.coord.x - half_length, y: paddle.coord.y - half_width}) <= ball.radius)
 		{
 			return { x: paddle.coord.x - half_length, y: paddle.coord.y - half_width}
 		}
@@ -284,11 +285,12 @@ export class GameService extends BroadcastService {
 	getBounceCoord(ball: Ball): Coord | null
 	{
 		let ret;
-		let radius = ball.diameter / 2;
-		if (ball.coord.y - radius <= 0)
-			ret = { x: 0, y: ball.coord.y - radius };
-		else if ((ball.coord.y + radius >= this.game.field.width))
-			ret = { x: this.game.field.width, y: ball.coord.y + radius };
+		if (ball.coord.y - ball.radius + ball.vect.y <= 0)
+			ret = { x: ball.coord.x, y:  0};
+
+		else if ((ball.coord.y + ball.radius + ball.vect.y >= this.game.field.width))
+			ret = { x: ball.coord.x, y: this.game.field.width };
+	
 		else
 		{
 			ret = this.getIntersection(ball, this.game.paddle1);
@@ -313,25 +315,17 @@ export class GameService extends BroadcastService {
 	*/
 	bounceBall(ball: Ball, intersection: Coord)
 	{
-		console.log("intersection = ", intersection);
+		let u = { x: ball.coord.x - intersection.x, y: ball.coord.y - intersection.y };
 
-		let u = { x: intersection.x - ball.coord.x, y: intersection.y - ball.coord.y };
-		console.log("u = ", u);
-		let v = ball.vect;
-		console.log("v = ", v);
-		let normV = Math.sqrt(Math.pow(v.x, 2) + Math.pow(v.y, 2));
-	
-		let vectorialProduct = u.x * v.x + u.y * v.y;
-		console.log("u * v = ", vectorialProduct);
-		let normalProduct = Math.sqrt(Math.pow(u.x, 2) + Math.pow(u.y, 2)) * normV;
-		let originAngle = Math.acos(vectorialProduct / normalProduct);
-		let directionalAngle = 180 - (originAngle + 90);
+		let normU = Math.sqrt(Math.pow(u.x, 2) + Math.pow(u.y, 2));
+		let n = { x: u.x / normU, y: u.y / normU }; 
+		let v = ball.vect; 
 
-		let x = Math.sin(directionalAngle + 90) / normV;
-		let y = Math.cos(directionalAngle + 90) / normV;
+		let vectorialProduct = n.x * v.x + n.y * v.y;
+		let u2 = { x: 2 * vectorialProduct * n.x, y: 2 * vectorialProduct * n.y };
+		ball.vect = { x: v.x - u2.x, y: v.y - u2.y};
 
-		ball.vect.x = x - ball.coord.x;
-		ball.vect.y = y - ball.coord.y;
+		ball.coord = { x: intersection.x + (n.x * ball.radius), y: intersection.y + (n.y * ball.radius)};
 	}
 
 	/* 
@@ -341,15 +335,16 @@ export class GameService extends BroadcastService {
 	{
 		let intersection = this.getBounceCoord(ball);
 		if (intersection != null)
-		{
-			console.log("Bounce!");
 			this.bounceBall(ball, intersection);
-		}
 		else
 		{
-			console.log("Simply move!");
 			ball.coord.x += ball.vect.x;
 			ball.coord.y += ball.vect.y;
+			if (ball.coord.y + ball.radius >= 
+				this.game.field.width)
+				ball.coord.y = this.game.field.width - ball.radius;
+			else if (ball.coord.y - ball.radius <= 0)
+				ball.coord.y = ball.radius;
 		}
 	}
 
@@ -359,14 +354,13 @@ export class GameService extends BroadcastService {
 	 */
 	isMarked(ball: Ball): boolean
 	{
-		let radius = ball.diameter / 2;
-		if (ball.coord.x - radius <= 0)
+		if (ball.coord.x - ball.radius <= 0)
 		{
 			this.player2.score += 1;
 			return true;
 		}
 		
-		if ((ball.coord.x + radius >= this.game.field.length))
+		if ((ball.coord.x + ball.radius >= this.game.field.length))
 		{
 			this.player1.score += 1;
 			return true;
@@ -384,17 +378,15 @@ export class GameService extends BroadcastService {
 	*/
 	resetBall(ball: Ball, speed)
 	{
-		ball.coord = { x: 4.5, y: 8 };
+		ball.coord = { x: 8, y: 4.5 };
+		let delta = 0.2;
 
-		let vectX = 0;
-		let vectY = 0;
-		while (vectX == 0 && vectY == 0)
-		{
-			vectX = this.getRandomInt(10) % 2 == 0 ? -this.getRandomInt(2) : this.getRandomInt(2);
-			vectY = this.getRandomInt(10) % 2 == 0 ? -this.getRandomInt(2) : this.getRandomInt(2);
-		}
-		//ball.vect = { x: vectX * speed, y: vectY * speed };
-		ball.vect = { x: 0, y: 1 };
+		let randomRad = Math.PI / 2;
+		
+		while (Math.abs(randomRad - Math.PI / 2) < delta  || Math.abs(randomRad - 3 * Math.PI / 2) < delta)
+			randomRad = Math.random() * 2 * Math.PI;
+
+		ball.vect = { x: Math.cos(randomRad) * speed, y: Math.sin(randomRad) * speed };
 	}
 
 	/*  This starts game, calculate scores and returns the GameResult
@@ -404,14 +396,12 @@ export class GameService extends BroadcastService {
         }
     */
 	async playGame(): Promise<GameResult> {
-		let speed = 0.25;
+		let speed = 0.2;
 		let scoreMax = 13;
 
 		this.resetBall(this.game.ball, speed);
-		while (true)
+		for (let i = 0; i < 10; i++)
 		{
-
-			console.log(this.game.ball);
 			// if someEventMatchedUserInput call eventMovePaddle
 			//this.movePaddle(this.game.paddle1, speed);
 			//this.movePaddle(this.game.paddle2, speed);

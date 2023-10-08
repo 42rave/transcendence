@@ -10,6 +10,9 @@ export default defineNuxtComponent({
   beforeMount() {
         this.$channel.getMessages();
         this.socket?.on('chat:message', (data: any) => {
+        const sender = this.$userChat.relationships.get(data.userId);
+        if ((sender && sender.kind === 'BLOCKED'))
+          return ;
         this.$channel.addMessage(data);
         });
   },

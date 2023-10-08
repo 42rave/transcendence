@@ -59,10 +59,19 @@ export const useUserChatStore = defineStore('userChat', {
 				this.relationships = new Map(currentRelationships.map((relationship: IRelationship) => [relationship.receiverId, relationship]))
 			}
 		},
-		async updateRelationship (relationship: IRelationship) {
-			this.relationships.set(relationship.receiverId, relationship);
+		updateRelationship (relationship: IRelationship) {
+			const relationToUpdate = this.relationships.get(relationship.receiverId);
+			if (!relationToUpdate)
+			{
+				this.relationships.set(relationship.receiverId, relationship);
+				return;
+			}
+			relationToUpdate.kind = relationship.kind;
 		},
-		async removeRelationship (relationship: IRelationship) {
+
+		removeRelationship (relationship: IRelationship) {
+			if (!relationship)
+				return;
 			this.relationships.delete(relationship.receiverId);
 		}
 	}

@@ -12,8 +12,19 @@ export default defineNuxtComponent({
       console.log("invite to play");
     },
 
-    blockBTN() {
-      console.log("can't stand you prick");
+    async blockBTN(targetUserId: number) {
+     const res = await this.$api.post(`relationship/${targetUserId}/block`);
+      this.$userChat.updateRelationship(
+        {
+          receiverId: targetUserId,
+	        kind: 'BLOCKED',
+        }
+      )
+    },
+
+    async unblockBTN(targetUserId: number) {
+      this.$userChat.removeRelationship(this.$userChat.relationships.get(targetUserId));;
+      await this.$api.delete(`relationship/${targetUserId}`);
     },
 
     async kickBTN(targetUserId: number) {
@@ -64,6 +75,15 @@ export default defineNuxtComponent({
       return false;
     },
 
+    isUserBlocked(targetUserId: number) {
+      const user = this.$userChat.relationships.get(targetUserId);
+      if (user && user.kind === 'BLOCKED')
+      {
+        return true;
+      }
+      return false;
+    },
+
   }
 })
 </script>
@@ -75,7 +95,8 @@ export default defineNuxtComponent({
     <v-card max-width="10rem">
       <v-btn @click="inviteBTN" size="small" block>Let's play !</v-btn>
       <v-divider></v-divider>
-      <v-btn @click="blockBTN(message.userId)" size="small" block>block</v-btn>
+      <v-btn v-if="isUserBlocked(message.userId)" @click="unblockBTN(message.userId)" size="small" block>unblock</v-btn>
+      <v-btn v-else @click="blockBTN(message.userId)" size="small" block>block</v-btn>
       <v-divider></v-divider>
       <v-btn @click="profileBTN(message.userId)" size="small" block>Profile</v-btn>
       <v-list class="allowed_actions" v-if="allowedActions()">

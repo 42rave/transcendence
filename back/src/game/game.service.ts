@@ -196,9 +196,19 @@ export class GameService extends BroadcastService {
 	movePaddle(paddle: Paddle, speed: number)
 	{
 		if (paddle.move == Move.UP)
-			paddle.coord.y += speed;
+		{
+			if (paddle.coord.y + paddle.obj.width / 2  + speed >= this.game.field.width)
+				paddle.coord.y = this.game.field.width;
+			else
+				paddle.coord.y += speed;
+		}
 		else if (paddle.move == Move.DOWN)
-			paddle.coord.y -= speed;
+		{
+			if (paddle.coord.y - paddle.obj.width / 2 - speed <= 0)
+				paddle.coord.y = 0;
+			else
+				paddle.coord.y -= speed;
+		}
 	}
 
 	/* 

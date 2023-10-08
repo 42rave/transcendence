@@ -18,6 +18,11 @@ export default defineNuxtComponent({
           path: '/chat',
           icon: 'mdi-chat',
         },
+        game: {
+          name: 'Game',
+          path: '/game',
+          icon: 'mdi-gamepad-variant',
+        }
       },
       loading: true,
       socket: null as NuxtSocket | null,

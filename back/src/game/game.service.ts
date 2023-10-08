@@ -28,7 +28,9 @@ export class GameService extends BroadcastService {
 
 		let ball = { colour: Colour.RED, coord: null, vect: null, diameter: 0.5 };
         let field = { colour: Colour.BLACK, width: 9, length: 16 };
-		let paddleForm = { colour: Colour.WHITE, width: 1.5, length: 0.5 };
+		let paddleWidth = 1.5;
+		let paddleLength = 0.5;
+		let paddleForm = { colour: Colour.WHITE, width: paddleWidth, length: paddleLength };
 		let paddle1 = { coord: { x: 1, y:  8 }, obj: paddleForm, move: Move.NONE };
 		let paddle2 = { coord: { x: 15, y: 8 }, obj: paddleForm, move: Move.NONE };
 	
@@ -286,14 +288,29 @@ export class GameService extends BroadcastService {
 	*/
 	getBounceCoord(ball: Ball): Coord | null
 	{
+		let ret;
 		let radius = ball.diameter / 2;
 		if (ball.coord.y - radius <= 0)
-			return { x: 0, y: ball.coord.y - radius };
-		if ((ball.coord.y + radius >= this.game.field.width))
-			return { x: this.game.field.width, y: ball.coord.y + radius };
-		let ret = this.getIntersection(ball, this.game.paddle1);
-		if (ret == null)
+			ret = { x: 0, y: ball.coord.y - radius };
+		else if ((ball.coord.y + radius >= this.game.field.width))
+			ret = { x: this.game.field.width, y: ball.coord.y + radius };
+		else
+		{
 			ret = this.getIntersection(ball, this.game.paddle1);
+			if (ret == null)
+				ret = this.getIntersection(ball, this.game.paddle1);
+		}
+		if (ret != null)
+		{
+			if (ret.x <= 0)
+				ret.x = 0;
+			else if (ret.x >= this.game.field.length)
+				ret.x = this.game.field.length;
+			if (ret.y <= 0)
+				ret.y = 0;
+			else if (ret.y >= this.game.field.width)
+				ret.y = this.game.field.width;
+		}
 		return ret;
 	}
 
@@ -301,11 +318,16 @@ export class GameService extends BroadcastService {
 	*/
 	bounceBall(ball: Ball, intersection: Coord)
 	{
+		console.log("intersection = ", intersection);
+
 		let u = { x: intersection.x - ball.coord.x, y: intersection.y - ball.coord.y };
+		console.log("u = ", u);
 		let v = ball.vect;
+		console.log("v = ", v);
 		let normV = Math.sqrt(Math.pow(v.x, 2) + Math.pow(v.y, 2));
 	
 		let vectorialProduct = u.x * v.x + u.y * v.y;
+		console.log("u * v = ", vectorialProduct);
 		let normalProduct = Math.sqrt(Math.pow(u.x, 2) + Math.pow(u.y, 2)) * normV;
 		let originAngle = Math.acos(vectorialProduct / normalProduct);
 		let directionalAngle = 180 - (originAngle + 90);
@@ -315,8 +337,6 @@ export class GameService extends BroadcastService {
 
 		ball.vect.x = x - ball.coord.x;
 		ball.vect.y = y - ball.coord.y;
-
-		ball.coord = { x, y };
 	}
 
 	/* 
@@ -326,9 +346,13 @@ export class GameService extends BroadcastService {
 	{
 		let intersection = this.getBounceCoord(ball);
 		if (intersection != null)
+		{
+			console.log("Bounce!");
 			this.bounceBall(ball, intersection);
+		}
 		else
 		{
+			console.log("Simply move!");
 			ball.coord.x += ball.vect.x;
 			ball.coord.y += ball.vect.y;
 		}
@@ -355,6 +379,10 @@ export class GameService extends BroadcastService {
 		return false;
 	}
 
+	getRandomInt(nb: number): number
+	{
+		return Math.floor(Math.random() * nb);
+	}
 	/* 	Reset ball.
 		Place the ball at the middle of the screen and generate
 		a random vector to starts the game with.
@@ -362,9 +390,16 @@ export class GameService extends BroadcastService {
 	resetBall(ball: Ball, speed)
 	{
 		ball.coord = { x: 4.5, y: 8 };
-		let vectX =  Math.floor(Math.random() * 2) - 1;
-		let vectY = Math.floor(Math.random() * 2) - 1;
-		ball.vect = { x: vectX * speed, y: vectY * speed };
+
+		let vectX = 0;
+		let vectY = 0;
+		while (vectX == 0 && vectY == 0)
+		{
+			vectX = this.getRandomInt(10) % 2 == 0 ? -this.getRandomInt(2) : this.getRandomInt(2);
+			vectY = this.getRandomInt(10) % 2 == 0 ? -this.getRandomInt(2) : this.getRandomInt(2);
+		}
+		//ball.vect = { x: vectX * speed, y: vectY * speed };
+		ball.vect = { x: 0, y: 1 };
 	}
 
 	/*  This starts game, calculate scores and returns the GameResult
@@ -374,15 +409,17 @@ export class GameService extends BroadcastService {
         }
     */
 	async playGame(): Promise<GameResult> {
-		let speed = 0.10;
+		let speed = 0.25;
 		let scoreMax = 13;
 
 		this.resetBall(this.game.ball, speed);
 		while (true)
 		{
+
+			console.log(this.game.ball);
 			// if someEventMatchedUserInput call eventMovePaddle
-			this.movePaddle(this.game.paddle1, speed);
-			this.movePaddle(this.game.paddle2, speed);
+			//this.movePaddle(this.game.paddle1, speed);
+			//this.movePaddle(this.game.paddle2, speed);
 
 			this.moveBall(this.game.ball);
 				

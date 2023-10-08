@@ -368,10 +368,6 @@ export class GameService extends BroadcastService {
 		return false;
 	}
 
-	getRandomInt(nb: number): number
-	{
-		return Math.floor(Math.random() * nb);
-	}
 	/* 	Reset ball.
 		Place the ball at the middle of the screen and generate
 		a random vector to starts the game with.

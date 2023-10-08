@@ -5,16 +5,11 @@ import { Logger } from '@nestjs/common';
 
 export class BroadcastService {
 	server: Server;
+	private readonly logger = new Logger(this.constructor.name);
 
-	private namespace: string;
-	private logger: Logger;
-
-	constructor(namespace: string) {
-		this.namespace = namespace;
-		this.logger = new Logger(namespace);
-		this.logger.debug(`${this.namespace} instantiated`);
+	constructor() {
+		this.logger.log('BroadcastService initialized');
 	}
-
 	async onConnection(socket: Socket) {
 		socket.join(`user:${socket.user.id}`);
 

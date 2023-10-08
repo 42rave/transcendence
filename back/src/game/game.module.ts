@@ -4,11 +4,12 @@ import { GameService } from '@game/game.service';
 import { PrismaModule } from '@prisma/prisma.module';
 import { AuthModule } from '@auth/auth.module';
 import { ChatModule } from '@chat/chat.module';
+import { GameGateway } from '@game/game.gateway';
 
 //Encapsulation
 @Module({
-	imports: [AuthModule, PrismaModule, ChatModule],
 	controllers: [GameController],
-	providers: [GameService]
+	imports: [AuthModule, PrismaModule, ChatModule],
+	providers: [GameGateway, GameService]
 })
 export class GameModule {}

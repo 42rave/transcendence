@@ -3,6 +3,7 @@ import { PrismaService } from '@prisma/prisma.service';
 import { UserDto } from '@type/user.dto';
 import { Otp, User } from '@prisma/client';
 import { decrypt, encrypt } from '@/utils/crypt-manager';
+import { RelationKind } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,10 @@ export class UserService {
 
 	async getById(id: number): Promise<User> {
 		return this.prisma.user.findUnique({ where: { id: id } });
+	}
+
+	async getByName(username: string): Promise<User> {
+		return this.prisma.user.findUnique({ where: { username } });
 	}
 
 	async update(data: { id?: number; username?: string; avatar?: string }): Promise<User> {
@@ -65,5 +70,15 @@ export class UserService {
 	async disableTotp(userId: number): Promise<User> {
 		await this.prisma.otp.delete({ where: { userId } }).catch(() => {});
 		return this.prisma.user.update({ where: { id: userId }, data: { twoFAEnabled: false } });
+	}
+
+	async getBlockedUsersIds(user: User): Promise<number[]> {
+		return (
+			await this.prisma.relationship.findMany({
+				where: {
+					AND: [{ senderId: user.id }, { kind: RelationKind.BLOCKED }]
+				}
+			})
+		).map((blocked) => blocked.receiverId);
 	}
 }

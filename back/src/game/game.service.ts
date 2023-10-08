@@ -20,23 +20,21 @@ export class GameService extends BroadcastService {
 	     username: string;
 	     winNb: number;
 	   }
-	  
-	   This needs to be sorted in descending order by the front based on winNb */
-	async getLadder(): Promise<LadderDisplay[]> {
-		const ladder: Array<LadderDisplay> = [];
+	 */
 
-		const allUsers = await this.prisma.user.findMany({
-			where: { gameRecords: { some: {} } },
-			include: {
-				_count: {
-					select: { gameRecords: { where: { result: GameState.WON } } }
+	async getLadder(): Promise<LadderDisplay[]> {
+		return (
+			await this.prisma.user.findMany({
+				where: { gameRecords: { some: {} } },
+				include: {
+					_count: {
+						select: { gameRecords: { where: { result: GameState.WON } } }
+					}
 				}
-			}
-		});
-		for (let i = 0; i < allUsers.length; i++) {
-			ladder.push({ id: allUsers[i].id, username: allUsers[i].username, winNb: allUsers[i]._count.gameRecords });
-		}
-		return ladder;
+			})
+		)
+			.map((users) => ({ id: users.id, username: users.username, winNb: users._count.gameRecords }))
+			.sort((a, b) => (a.winNb < b.winNb ? 1 : -1));
 	}
 
 	/* This returns a HistoryDisplay array
@@ -48,34 +46,31 @@ export class GameService extends BroadcastService {
 	   }
 	   GameState is a prisma enum { WON, LOST, DRAW } */
 	async getHistory(userId: number): Promise<HistoryDisplay[]> {
-		const gameHistory: Array<HistoryDisplay> = [];
-
-		const allGames = await this.prisma.game.findMany({
-			where: {
-				records: {
-					some: { playerId: userId }
-				}
-			},
-			include: { records: { include: { player: true }, orderBy: { position: 'asc' } } }
-		});
-		for (let i = 0; i < allGames.length; i++) {
-			gameHistory.push({
-				date: allGames[i].createdAt,
+		return (
+			await this.prisma.game.findMany({
+				where: {
+					records: {
+						some: { playerId: userId }
+					}
+				},
+				include: { records: { include: { player: true }, orderBy: { position: 'asc' } } }
+			})
+		)
+			.map((games) => ({
+				date: games.createdAt,
 				player_1: {
-					id: allGames[i].records[0].playerId,
-					username: allGames[i].records[0].player.username,
-					score: allGames[i].records[0].score
+					id: games.records[0].playerId,
+					username: games.records[0].player.username,
+					score: games.records[0].score
 				},
 				player_2: {
-					id: allGames[i].records[1].playerId,
-					username: allGames[i].records[1].player.username,
-					score: allGames[i].records[1].score
+					id: games.records[1].playerId,
+					username: games.records[1].player.username,
+					score: games.records[1].score
 				},
-				state:
-					allGames[i].records[0].playerId === userId ? allGames[i].records[0].result : allGames[i].records[1].result
-			});
-		}
-		return gameHistory;
+				state: games.records[0].playerId === userId ? games.records[0].result : games.records[1].result
+			}))
+			.sort((a, b) => (a.date < b.date ? 1 : -1));
 	}
 
 	async getGameNbByResult(userId: number, result: GameState): Promise<number> {

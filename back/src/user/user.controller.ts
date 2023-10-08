@@ -2,9 +2,7 @@ import {
 	BadRequestException,
 	Body,
 	Controller,
-	Delete,
 	Get,
-	HttpCode,
 	Param,
 	ParseIntPipe,
 	Post,
@@ -15,10 +13,11 @@ import {
 	UseGuards,
 	Req,
 	Put,
-	ConflictException
+	ConflictException,
+	ImATeapotException
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserDto, UsernameDto } from '@type/user.dto';
+import { UsernameDto } from '@type/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { diskStorage } from 'multer';
@@ -51,6 +50,16 @@ export class UserController {
 		const user = await this.userService.getById(id);
 		if (!user) return undefined;
 		return { ...user, ...(await this.statusService.getByUserId(id)) };
+	}
+
+	@Get('name/:name')
+	@UsePipes(ValidationPipe)
+	async getUserByName(@Req() req: Request, @Param('name') name: string) {
+		const user = await this.userService.getByName(name);
+		if (!user) {
+			throw new ImATeapotException('No such user');
+		}
+		return user;
 	}
 
 	@Put('username')
@@ -106,20 +115,5 @@ export class UserController {
 			avatar: `${appConfig.BASE_URL}/${file.path}`
 		});
 		return { file, user };
-	}
-
-	/*
-	 ** TODO: Add a 'development' Guard for these routes, so that they can only be accessed in development mode.
-	 */
-	@Post()
-	@HttpCode(200)
-	@UsePipes(new ValidationPipe())
-	async createOrUpdateUser(@Body() data: UserDto) {
-		return await this.userService.createOrUpdate(data);
-	}
-
-	@Delete(':id')
-	async deleteUserById(@Param('id', ParseIntPipe) id: number) {
-		return await this.userService.delete(id);
 	}
 }

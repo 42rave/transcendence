@@ -3,15 +3,21 @@
 </template>
 
 <script lang='ts'>
+const backendRes = {x: 16, y: 9};
+const backendPlayerRes = {x: 0.25, y: 1.5};
+const backendBallRes = {x: 0.25, y: 0.25};
+const mapRatio = backendRes.x / backendRes.y;
+const speed = 0.1;
+
 class Player {
   constructor (public x: number = 0, public y: number = 0) {}
   speed: number = 0;
 }
 
-const backendRes = {x: 16, y: 9};
-const backendPlayerRes = {x: 0.25, y: 1.5};
-const mapRatio = backendRes.x / backendRes.y;
-const speed = 0.1;
+class Ball {
+  constructor (public x: number = backendRes.x / 2, public y: number = backendRes.y / 2) {}
+  speed: { x: number, y: number } = { x: 0, y: 0 };
+}
 
 export default defineNuxtComponent({
   name: 'Game',
@@ -22,8 +28,9 @@ export default defineNuxtComponent({
     canvas: null as HTMLCanvasElement | null,
     ctx: null as CanvasRenderingContext2D | null,
     ratio: { x: 1, y: 1 },
-    playerLeft: new Player(0.5, 4.5),
-    playerRight: new Player(15.5, 4.5),
+    playerLeft: new Player(0.5, backendRes.y / 2),
+    playerRight: new Player(backendRes.x - 0.5, backendRes.y / 2),
+    ball: new Ball(),
     keyState: {
       ArrowDown: false,
       ArrowUp: false,
@@ -71,6 +78,7 @@ export default defineNuxtComponent({
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.displayPlayer(this.playerLeft);
       this.displayPlayer(this.playerRight);
+      this.displayBall(this.ball);
       this.frames.delta = timestamp - this.frames.last;
       this.frames.last = timestamp;
       this.displayFps();
@@ -84,6 +92,16 @@ export default defineNuxtComponent({
         player.y * this.ratio.y - backendPlayerRes.y * this.ratio.y / 2,
         backendPlayerRes.x * this.ratio.x,
         backendPlayerRes.y * this.ratio.y,
+      );
+    },
+    displayBall() {
+      if (!this.ctx) return ;
+      this.ctx.fillStyle = 'white';
+      this.ctx.fillRect(
+        this.ball.x * this.ratio.x - backendBallRes.x * this.ratio.x / 2,
+        this.ball.y * this.ratio.y - backendBallRes.y * this.ratio.y / 2,
+        backendBallRes.x * this.ratio.x,
+        backendBallRes.y * this.ratio.y,
       );
     },
     displayFps() {

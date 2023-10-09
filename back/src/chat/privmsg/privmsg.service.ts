@@ -1,23 +1,42 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
+import { SocialService } from '@chat/social.service';
 import { Channel, User, Relationship, RelationKind, ChannelRole, ChannelKind } from '@prisma/client';
 
 @Injectable()
 export class PrivmsgService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly socialService: SocialService
+	) {}
 
-	async getAll(userId: number): Promise<Channel[]> {
-		return this.prisma.channel.findMany({
-			where: {
-				AND: [{ kind: ChannelKind.DIRECT }, { channelConnection: { some: { userId: userId } } }]
-			}
-		});
+	async getAll(userId: number) {
+		return (
+			await this.prisma.channel.findMany({
+				where: {
+					AND: [{ kind: ChannelKind.DIRECT }, { channelConnection: { some: { userId: userId } } }]
+				},
+				include: {
+					channelConnection: {
+						include: {
+							user: true
+						}
+					}
+				}
+			})
+		).map((channels) => ({
+			name:
+				channels.channelConnection[0].userId === userId
+					? channels.channelConnection[1].user.username
+					: channels.channelConnection[0].user.username,
+			channel: channels
+		}));
 	}
 
 	async join(user: User, privmsgId: number, socketId: string): Promise<Channel> {
 		const [lowUserId, highUserId] = user.id > privmsgId ? [privmsgId, user.id] : [user.id, privmsgId];
 		const convName = `${lowUserId}-${highUserId}`;
-		return this.prisma.channel
+		const channel = await this.prisma.channel
 			.upsert({
 				where: { name: convName },
 				update: {},
@@ -38,9 +57,9 @@ export class PrivmsgService {
 				});
 			});
 
-		void socketId;
-		//TODO: Define a new even for privmsg
-		// return null;
+		this.socialService.joinRoom(socketId, channel.id.toString());
+		this.socialService.emit('privmsg:create', channel);
+		return channel;
 	}
 
 	async getBlockedRelation(userdId: number, privmsgId: number): Promise<Relationship> {

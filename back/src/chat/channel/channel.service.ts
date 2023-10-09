@@ -346,9 +346,6 @@ export class ChannelService {
 				});
 			}
 			if (!newOwner) {
-				await this.prisma.channelConnection.deleteMany({
-					where: { channelId: targetChannelId }
-				});
 				this.socialService.emit('chat:delete', targetChannelId);
 				await this.prisma.channel.delete({ where: { id: targetChannelId } });
 				return;
@@ -582,7 +579,7 @@ export class ChannelService {
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot update channel', {
-					description: 'Something went horribly wrong'
+					description: 'Name already taken'
 				});
 			});
 		this.socialService.emit('chat:update', channel);

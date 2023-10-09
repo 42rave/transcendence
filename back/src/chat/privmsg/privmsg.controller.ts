@@ -13,7 +13,6 @@ import {
 import type { Request } from '@type/request';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 import { PrivmsgService } from './privmsg.service';
-import { Channel } from '@prisma/client';
 import { IsPrivmsgGuard } from '@guard/isPrivmsg.guard';
 import { IsUserSocketGuard } from '@guard/isUserSocket.guard';
 import { ChannelPasswordDto } from '@type/channel.dto';
@@ -22,9 +21,13 @@ import { ChannelPasswordDto } from '@type/channel.dto';
 export class PrivmsgController {
 	constructor(private readonly privmsgService: PrivmsgService) {}
 
+	/* This returns an object {
+	 * name: NameThatShouldBeDisplayedForChannel
+	 * channel: Channel
+	 */
 	@Get()
 	@UseGuards(...AuthenticatedGuard)
-	async getAll(@Req() req: Request): Promise<Channel[]> {
+	async getAll(@Req() req: Request) {
 		return await this.privmsgService.getAll(req.user.id);
 	}
 

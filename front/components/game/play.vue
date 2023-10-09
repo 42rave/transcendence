@@ -10,7 +10,6 @@ const backendPlayerRes = new Vector2(0.25, 1.5);
 const backendBallRes = new Vector2(0.25, 0.25);
 const mapRatio = backendRes.x / backendRes.y;
 const speed = 0.005;
-const maxFps = 30;
 
 export default defineNuxtComponent({
   name: 'Game',
@@ -93,9 +92,7 @@ export default defineNuxtComponent({
       (this.left ? this.playerLeft : this.playerRight).setSpeed(Vector2.down().mul(this.inputs.speed));
 
       this.displayFps();
-      setTimeout(() => {
-        window.requestAnimationFrame(this.drawLoop);
-      }, 1000 / maxFps);
+      window.requestAnimationFrame(this.drawLoop);
       return ;
     },
     displayFps() {

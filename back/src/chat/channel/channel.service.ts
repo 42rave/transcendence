@@ -37,7 +37,8 @@ export class ChannelService {
 
 	async getChannelConnections(channelId: number): Promise<ChannelConnection[]> {
 		return await this.prisma.channelConnection.findMany({
-			where: { channelId }
+			where: { channelId },
+			include: { user: true }
 		});
 	}
 
@@ -538,7 +539,6 @@ export class ChannelService {
 					description: 'User does not exist or is not banned'
 				});
 			});
-		await this.socialService.quitRoom(targetUserId, targetChannelId.toString());
 		this.socialService.emit('chat:unbanning', targetUserId, targetChannelId.toString());
 		this.socialService.emitToUser('chat:unbanned', targetChannelId, targetUserId);
 	}

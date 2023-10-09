@@ -75,7 +75,7 @@ export default defineNuxtComponent({
         <v-icon>{{ alert.type === 'error' ? 'mdi-alert' : 'mdi-check-circle' }}</v-icon>
       </template>
       <template v-slot:text>
-        <b>{{ !!alert.title ? `${alert.title}:` : '' }}</b> {{ alert.message }} #{{ alert.id }}
+        <b>#{{ alert.id }} {{ !!alert.title ? `${alert.title}:` : '' }}</b> {{ alert.message }}
       </template>
     </v-alert>
   </div>

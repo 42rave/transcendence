@@ -28,7 +28,7 @@ export default defineNuxtComponent({
 </script>
 
 <template>
-    <v-textarea
+    <v-textarea v-if="this.$channel.id"
       v-model="input"
       label="Message"
       append-inner-icon="mdi-rocket-launch"

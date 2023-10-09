@@ -9,24 +9,76 @@ export default defineNuxtComponent({
   name: 'ChatBox',
   props: ['socket'],
   data: () => ({
-    drawer: false,
+    drawer: true,
     
   }),
 
   mounted() {
-    this.$chat.currentConnections();
-    this.$chat.currentRelationships();
+    const {$event} = useNuxtApp();
+
+    this.$userChat.currentConnections();
+    this.$userChat.currentRelationships();
     this.socket.on('relation:update', (data: Relationship) => {
-      this.$chat.updateRelationship(data);
+      this.$userChat.updateRelationship(data);
     });
+
     this.socket.on('relation:remove', (data: Relationship) => {
-      this.$chat.removeRelationship(data);
+      this.$userChat.removeRelationship(data);
     });
+
+/*  if the user is kicked from the channel, his connection is removed from the channel, 
+    the current channel state is reset 
+    and the user is redirected to channel 0 */
+    this.socket?.on('chat:kicked', (data: any) => {
+		  this.$userChat.removeConnection(data.id);
+      $event('alert:error', {message: `You are kicked from ${data.name}`});
+      if (data.id === this.$channel.id)
+      {
+        this.$router.push('/chat');
+		    this.$channel.$reset();
+      }
+    });
+
+    /*  if a user is kicked from the channel, his connection is removed from the channel */
+    this.socket?.on('chat:kicking', (data: number) => {
+		  this.$channel.removeUser(data);     
+    });
+
+    /*  if the user is banned from the channel, his connection is removed from the channel, 
+    the current channel state is reset 
+    and the user is redirected to channel 0 */
+    this.socket?.on('chat:banned', (data: any) => {
+		  this.$userChat.removeConnection(data);
+      $event('alert:error', {message: `You are banned from ${data.channel.name}`});
+      if (data.channel.id === this.$channel.id)
+      {
+        this.$router.push('/chat');
+		    this.$channel.$reset();
+      }
+    });
+
+    /*  if a user is banned from the channel */
+    this.socket?.on('chat:banning', (data: number) => {   
+    });
+
+    this.socket?.on('chat:unbanned', (data: any) => {
+      $event('alert:success', {message: `You are unbanned from ${data}`});
+    });
+
+    this.socket?.on('chat:unbanning', (data: number) => {
+    });
+
   },
 
   unmounted() {
     this.socket.off('relation:update');
     this.socket.off('relation:remove');
+    this.socket.off('chat:kicked');
+    this.socket.off('chat:kicking');
+    this.socket.off('chat:banned');
+    this.socket.off('chat:banning');
+    this.socket.off('chat:unbanned');
+    this.socket.off('chat:unbanning');
   },
 
   methods: {

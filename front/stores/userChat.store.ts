@@ -19,7 +19,7 @@ interface IChat {
 	relationships: Map<number, IRelationship>
 }
 
-export const useChatStore = defineStore('chat', {
+export const useUserChatStore = defineStore('userChat', {
 	state: (): IChat => ({
 		channelConnections: new Map<number, IChannelConnection>(),
 		relationships: new Map<number, IRelationship>()
@@ -40,8 +40,11 @@ export const useChatStore = defineStore('chat', {
 			if (currentConnections)
 			{
 				this.channelConnections = new Map(currentConnections.map((connection: IChannelConnection) => [connection.channelId, connection]))
-				console.log(this.channelConnections);
 			}
+		},
+
+		async removeConnection(connection: IChannelConnection) {
+			this.channelConnections.delete(connection.channelId);
 		},
 
 		async currentRelationships () {
@@ -56,10 +59,19 @@ export const useChatStore = defineStore('chat', {
 				this.relationships = new Map(currentRelationships.map((relationship: IRelationship) => [relationship.receiverId, relationship]))
 			}
 		},
-		async updateRelationship (relationship: IRelationship) {
-			this.relationships.set(relationship.receiverId, relationship);
+		updateRelationship (relationship: IRelationship) {
+			const relationToUpdate = this.relationships.get(relationship.receiverId);
+			if (!relationToUpdate)
+			{
+				this.relationships.set(relationship.receiverId, relationship);
+				return;
+			}
+			relationToUpdate.kind = relationship.kind;
 		},
-		async removeRelationship (relationship: IRelationship) {
+
+		removeRelationship (relationship: IRelationship) {
+			if (!relationship)
+				return;
 			this.relationships.delete(relationship.receiverId);
 		}
 	}

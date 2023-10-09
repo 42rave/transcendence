@@ -51,8 +51,10 @@ export default defineNuxtComponent({
       });
         if (res)
         {
-          this.$channel.currentChannel(res.channel.name, res.channel.id);
-          this.$channel.clearMessages();        
+          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role);
+          this.$channel.clearMessages();
+          this.$userChat.currentConnections();
+          this._drawer = false;    
         }
     },
 
@@ -62,15 +64,17 @@ export default defineNuxtComponent({
           socketId: this.socket.id,
           password: this.protectedPassword
         }
-      }) ;
+      });
         if (res)
-          this.$channel.currentChannel(res.channel.name, res.channel.id);
+          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role);
           this.$channel.clearMessages();
           this.$refs.form.reset();
+          this.$userChat.currentConnections();
+           this._drawer = false;  
     },
 
     isInChannel(id: number) {
-      return this.$chat.channelConnections.has(id);
+      return this.$userChat.channelConnections.has(id);
     },
 
     channelIconUpdate(channel) {
@@ -87,7 +91,6 @@ export default defineNuxtComponent({
           return 'mdi-lock';
       }
     }
-
   },
     watch: {
     drawer: {

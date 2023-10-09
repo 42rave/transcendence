@@ -174,7 +174,7 @@ export class ChannelController {
 		return await this.channelService.mute(req.user, channelId, targetUserId, muteTime.time);
 	}
 
-	@Post(':targetChannelId/mute/:targetUserId')
+	@Post(':targetChannelId/unmute/:targetUserId')
 	@UseGuards(...AuthenticatedGuard, IsAdminGuard)
 	@UsePipes(ValidationPipe)
 	async unmute(

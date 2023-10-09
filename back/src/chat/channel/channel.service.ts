@@ -193,11 +193,9 @@ export class ChannelService {
 	}
 
 	async checkPassword(channel: Channel, password: string): Promise<boolean> {
-		return await bcrypt
-			.compare(password, channel.password)
-			.catch(() => {
-				return false;
-			});
+		return await bcrypt.compare(password, channel.password).catch(() => {
+			return false;
+		});
 	}
 
 	async updateChannelRole(role: ChannelRole, targetChannelId: number, targetUserId: number) {

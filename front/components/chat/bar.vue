@@ -159,7 +159,7 @@ export default defineNuxtComponent({
                   <template v-slot:append>
                     <v-btn v-if="channel.kind === 'PUBLIC' || isInChannel(channel.id)" flat :icon="channelIconUpdate(channel)" @click="joinChannel(channel.id)">
                     </v-btn>
-                    <v-menu v-else-if="channel.kind === 'PROTECTED'" :close-on-content-click=false>
+                    <v-menu v-else-if="channel.kind === 'PROTECTED'">
                       <template v-slot:activator="{ props }">
                         <v-btn flat :icon="channelIconUpdate(channel)" v-bind="props"></v-btn>
                       </template>

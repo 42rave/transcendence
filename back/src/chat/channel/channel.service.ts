@@ -392,14 +392,15 @@ export class ChannelService {
 					channelId: targetChannelId,
 					role: ChannelRole.INVITED
 				},
-				update: { role: ChannelRole.INVITED }
+				update: { role: ChannelRole.INVITED },
+				include: { channel: true }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot invite user', {
 					description: 'user does not exist'
 				});
 			});
-		this.socialService.emitToUser('chat:invite', invite, targetUserId);
+		this.socialService.emitToUser('chat:invited', invite, targetUserId);
 		this.socialService.emit('chat:invite', invite, targetChannelId.toString());
 		return invite;
 	}

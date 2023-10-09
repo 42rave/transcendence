@@ -69,19 +69,23 @@ export default defineNuxtComponent({
     });
 
     this.socket?.on('chat:promote', (data: any) => {
-      this.$event('alert:success', {message: `${this.$channel.name} has a new admin`})
     });
 
     this.socket?.on('chat:demote', (data: any) => {
-      this.$event('alert:error', {message: `${this.$channel.name} lost an admin`})
     });
 
     this.socket?.on('chat:transfer', (data: any) => {
-      this.$event('alert:success', {message: `${this.$channel.name} has a new owner`})
     });
 
     this.socket?.on('chat:quit', (data: any) => {    
-    })
+    });
+
+    this.socket?.on('chat:invited', (data: any) => {
+      this.$event('alert:success', {message: `You are invited to ${data.channel.name}`})
+    });
+
+    this.socket?.on('chat:invite', (data: any) => {    
+    });
 
   },
 
@@ -97,6 +101,9 @@ export default defineNuxtComponent({
     this.socket?.off('chat:promote');
     this.socket?.off('chat:demote');
     this.socket?.off('chat:transfer');
+    this.socket?.off('chat:quit');
+    this.socket?.off('chat:invited');
+    this.socket?.off('chat:invite');
   },
 
   methods: {

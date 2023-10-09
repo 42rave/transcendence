@@ -59,6 +59,10 @@ export default defineNuxtComponent({
       }
     },
 
+    async inviteUser(userId) {
+      await this.$api.post(`/chat/channel/${this.$channel.id}/invite/${userId}`);
+    },
+
   }
 })
 </script>
@@ -95,14 +99,15 @@ export default defineNuxtComponent({
             <div class="my-auto remove-zone" @click.prevent="demoteUser(user.id)">
               <v-icon color="red" class="btn">mdi-chevron-down</v-icon>
             </div>
+            <div class="my-auto remove-zone" @click.prevent="inviteUser(user.id)">
+              <v-icon color="red" class="btn">mdi-account-plus-outline</v-icon>
+            </div>
             <div class="my-auto remove-zone" @click.prevent="transferOwnership(user.id)">
               <v-icon color="red" class="btn">mdi-plus</v-icon>
             </div>
           </div>
         </div>
       </v-list-item-title>
-      <v-spacer />
-
     </div>
   </v-list-item>
 </template>

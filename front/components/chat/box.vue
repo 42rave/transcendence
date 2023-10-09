@@ -99,27 +99,31 @@ export default defineNuxtComponent({
     this.socket?.on('chat:invite', (data: any) => {    
     });
 
-	this.gameSocket?.on('game:redirect', () => {
+	  this.gameSocket?.on('game:redirect', () => {
 		this.$router.push('/game');
-	});
+	  });
+    
+    this.socket?.on('privmsg:create', (data: any) => {   
+    });
 
   },
 
   unmounted() {
-    this.socket.off('relation:update');
-    this.socket.off('relation:remove');
-    this.socket.off('chat:kicked');
-    this.socket.off('chat:kicking');
-    this.socket.off('chat:banned');
-    this.socket.off('chat:banning');
-    this.socket.off('chat:unbanned');
-    this.socket.off('chat:unbanning');
-    this.socket.off('chat:promote');
-    this.socket.off('chat:demote');
-    this.socket.off('chat:transfer');
-    this.socket.off('chat:quit');
-    this.socket.off('chat:invited');
-    this.socket.off('chat:invite');
+    this.socket?.off('relation:update');
+    this.socket?.off('relation:remove');
+    this.socket?.off('chat:kicked');
+    this.socket?.off('chat:kicking');
+    this.socket?.off('chat:banned');
+    this.socket?.off('chat:banning');
+    this.socket?.off('chat:unbanned');
+    this.socket?.off('chat:unbanning');
+    this.socket?.off('chat:promote');
+    this.socket?.off('chat:demote');
+    this.socket?.off('chat:transfer');
+    this.socket?.off('chat:quit');
+    this.socket?.off('chat:invited');
+    this.socket?.off('chat:invite');
+    this.socket?.off('privmsg:create')
   },
 
   methods: {

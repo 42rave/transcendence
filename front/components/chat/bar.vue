@@ -69,7 +69,7 @@ export default defineNuxtComponent({
         if (res)
           this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role, res.channel.kind);
           this.$channel.clearMessages();
-          this.$refs.form.reset();
+          // this.$refs.form.reset();
           this.$userChat.currentConnections();
            this._drawer = false;  
     },
@@ -129,9 +129,9 @@ export default defineNuxtComponent({
   <v-navigation-drawer v-model=_drawer location="right" width="320">
     <div class="d-flex flex-row">
       <v-tabs v-model="tab" direction="vertical">
+        <v-tab v-if="this.isOwner() || this.isAdmin()" value="channel_settings"><v-icon icon="mdi-cog" /></v-tab>
       	<v-tab value="channels"><v-icon icon="mdi-forum" /></v-tab>
         <v-tab value="private_messages"><v-icon icon="mdi-chat" /></v-tab>
-        <v-tab v-if="this.isOwner() || this.isAdmin()" value="channel_settings"><v-icon icon="mdi-cog" /></v-tab>
         <v-tab value="create_channel"><v-icon icon="mdi-plus" /></v-tab>
       </v-tabs>
 
@@ -147,7 +147,7 @@ export default defineNuxtComponent({
                   <template v-slot:append>
                     <v-btn v-if="channel.kind === 'PUBLIC' || isInChannel(channel.id)" flat :icon="channelIconUpdate(channel)" @click="joinChannel(channel.id)">
                     </v-btn>
-                    <v-menu v-else-if="channel.kind === 'PROTECTED'">
+                    <v-menu v-else-if="channel.kind === 'PROTECTED'" :close-on-content-click=false>
                       <template v-slot:activator="{ props }">
                         <v-btn flat :icon="channelIconUpdate(channel)" v-bind="props"></v-btn>
                       </template>

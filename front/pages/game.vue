@@ -1,14 +1,36 @@
 <script lang='ts'>
 export default defineNuxtComponent({
   props: ['gameSocket'],
+  data: () => ({
+    status: 0,
+    left: true,
+  }),
+  mounted() {
+    this.gameSocket.on('test:response', (data: { side: 'right' | 'left'}) => {
+      this.status = (!!data) ? 2 : 1;
+      if (this.status === 2)
+        this.left = data.side === 'left';
+    })
+  },
+  methods: {
+    gameConnect() {
+      this.status = 1;
+      this.gameSocket.emit('test');
+    }
+  }
 })
 </script>
 
 <template>
   <div v-if="this.$sockets.gameConnected" class="gamePage">
-    <div id="game-container">
-      <GamePlay :socket='this.gameSocket' :left='true' />
+    <div id="game-container" v-if="status === 2">
+      <GamePlay :socket='this.gameSocket' :left='this.left' />
     </div>
+    <div v-else-if="status === 1">
+      <v-progress-circular class="ma-auto" indeterminate size="64" color="purple" />
+      Connecting
+    </div>
+    <v-btn v-else @click="gameConnect" color="purple" dark>Connect</v-btn>
   </div>
   <div class="ma-auto d-flex flex-column" v-else>
     <v-progress-circular class="ma-auto" indeterminate size="64" color="purple" />

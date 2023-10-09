@@ -68,6 +68,37 @@ export default defineNuxtComponent({
     this.socket?.on('chat:unbanning', (data: number) => {
     });
 
+    this.socket?.on('chat:promote', (data: any) => {
+      if (data.channelId === this.$channel.id && data.userId === this.$auth.user.id)
+        this.$channel.userRole = data.role;
+      if (data.userId == this.$auth.user.id)
+        $event('alert:success', {message: `You are promoted to Admin on ${data.channel.name}`});
+      else
+        $event('alert:success', {message: `${data.user.username} is promoted on ${data.channel.name}`});
+    });
+
+    this.socket?.on('chat:demote', (data: any) => {
+      if (data.channelId === this.$channel.id && data.userId === this.$auth.user.id)
+        this.$channel.userRole = data.role;
+      if (data.userId === this.$auth.user.id)
+        $event('alert:error', {message: `You are demoted on ${data.channel.name}`});
+      else
+        $event('alert:success', {message: `${data.user.username} is demoted on ${data.channel.name}`});
+    });
+
+    this.socket?.on('chat:transfer', (data: any) => {
+    });
+
+    this.socket?.on('chat:quit', (data: any) => {    
+    });
+
+    this.socket?.on('chat:invited', (data: any) => {
+      this.$event('alert:success', {message: `You are invited to ${data.channel.name}`})
+    });
+
+    this.socket?.on('chat:invite', (data: any) => {    
+    });
+
   },
 
   unmounted() {
@@ -79,6 +110,12 @@ export default defineNuxtComponent({
     this.socket.off('chat:banning');
     this.socket.off('chat:unbanned');
     this.socket.off('chat:unbanning');
+    this.socket.off('chat:promote');
+    this.socket.off('chat:demote');
+    this.socket.off('chat:transfer');
+    this.socket.off('chat:quit');
+    this.socket.off('chat:invited');
+    this.socket.off('chat:invite');
   },
 
   methods: {

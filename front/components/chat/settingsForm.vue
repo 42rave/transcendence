@@ -15,23 +15,28 @@ export default defineNuxtComponent({
         return true;
       }],
   }),
-
+  beforeMount(){
+    this.channelName = this.$channel.name.replace("channel:", '');
+    this.channelKind = this.$channel.kind;
+  },
   methods: {
 
-    async createChannel() {
-      const res = await this.$api.post(`/chat/channel/`, {
+    async updateChannel() {
+      const res = await this.$api.patch(`/chat/channel/${this.$channel.id}`, {
         body: {
+          id: this.$channel.id,
           name: this.channelName,
           kind: this.channelKind,
           password: this.channelKind === 'PROTECTED' ? this.protectedPassword : null,
+          socketId: this.socket.id,
         }
       });
 
       if (res) {
       	this.$emit("channelList:update", res);
-        this.$event('alert:success', {title: 'Channel successfully created', message: 'chat away'})
+        this.$event('alert:success', {message: 'Channel successfully updated'})
         this.$refs.form.reset();
-        this.channelKind = 'PUBLIC';
+        this.channelKind = res.kind;
         this.protectedPassword = '';
       }
     },
@@ -39,7 +44,10 @@ export default defineNuxtComponent({
     async validate() {
       const { valid } = await this.$refs.form.validate();
       if (valid)
-        this.createChannel();
+      {
+        this.updateChannel();
+        this.$refs.form.reset();
+      }
     }
 
   }
@@ -75,10 +83,11 @@ export default defineNuxtComponent({
                   </v-col>
 
                   <v-col cols="12">
-                    <v-btn type="submit" @click="validate" block>Create Channel</v-btn>
+                    <v-btn type="submit" @click="validate" block>Update Channel</v-btn>
                   </v-col>
                 </v-row>
     </v-container>
   </v-form>
-
+  <v-divider thickness="3" class="my-4"></v-divider>
+  <ChatFetchUser />
 </template>

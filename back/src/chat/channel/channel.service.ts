@@ -193,14 +193,9 @@ export class ChannelService {
 	}
 
 	async checkPassword(channel: Channel, password: string): Promise<boolean> {
-		return await bcrypt
-			.compare(password, channel.password)
-			.then(() => {
-				return true;
-			})
-			.catch(() => {
-				return false;
-			});
+		return await bcrypt.compare(password, channel.password).catch(() => {
+			return false;
+		});
 	}
 
 	async updateChannelRole(role: ChannelRole, targetChannelId: number, targetUserId: number) {
@@ -213,7 +208,7 @@ export class ChannelService {
 					}
 				},
 				data: { role: role },
-				include: { channel: true }
+				include: { channel: true, user: true }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot update user status', {
@@ -395,14 +390,15 @@ export class ChannelService {
 					channelId: targetChannelId,
 					role: ChannelRole.INVITED
 				},
-				update: { role: ChannelRole.INVITED }
+				update: { role: ChannelRole.INVITED },
+				include: { channel: true }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot invite user', {
 					description: 'user does not exist'
 				});
 			});
-		this.socialService.emitToUser('chat:invite', invite, targetUserId);
+		this.socialService.emitToUser('chat:invited', invite, targetUserId);
 		this.socialService.emit('chat:invite', invite, targetChannelId.toString());
 		return invite;
 	}

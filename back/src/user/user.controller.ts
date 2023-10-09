@@ -59,7 +59,7 @@ export class UserController {
 		if (!user) {
 			throw new ImATeapotException('No such user');
 		}
-		return user;
+		return { ...user, ...(await this.statusService.getByUserId(user.id)) };
 	}
 
 	@Put('username')

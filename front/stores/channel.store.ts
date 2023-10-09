@@ -63,7 +63,7 @@ export const useChannelStore = defineStore('channel', {
 
 		async getUserList () {
 			const config = useRuntimeConfig();
-			const loadUsers = await $fetch<IUser[]>(`http://localhost:3000/chat/channel/${this.id}/connection`, {
+			const loadUsers = await $fetch<IUser[]>(`${config.app.API_URL}/chat/channel/${this.id}/connection`, {
 				credentials: 'include',
 			}).catch((err) => {
 				console.log(err.response._data.err);	

@@ -80,6 +80,9 @@ export default defineNuxtComponent({
       this.$event('alert:success', {message: `${this.$channel.name} has a new owner`})
     });
 
+    this.socket?.on('chat:quit', (data: any) => {    
+    })
+
   },
 
   unmounted() {

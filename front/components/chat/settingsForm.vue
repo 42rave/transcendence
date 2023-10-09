@@ -16,7 +16,7 @@ export default defineNuxtComponent({
       }],
   }),
   beforeMount(){
-    this.channelName = this.$channel.name;
+    this.channelName = this.$channel.name.replace("channel:", '');
     this.channelKind = this.$channel.kind;
   },
   methods: {
@@ -36,7 +36,6 @@ export default defineNuxtComponent({
       	this.$emit("channelList:update", res);
         this.$event('alert:success', {message: 'Channel successfully updated'})
         this.$refs.form.reset();
-        this.channelName = res.name;
         this.channelKind = res.kind;
         this.protectedPassword = '';
       }
@@ -45,7 +44,10 @@ export default defineNuxtComponent({
     async validate() {
       const { valid } = await this.$refs.form.validate();
       if (valid)
+      {
         this.updateChannel();
+        this.$refs.form.reset();
+      }
     }
 
   }

@@ -1,5 +1,6 @@
 <script lang="ts">
 interface IChannel {
+  id: number;
   name: string;
   owner: string;
 }
@@ -39,11 +40,11 @@ export default defineNuxtComponent({
       }
     },
 
-    addNewChannel(newChannel) {
+    addNewChannel(newChannel: IChannel) {
       this.channelList.push(newChannel);
     },
 
-    async joinChannel(id) {
+    async joinChannel(id: number) {
       const res = await this.$api.post(`/chat/channel/${id}/join`, {
         body: {
           socketId: this.socket.id
@@ -51,14 +52,14 @@ export default defineNuxtComponent({
       });
         if (res)
         {
-          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role);
+          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role, res.channel.kind);
           this.$channel.clearMessages();
           this.$userChat.currentConnections();
           this._drawer = false;    
         }
     },
 
-    async joinProtectedChannel(id) {    
+    async joinProtectedChannel(id: number) {
       const res = await this.$api.post(`/chat/channel/${id}/join`, {
         body: {
           socketId: this.socket.id,
@@ -66,7 +67,7 @@ export default defineNuxtComponent({
         }
       });
         if (res)
-          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role);
+          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role, res.channel.kind);
           this.$channel.clearMessages();
           this.$refs.form.reset();
           this.$userChat.currentConnections();
@@ -77,7 +78,7 @@ export default defineNuxtComponent({
       return this.$userChat.channelConnections.has(id);
     },
 
-    channelIconUpdate(channel) {
+    channelIconUpdate(channel: IChannel) {
       if (this.isInChannel(channel.id))
       {
         return 'mdi-check-circle-outline';
@@ -89,6 +90,21 @@ export default defineNuxtComponent({
           return 'mdi-key-chain-variant';
         case 'PRIVATE':
           return 'mdi-lock';
+      }
+    },
+
+    isOwner() {
+      return this.$channel.userRole === 'OWNER';
+    },
+
+    isAdmin() {
+      return this.$channel.userRole === 'ADMIN';
+    },
+
+    updateChannel(channel: IChannel) {
+      const _i = this.channelList.findIndex((c: IChannel) => c.id === channel.id);
+      if (_i !== -1) {
+        this.channelList[_i].name = channel.name;
       }
     }
   },
@@ -115,6 +131,7 @@ export default defineNuxtComponent({
       <v-tabs v-model="tab" direction="vertical">
       	<v-tab value="channels"><v-icon icon="mdi-forum" /></v-tab>
         <v-tab value="private_messages"><v-icon icon="mdi-chat" /></v-tab>
+        <v-tab v-if="this.isOwner() || this.isAdmin()" value="channel_settings"><v-icon icon="mdi-cog" /></v-tab>
         <v-tab value="create_channel"><v-icon icon="mdi-plus" /></v-tab>
       </v-tabs>
 
@@ -157,7 +174,10 @@ export default defineNuxtComponent({
           </v-card>
         </v-window-item>
 
-      	<v-window-item value="create_channel">
+        <v-window-item value="channel_settings">
+          <ChatSettingsForm :socket="this.socket" @channelList:update="updateChannel" />
+        </v-window-item>
+        <v-window-item value="create_channel">
           <ChatCreationForm @channelList:update="addNewChannel" />
         </v-window-item>
       </v-window>

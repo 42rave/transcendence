@@ -29,6 +29,10 @@ class Api {
 		return this._fetch(route, { method: 'POST', ...options }, customErrorCallback);
 	}
 
+	public async patch(route: string, options: WrapperOptions, customErrorCallback?: ErrorCallback) {
+		return this._fetch(route, { method: 'PATCH', ...options }, customErrorCallback);
+	}
+
 	public async put(route: string, options?: WrapperOptions, customErrorCallback?: ErrorCallback) {
 		return this._fetch(route, { method: 'PUT', ...options }, customErrorCallback);
 	}

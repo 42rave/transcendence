@@ -31,34 +31,30 @@ export declare type GameStats = {
 export class Vector2 { constructor (public x: number = 0, public y: number = 0) {}
 	add(v: Vector2 | number) {
 		const type = typeof v;
-		return new Vector2(
-			this.x + (type == 'number' ? v as number : (v as Vector2).x),
-			this.y + (type == 'number' ? v as number : (v as Vector2).y),
-		);
+		this.x += (type == 'number' ? v as number : (v as Vector2).x);
+		this.y += (type == 'number' ? v as number : (v as Vector2).y);
+		return this;
 	}
 
 	sub(v: Vector2 | number) {
 		const type = typeof v;
-		return new Vector2(
-			this.x - (type == 'number' ? v as number : (v as Vector2).x),
-			this.y - (type == 'number' ? v as number : (v as Vector2).y),
-		);
+		this.x -= (type == 'number' ? v as number : (v as Vector2).x);
+		this.y -= (type == 'number' ? v as number : (v as Vector2).y);
+		return this;
 	}
 
 	mul(v: Vector2 | number) {
 		const type = typeof v;
-		return new Vector2(
-			this.x * (type == 'number' ? v as number : (v as Vector2).x),
-			this.y * (type == 'number' ? v as number : (v as Vector2).y),
-		);
+		this.x *= (type == 'number' ? v as number : (v as Vector2).x);
+		this.y *= (type == 'number' ? v as number : (v as Vector2).y);
+		return this;
 	}
 
 	div(v: Vector2 | number) {
 		const type = typeof v;
-		return new Vector2(
-			this.x / (type == 'number' ? v as number : (v as Vector2).x),
-			this.y / (type == 'number' ? v as number : (v as Vector2).y),
-		);
+		this.x /= (type == 'number' ? v as number : (v as Vector2).x);
+		this.y /= (type == 'number' ? v as number : (v as Vector2).y);
+		return this;
 	}
 
 	equals(v: Vector2, delta: number = 0.01) {
@@ -138,8 +134,8 @@ export class GameObject {
 	}
 
 	update(delta: number, bounds: Vector2) {
-		this.position = this.position.add(this.speed.mul(delta));
-		console.log(this.position.toString(), this.speed.toString(), this.speed.mul(delta).toString());
+		this.position.add(this.speed.clone().mul(delta));
+		//console.log(this.position.toString(), this.speed.toString(), this.speed.mul(delta).toString());
 		if (this.position.x < this.size.x / 2) {
 			this.position.x = this.size.x / 2;
 		} else if (this.position.x > bounds.x - this.size.x / 2) {
@@ -166,8 +162,8 @@ export class GameObject {
 	}
 
 	display(ctx: CanvasRenderingContext2D, ratio: Vector2){
-		const { x, y } = this.position.sub(this.size.div(2));
-		const { x: w, y: h } = this.size.mul(ratio);
+		const { x, y } = this.position.clone().sub(this.size.clone().div(2));
+		const { x: w, y: h } = this.size.clone().mul(ratio);
 		ctx.fillStyle = this.color;
 
 		ctx.fillRect(x * ratio.x, y * ratio.y, w, h);

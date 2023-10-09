@@ -49,8 +49,23 @@ export class Vector2 {
 		return Math.abs(this.x - v.x) <= delta && Math.abs(this.y - v.y) <= delta;
 	}
 
+	signs(s_x: number, s_y: number) {
+		return new Vector2(this.x * s_x, this.y * s_y);
+	}
+
+	normalize() {
+		const norm = Math.sqrt(this.x ** 2 + this.y ** 2);
+		return this.clone().div(norm);
+	}
+
 	clone() {
 		return new Vector2(this.x, this.y);
+	}
+
+	copy(v: Vector2) {
+		this.x = v.x;
+		this.y = v.y;
+		return this;
 	}
 
 	toString() {
@@ -146,20 +161,14 @@ export class GameObject {
 	clone() {
 		return GameObject.fromObject(this);
 	}
-
-	// display(ctx: CanvasRenderingContext2D, ratio: Vector2) {
-	// 	const { x, y } = this.position.sub(this.size.div(2));
-	// 	const { x: w, y: h } = this.size.mul(ratio);
-	// 	ctx.fillStyle = this.color;
-	//
-	// 	ctx.fillRect(x * ratio.x, y * ratio.y, w, h);
-	// }
 }
 
 export enum Move {
 	NONE,
 	UP,
-	DOWN
+	DOWN,
+	LEFT,
+	RIGHT
 }
 
 export interface Coord {
@@ -200,7 +209,7 @@ export class GameField {
 					position: this.field.clone().div(2.0),
 					speed: Vector2.zero()
 				},
-				0.125
+				0.25
 			);
 		this.paddle1 =
 			paddle1 ||
@@ -214,7 +223,7 @@ export class GameField {
 			new Paddle({
 				color: '#fff',
 				position: new Vector2(this.field.x - 0.5, this.field.y / 2.0),
-				size: new Vector2(1.5, 0.5)
+				size: new Vector2(0.25, 1.5)
 			});
 	}
 }

@@ -15,7 +15,6 @@ import { GameplayService } from '@game/gameplay.service';
 import { SocialService } from '@chat/social.service';
 import { Logger } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
-import { StatusService } from '@user/status/status.service';
 import { Move } from '@type/gameplay';
 
 @WebSocketGateway({
@@ -37,7 +36,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private gameService: GameService,
 		private authService: AuthService,
 		private socialService: SocialService,
-		private prisma: PrismaService,
+		private prisma: PrismaService
 	) {}
 
 	afterInit(): void {

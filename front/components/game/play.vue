@@ -32,9 +32,11 @@ export default defineNuxtComponent({
       color: 'white'
     }),
     ball: new Ball({
-      position: backendRes.div(2),
+      position: backendRes.clone().div(2),
       size: backendBallRes.clone(),
-      color: 'white'
+      speed: Vector2.zero(),
+      color: 'white',
+      radius: 1000,
     }),
     inputs: {
       ArrowDown: false,
@@ -69,19 +71,27 @@ export default defineNuxtComponent({
       this.frames.fps = Math.round(1000 / this.frames.delta);
     }, 1000);
 
-    this.socket.on("game:move", ({user, move, side}: {user: User, move: number, side: 'left' | 'right'}) => {
-      console.log('move', user, move);
-
-      console.log('move', move, side);
+    this.socket.on("game:move", ({move, side}: {user: User, move: number, side: 'left' | 'right'}) => {
       let player = side === 'left' ? this.playerLeft : this.playerRight;
       if (move == 1) player.setSpeed(Vector2.up().mul(speed));
       else if (move == 2) player.setSpeed(Vector2.down().mul(speed));
       else player.setSpeed(Vector2.zero());
     })
+
+    this.ball.setPosition(new Vector2(backendRes.x / 2, backendRes.y / 2));
+    this.socket.on("game:ball", (data: {position: Vector2, speed: Vector2}) => {
+      this.ball.setPosition(new Vector2(data.position.x, data.position.y));
+      this.ball.setSpeed(new Vector2(data.speed.x * speed, data.speed.y * speed));
+      //this.ball.radius = data.radius;
+    });
     this.drawLoop(0);
   },
   unmounted() {
     this.container_observer?.disconnect();
+    this.socket.off("game:move");
+    this.socket.off("game:ball");
+    this.socket.off("game:score");
+    this.socket.off("game:");
     this.unbindEvents()
   },
   methods: {
@@ -97,13 +107,15 @@ export default defineNuxtComponent({
 
       this.playerLeft.display(this.ctx, this.ratio);
       this.playerRight.display(this.ctx, this.ratio);
+      this.ctx.fill();
+
       this.ball.display(this.ctx, this.ratio);
 
       this.manageSocketEvents();
 
       this.playerLeft.update(this.frames.delta, backendRes);
       this.playerRight.update(this.frames.delta, backendRes);
-      console.log(this.frames.delta);
+      this.ball.update(this.frames.delta, backendRes);
       (this.left ? this.playerLeft : this.playerRight).setSpeed(Vector2.down().mul(this.inputs.speed));
       this.inputs.oldSpeed = this.inputs.speed;
 
@@ -118,7 +130,6 @@ export default defineNuxtComponent({
         else if (this.inputs.speed > 0) move = 2;
 
         this.socket.emit('game:move', move);
-        console.log('move', move, this.inputs.speed);
       }
     },
     displayFps() {

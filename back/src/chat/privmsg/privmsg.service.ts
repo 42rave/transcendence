@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { SocialService } from '@chat/social.service';
-import { Channel, User, Relationship, RelationKind, ChannelRole, ChannelKind } from '@prisma/client';
+import { User, Relationship, RelationKind, ChannelRole, ChannelKind } from '@prisma/client';
 
 @Injectable()
 export class PrivmsgService {
@@ -66,11 +66,13 @@ export class PrivmsgService {
 
 		this.socialService.joinRoom(socketId, channel.id.toString());
 		this.socialService.emit('privmsg:create', channel);
-		return { name: 
+		return {
+			name:
 				channel.channelConnection[0].userId === user.id
 					? channel.channelConnection[1].user.username
 					: channel.channelConnection[0].user.username,
-	channel: channel };
+			channel: channel
+		};
 	}
 
 	async getBlockedRelation(userdId: number, privmsgId: number): Promise<Relationship> {

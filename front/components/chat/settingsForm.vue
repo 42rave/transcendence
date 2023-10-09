@@ -1,6 +1,7 @@
 <script lang="ts">
 
 export default defineNuxtComponent({
+  emits: ['channelList:update'],
   props: ['socket'],
   data: () => ({
     valid: false,
@@ -86,5 +87,6 @@ export default defineNuxtComponent({
                 </v-row>
     </v-container>
   </v-form>
-
+  <v-divider thickness="3" class="my-4"></v-divider>
+  <ChatFetchUser />
 </template>

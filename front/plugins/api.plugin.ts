@@ -57,6 +57,7 @@ export default defineNuxtPlugin(({ $config, $event, $auth }: any) => {
 			$auth.logout();
 		}
 		else {
+			console.log(reason);
 			$event('alert:error', { title: reason.data.message, message: reason.data.error});
 		}
 	});

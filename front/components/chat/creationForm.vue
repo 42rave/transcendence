@@ -1,6 +1,7 @@
 <script lang="ts">
 
 export default defineNuxtComponent({
+  emits: ['channelList:update'],
   props: ['socket'],
   data: () => ({
     valid: false,

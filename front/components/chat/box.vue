@@ -69,9 +69,21 @@ export default defineNuxtComponent({
     });
 
     this.socket?.on('chat:promote', (data: any) => {
+      if (data.channelId === this.$channel.id && data.userId === this.$auth.user.id)
+        this.$channel.userRole = data.role;
+      if (data.userId == this.$auth.user.id)
+        $event('alert:success', {message: `You are promoted to Admin on ${data.channel.name}`});
+      else
+        $event('alert:success', {message: `${data.user.username} is promoted on ${data.channel.name}`});
     });
 
     this.socket?.on('chat:demote', (data: any) => {
+      if (data.channelId === this.$channel.id && data.userId === this.$auth.user.id)
+        this.$channel.userRole = data.role;
+      if (data.userId === this.$auth.user.id)
+        $event('alert:error', {message: `You are demoted on ${data.channel.name}`});
+      else
+        $event('alert:success', {message: `${data.user.username} is demoted on ${data.channel.name}`});
     });
 
     this.socket?.on('chat:transfer', (data: any) => {

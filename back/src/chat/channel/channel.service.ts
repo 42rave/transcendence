@@ -210,7 +210,7 @@ export class ChannelService {
 					}
 				},
 				data: { role: role },
-				include: { channel: true }
+				include: { channel: true, user: true }
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot update user status', {

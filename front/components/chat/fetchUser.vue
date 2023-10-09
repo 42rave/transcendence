@@ -63,6 +63,10 @@ export default defineNuxtComponent({
       await this.$api.post(`/chat/channel/${this.$channel.id}/invite/${userId}`);
     },
 
+    profileRedirect(targetUserId: number) {
+      this.$router.push(`/profile/${targetUserId}`);
+    },
+
   }
 })
 </script>
@@ -78,9 +82,9 @@ export default defineNuxtComponent({
   <div v-if="this.loading" class="d-flex justify-center">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
   </div>
-  <v-list-item v-else-if="this.user" @click="console.log('redirect to profile...')">
+  <v-list-item v-else-if="this.user">
     <template v-slot:prepend>
-      <v-avatar :image="user.avatar" />
+      <v-avatar style="cursor: pointer" :image="user.avatar" @click="profileRedirect(user.id)"/>
     </template>
     <div class='d-flex flex-row'>
       <v-list-item-title>
@@ -90,10 +94,10 @@ export default defineNuxtComponent({
               class="status text-caption font-italic"
               :class="{'online': user.status === 'online'}"
           >
-            {{user.status}}
+            {{ user.status }}
           </p>
           <div class="d-flex flex-row">
-            <div class="my-auto remove-zone" @click.prevent="promoteUser(user.id)">
+            <div class="my-auto remove-zone" @click="promoteUser(user.id)">
               <v-icon color="red" class="btn">mdi-chevron-up</v-icon>
             </div>
             <div class="my-auto remove-zone" @click.prevent="demoteUser(user.id)">

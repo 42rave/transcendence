@@ -2,40 +2,43 @@ import Socket from '@type/socket';
 
 export class Vector2 {
 	constructor(
-		public x: number = 0,
-		public y: number = 0
+		public x: number = 0.0,
+		public y: number = 0.0
 	) {}
+
+	set(v: Vector2 | number) {
+		const type = typeof v;
+		this.x = type === 'number' ? (v as number) : (v as Vector2).x;
+		this.y = type === 'number' ? (v as number) : (v as Vector2).y;
+		return this;
+	}
 
 	add(v: Vector2 | number) {
 		const type = typeof v;
-		return new Vector2(
-			this.x + (type == 'number' ? (v as number) : (v as Vector2).x),
-			this.y + (type == 'number' ? (v as number) : (v as Vector2).y)
-		);
+		this.x += type == 'number' ? (v as number) : (v as Vector2).x;
+		this.y += type == 'number' ? (v as number) : (v as Vector2).y;
+		return this;
 	}
 
 	sub(v: Vector2 | number) {
 		const type = typeof v;
-		return new Vector2(
-			this.x - (type == 'number' ? (v as number) : (v as Vector2).x),
-			this.y - (type == 'number' ? (v as number) : (v as Vector2).y)
-		);
+		this.x -= type == 'number' ? (v as number) : (v as Vector2).x;
+		this.y -= type == 'number' ? (v as number) : (v as Vector2).y;
+		return this;
 	}
 
 	mul(v: Vector2 | number) {
 		const type = typeof v;
-		return new Vector2(
-			this.x * (type == 'number' ? (v as number) : (v as Vector2).x),
-			this.y * (type == 'number' ? (v as number) : (v as Vector2).y)
-		);
+		this.x *= type == 'number' ? (v as number) : (v as Vector2).x;
+		this.y *= type == 'number' ? (v as number) : (v as Vector2).y;
+		return this;
 	}
 
 	div(v: Vector2 | number) {
 		const type = typeof v;
-		return new Vector2(
-			this.x / (type == 'number' ? (v as number) : (v as Vector2).x),
-			this.y / (type == 'number' ? (v as number) : (v as Vector2).y)
-		);
+		this.x /= type == 'number' ? (v as number) : (v as Vector2).x;
+		this.y /= type == 'number' ? (v as number) : (v as Vector2).y;
+		return this;
 	}
 
 	dot(v: Vector2) {
@@ -51,7 +54,7 @@ export class Vector2 {
 	}
 
 	toString() {
-		return `(${this.x}, ${this.y})`;
+		return `(${this.x.toFixed(4)}, ${this.y.toFixed(4)})`;
 	}
 
 	static fromAngle(angle: number) {
@@ -188,25 +191,29 @@ export class GameField {
 	paddle2: Paddle;
 
 	constructor({ field, ball, paddle1, paddle2 }: { field?: Vector2; ball?: Ball; paddle1?: Paddle; paddle2?: Paddle }) {
-		this.field = field || new Vector2(9, 16);
+		this.field = field || new Vector2(16, 9);
 		this.ball =
 			ball ||
 			new Ball(
 				{
 					color: '#fff',
-					position: this.field.div(2),
+					position: this.field.clone().div(2.0),
 					speed: Vector2.zero()
 				},
 				0.125
 			);
 		this.paddle1 =
 			paddle1 ||
-			new Paddle({ color: '#fff', position: new Vector2(0.5, this.field.y / 2), size: new Vector2(0.25, 1.5) });
+			new Paddle({
+				color: '#fff',
+				position: new Vector2(0.5, this.field.y / 2.0),
+				size: new Vector2(0.25, 1.5)
+			});
 		this.paddle2 =
 			paddle2 ||
 			new Paddle({
 				color: '#fff',
-				position: new Vector2(this.field.x - 0.5, this.field.y / 2),
+				position: new Vector2(this.field.x - 0.5, this.field.y / 2.0),
 				size: new Vector2(1.5, 0.5)
 			});
 	}

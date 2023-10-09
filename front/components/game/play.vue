@@ -4,6 +4,7 @@
 
 <script lang='ts'>
 import { Vector2, Player, Ball } from '~/types/game';
+import { User } from '~/types/user';
 
 const backendRes = new Vector2(16, 9);
 const backendPlayerRes = new Vector2(0.25, 1.5);
@@ -39,6 +40,7 @@ export default defineNuxtComponent({
       ArrowDown: false,
       ArrowUp: false,
       speed: 0,
+      oldSpeed: 0,
     },
     eventListeners: {
       keydown: null as EventListenerOrEventListenerObject | null,
@@ -67,6 +69,15 @@ export default defineNuxtComponent({
       this.frames.fps = Math.round(1000 / this.frames.delta);
     }, 1000);
 
+    this.socket.on("game:move", ({user, move, side}: {user: User, move: number, side: 'left' | 'right'}) => {
+      console.log('move', user, move);
+
+      console.log('move', move, side);
+      let player = side === 'left' ? this.playerLeft : this.playerRight;
+      if (move == 1) player.setSpeed(Vector2.up().mul(speed));
+      else if (move == 2) player.setSpeed(Vector2.down().mul(speed));
+      else player.setSpeed(Vector2.zero());
+    })
     this.drawLoop(0);
   },
   unmounted() {
@@ -88,12 +99,27 @@ export default defineNuxtComponent({
       this.playerRight.display(this.ctx, this.ratio);
       this.ball.display(this.ctx, this.ratio);
 
-      (this.left ? this.playerLeft : this.playerRight).update(this.frames.delta, backendRes);
+      this.manageSocketEvents();
+
+      this.playerLeft.update(this.frames.delta, backendRes);
+      this.playerRight.update(this.frames.delta, backendRes);
+      console.log(this.frames.delta);
       (this.left ? this.playerLeft : this.playerRight).setSpeed(Vector2.down().mul(this.inputs.speed));
+      this.inputs.oldSpeed = this.inputs.speed;
 
       this.displayFps();
       window.requestAnimationFrame(this.drawLoop);
       return ;
+    },
+    manageSocketEvents() {
+      if (this.inputs.speed != this.inputs.oldSpeed) {
+        let move = 0;
+        if (this.inputs.speed < 0) move = 1;
+        else if (this.inputs.speed > 0) move = 2;
+
+        this.socket.emit('game:move', move);
+        console.log('move', move, this.inputs.speed);
+      }
     },
     displayFps() {
       if (!this.ctx) return ;
@@ -124,14 +150,12 @@ export default defineNuxtComponent({
           if (!this.inputs.ArrowDown) {
             this.inputs.ArrowDown = true;
             _speed += speed;
-            // TODO: emit to backend
           }
         }
         if (e.key == 'ArrowUp') {
           if (!this.inputs.ArrowUp) {
             this.inputs.ArrowUp = true;
             _speed -= speed;
-            // TODO: emit to backend
           }
         }
         this.inputs.speed += _speed;
@@ -145,14 +169,12 @@ export default defineNuxtComponent({
           if (this.inputs.ArrowDown) {
             this.inputs.ArrowDown = false;
             _speed -= speed;
-            // TODO: emit to backend
           }
         }
         if (e.key == 'ArrowUp') {
           if (this.inputs.ArrowUp) {
             this.inputs.ArrowUp = false;
             _speed += speed;
-            // TODO: emit to backend
           }
         }
         this.inputs.speed += _speed;

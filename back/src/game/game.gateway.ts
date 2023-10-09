@@ -13,6 +13,8 @@ import Socket from '@type/socket';
 import type { Server } from '@type/server';
 import { GameplayService } from '@game/gameplay.service';
 import { Logger } from '@nestjs/common';
+import { PrismaService } from '@prisma/prisma.service';
+import { Move } from '@type/gameplay';
 
 @WebSocketGateway({
 	namespace: 'game',
@@ -25,13 +27,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@WebSocketServer() server: Server;
 	private logger = new Logger(this.constructor.name);
 
-	protected userGame = new Map<number, GameplayService>();
-	protected userQueue = new Array<Socket>();
-	protected disconnectedQueue = new Array<number>();
+	protected gamesInProgress = new Map<string, GameplayService>();
+	protected matchMaking = new Array<Socket>();
+	protected disconnectedUsers = new Array<string>();
 
 	constructor(
 		private gameService: GameService,
-		private authService: AuthService
+		private authService: AuthService,
+		private prisma: PrismaService
 	) {}
 
 	afterInit(): void {
@@ -44,6 +47,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			socket.disconnect(true);
 			return;
 		}
+		// TODO:  Check if user is already in a game
 		await this.gameService.onConnection(socket);
 	}
 
@@ -51,37 +55,53 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (!socket.user) return;
 		await this.gameService.onDisconnection(socket);
 
-		// remove from userQueue
-		this.disconnectedQueue.push(socket.user.id);
-		setTimeout(() => {
-			if (this.disconnectedQueue.includes(socket.user.id)) {
-				this.disconnectedQueue.splice(this.disconnectedQueue.indexOf(socket.user.id), 1);
-				// TODO: remove from userGame and set the other player as winner
-			}
-		});
+		if (this.gamesInProgress.has(socket.id)) {
+			// remove from matchMaking
+			this.disconnectedUsers.push(socket.id);
+
+			const game = this.gamesInProgress.get(socket.id);
+
+			this.logger.debug(
+				`User ${socket.user.id} (${socket.id}) disconnected, waiting 10s before removing him from the queue`
+			);
+			setTimeout(() => {
+				if (this.disconnectedUsers.includes(socket.id)) {
+					this.disconnectedUsers.splice(this.disconnectedUsers.indexOf(socket.id), 1);
+					this.logger.debug(`User ${socket.user.id} (${socket.id}) removed from the disconnected queue`);
+					game.disconnectedUser(socket.id);
+
+					// TODO: remove from gamesInProgress and set the other player as winner
+				}
+			}, 5000);
+		}
 	}
 
 	// TODO: Remove this one, only for testing purpose
 	@SubscribeMessage('test')
 	async test(socket: Socket): Promise<void> {
 		// TODO: Uncomment this line, it permit to remove duplicate user in the queue
-		//this.userQueue = this.userQueue.filter((_s) => _s.user.id !== socket.user.id);
+		// this.matchMaking = this.matchMaking.filter((_s) => _s.user.id !== socket.user.id);
 
-		this.userQueue.push(socket);
+		// TODO: Check if user is already in a game, if yes don't allow him to join the queue
+		this.matchMaking.push(socket);
 
-		this.logger.debug(`${this.userQueue.length} users waiting for a game`);
+		this.logger.debug(`${this.matchMaking.length} users waiting for a game`);
 
-		if (this.userQueue.length >= 2) {
-			const users = this.userQueue.splice(0, 2);
-			const game = new GameplayService(users[0], users[1]);
-			this.userGame.set(users[0].user.id, game);
-			this.userGame.set(users[1].user.id, game);
+		if (this.matchMaking.length >= 2) {
+			const users = this.matchMaking.splice(0, 2);
+			const game = new GameplayService(users[0], users[1], this.prisma);
+			this.gamesInProgress.set(users[0].id, game);
+			this.gamesInProgress.set(users[1].id, game);
 			this.logger.debug(`Game start with users ${users[0].user.id} and ${users[1].user.id}`);
 		} else {
-			socket.emit('test:response', false);
+			socket.emit('game:queueing');
 		}
 	}
 
 	@SubscribeMessage('game:move')
-	async move(socket: Socket, move: string): Promise<void> {}
+	async move(socket: Socket, move: Move): Promise<void> {
+		const game = this.gamesInProgress.get(socket.id);
+		if (!game) return;
+		game.eventMovePaddle(socket, move);
+	}
 }

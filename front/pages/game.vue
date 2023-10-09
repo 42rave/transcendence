@@ -6,11 +6,17 @@ export default defineNuxtComponent({
     left: true,
   }),
   mounted() {
-    this.gameSocket.on('test:response', (data: { side: 'right' | 'left'}) => {
-      this.status = (!!data) ? 2 : 1;
-      if (this.status === 2)
-        this.left = data.side === 'left';
-    })
+    this.gameSocket.on('game:queueing', () => {
+      this.status = 1;
+    });
+    this.gameSocket.on('game:start', ({ side }: { side: 'right' | 'left'}) => {
+      this.status = 2;
+      this.left = side === 'left';
+    });
+  },
+  unmounted() {
+    this.gameSocket.off('game:queueing');
+    this.gameSocket.off('game:start');
   },
   methods: {
     gameConnect() {

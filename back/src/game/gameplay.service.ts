@@ -1,6 +1,10 @@
-import { Ball, Paddle, Coord, Rectangle, GameField, Player, GameResult, Move } from '@type/gameplay';
+import { Ball, Paddle, Coord, Rectangle, GameField, Player, GameResult, Move, Vector2 } from '@type/gameplay';
 import Socket from '@type/socket';
 import { Logger } from '@nestjs/common';
+import { PrismaService } from '@prisma/prisma.service';
+
+const frameRate = 60;
+const factor = 0.005;
 
 //the game itself
 export class GameplayService {
@@ -8,24 +12,103 @@ export class GameplayService {
 	protected game: GameField;
 	protected player_1: Player;
 	protected player_2: Player;
+	protected date: Date = new Date();
 
-	constructor(player_1: Socket, player_2: Socket) {
+	protected debugLogger: any;
+
+	protected frames = {
+		previous: 0,
+		delta: 0
+	};
+
+	protected winner = undefined;
+
+	constructor(
+		player_1: Socket,
+		player_2: Socket,
+		private readonly prisma: PrismaService
+	) {
 		this.game = new GameField({});
 
-		//this.logger.log(game);
 		console.log(this.game);
+		console.log(this.game.paddle1.position.y);
+
+		//this.logger.log(game);
 		this.player_1 = new Player(player_1.user.id, player_1, this.game.paddle1);
 		this.player_2 = new Player(player_2.user.id, player_2, this.game.paddle2);
 		this.player_1.socket?.emit('game:start', { side: 'left' });
 		this.player_2.socket?.emit('game:start', { side: 'right' });
+
+		this.logger.log(`Game started between ${this.player_1.socket.id} and ${this.player_2.socket.id}`);
+		this.startDebugLogger();
+		this.gameLoop();
 	}
 
+	async gameLoop() {
+		if (!this.frames.previous) this.frames.previous = Date.now();
+		this.frames.delta = Date.now() - this.frames.previous;
+		this.frames.previous = Date.now();
+
+		//this.logger.log(`Game loop ${this.frames.delta}`);
+		this.movePaddle(this.game.paddle1);
+		this.movePaddle(this.game.paddle2);
+
+		if (!this.winner) {
+			setTimeout(() => {
+				this.gameLoop();
+			}, 1000 / frameRate);
+		}
+		this.stopDebugLogger();
+		// TODO: insert game history in database
+	}
+
+	/* ---- SOCKET MANAGEMENT  PART ---- */
+	emitToPlayers(event: string, data: any) {
+		this.player_1.socket?.emit(event, data);
+		this.player_2.socket?.emit(event, data);
+	}
+
+	getSocketIds() {
+		return [this.player_1.socket?.id, this.player_2.socket?.id];
+	}
+
+	getSockets() {
+		return [this.player_1.socket, this.player_2.socket];
+	}
+
+	disconnectedUser(socketId: string) {
+		this.logger.error(`User ${socketId} disconnected`);
+		this.logger.error(`user1: ${this.player_1.socket?.id} user2: ${this.player_2.socket?.id}`);
+		this.winner = this.player_1.socket.id === socketId ? this.player_2.socket.user : this.player_1.socket.user;
+	}
+	/* ---- END OF SOCKET MANAGEMENT  PART ---- */
+
+	/*
+		This function returns the content of the game.
+	 */
 	getContent() {
 		return { field: this.game, player_1: this.player_1.userId, player_2: this.player_2.userId };
 	}
 
 	toString() {
 		return JSON.stringify(this.getContent());
+	}
+
+	startDebugLogger() {
+		if (!Logger.isLevelEnabled('debug')) return;
+		if (this.debugLogger) clearInterval(this.debugLogger);
+		this.debugLogger = setInterval(() => {
+			this.logger.debug(
+				`${this.player_1.socket.id} vs ${this.player_2.socket.id}, FPS: ${(1000 / this.frames.delta).toFixed(
+					2
+				)} (delta: ${this.frames.delta.toFixed(4)} ms)`
+			);
+		}, 1000);
+	}
+
+	stopDebugLogger() {
+		if (!Logger.isLevelEnabled('debug')) return;
+		if (this.debugLogger) clearInterval(this.debugLogger);
 	}
 
 	// /*  This function change the state of paddle move attribute when
@@ -37,37 +120,57 @@ export class GameplayService {
 	// 		NONE,
 	// 	}
 	// */
-	// eventMovePaddle(socket: Socket, move: Move) {
-	// 	let paddle = undefined;
-	// 	if (socket.id === this.player1.socket.id) paddle = this.game.paddle1;
-	// 	else if (socket.id == this.player2.socket.id) paddle = this.game.paddle2;
-	// 	else return; //error
-	// 	paddle.move = move;
-	// }
-	// /*  This function change the position of a paddle depending on its move attribute.
-	// 	Move
-	// 	{
-	// 		UP, // The paddle goes up
-	// 		DOWN, // The paddle goes down
-	// 		NONE, // The paddle don't move
-	// 	}
-	// */
-	// movePaddle(paddle: Paddle, speed: number) {
-	// 	if (paddle.move == Move.UP) {
-	// 		if (paddle.coord.y + paddle.obj.width / 2 + speed >= this.game.field.width)
-	// 			paddle.coord.y = this.game.field.width - paddle.coord.y - paddle.obj.width / 2;
-	// 		else paddle.coord.y += speed;
-	// 	} else if (paddle.move == Move.DOWN) {
-	// 		if (paddle.coord.y - paddle.obj.width / 2 - speed <= 0) paddle.coord.y = 0 + paddle.obj.width / 2;
-	// 		else paddle.coord.y -= speed;
-	// 	}
-	// }
-	// /*
-	// 	This function returns the distance between two points
-	//  */
-	// distanceBetweenPoints(a: Coord, b: Coord): number {
-	// 	return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
-	// }
+	eventMovePaddle(socket: Socket, move: Move) {
+		this.logger.debug(`eventMovePaddle ${socket.id} ${move}`);
+		const side = socket.id == this.player_1.socket.id ? 'left' : 'right';
+		const paddle: Paddle = side === 'left' ? this.game.paddle1 : this.game.paddle2;
+		paddle.move = move;
+		this.emitToPlayers('game:move', { user: socket.user, move, side });
+	}
+
+	/*  This function change the position of a paddle depending on its move attribute.
+		Move
+		{
+			UP, // The paddle goes up
+			DOWN, // The paddle goes down
+			NONE, // The paddle don't move
+		}
+	*/
+	movePaddle(paddle: Paddle) {
+		let speed: Vector2 = Vector2.zero();
+		if (paddle.move == Move.UP) {
+			speed = Vector2.up();
+		} else if (paddle.move == Move.DOWN) speed = Vector2.down();
+
+		paddle.position.add(speed.mul(factor * this.frames.delta));
+		if (paddle.position.y < paddle.size.y / 2) {
+			paddle.position.y = paddle.size.y / 2;
+		}
+		if (paddle.position.y > this.game.field.y - paddle.size.y / 2) {
+			paddle.position.y = this.game.field.y - paddle.size.y / 2;
+		}
+	}
+
+	/* 	This function check if the ball has an intersection with te paddle.
+		If yes returns intersection point Coord {x: number, y: number}.
+		If no returns null.
+	*/
+	getIntersection(ball: Ball, paddle: Paddle): Vector2 | null {
+		const nextMove = ball.position.clone().add(ball.speed.clone().mul(factor * this.frames.delta));
+		const half_size = paddle.size.clone().div(2.0);
+
+		if (nextMove.x - ball.radius >= paddle.position.x - half_size.x && nextMove.x <= paddle.position.x + half_size.x) {
+			if (Math.abs(nextMove.y - paddle.position.y - half_size.y) <= ball.radius)
+				return new Vector2(nextMove.x, paddle.position.y - half_size.y);
+			if (Math.abs(nextMove.y - paddle.position.y + half_size.y) <= ball.radius)
+				return new Vector2(nextMove.x, paddle.position.y + half_size.y);
+		} else if (nextMove.y >= paddle.position.y - half_size.y && nextMove.y <= paddle.position.y + half_size.y) {
+			if (Math.abs(nextMove.x - paddle.position.x - half_size.x) <= ball.radius)
+				return new Vector2(paddle.position.x - half_size.x, nextMove.y);
+			if (Math.abs(nextMove.x - paddle.position.x + half_size.x) <= ball.radius)
+				return new Vector2(paddle.position.x + half_size.x, nextMove.y);
+		}
+	}
 	// /* 	This function check if the ball has an intersection with te paddle.
 	// 	If yes returns intersection point Coord {x: number, y: number}.
 	// 	If no returns null.

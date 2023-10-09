@@ -346,9 +346,6 @@ export class ChannelService {
 				});
 			}
 			if (!newOwner) {
-				await this.prisma.channelConnection.deleteMany({
-					where: { channelId: targetChannelId }
-				});
 				this.socialService.emit('chat:delete', targetChannelId);
 				await this.prisma.channel.delete({ where: { id: targetChannelId } });
 				return;
@@ -379,7 +376,7 @@ export class ChannelService {
 			await this.socialService.quitRoom(user.id, targetChannelId.toString());
 			if (foundChannel.channelConnection.length === 1) {
 				this.socialService.emit('chat:delete', targetChannelId);
-				await this.prisma.channel.delete({ where: { id: targetChannelId } });
+				await this.prisma.channel.delete({ where: { id: targetChannelId } })
 			}
 		}
 	}

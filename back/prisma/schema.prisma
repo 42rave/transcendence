@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Relationship {
-  sender     User          @relation("senderRelation", fields: [senderId], references: [id])
-  receiver   User          @relation("receiverRelation", fields: [receiverId], references: [id])
+  sender     User          @relation("senderRelation", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User          @relation("receiverRelation", fields: [receiverId], references: [id], onDelete: Cascade)
   senderId   Int
   receiverId Int
   kind       RelationKind?
@@ -27,8 +27,8 @@ model Channel {
 }
 
 model ChannelConnection {
-  user      User        @relation(fields: [userId], references: [id])
-  channel   Channel     @relation(fields: [channelId], references: [id])
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel   Channel     @relation(fields: [channelId], references: [id], onDelete: Cascade)
   userId    Int
   channelId Int
   role      ChannelRole
@@ -39,10 +39,10 @@ model ChannelConnection {
 
 model Message {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
   body      String
-  channel   Channel  @relation(fields: [channelId], references: [id])
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   channelId Int
   createdAt DateTime @default(now())
 }

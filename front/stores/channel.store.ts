@@ -18,6 +18,7 @@ interface IChannel {
   messages: Map<number, IMessage>;
   userRole: string;
   userList: Map<number, IUser>;
+	kind: string;
 }
 
 export const useChannelStore = defineStore('channel', {
@@ -27,7 +28,7 @@ export const useChannelStore = defineStore('channel', {
 		userRole: '',
 		messages: new Map<number, IMessage>(),
 		userList: new Map<number, IUser>(),
-
+		kind: 'PUBLIC',
 	}),
 	getters: {
 		// getters can access the state through the parameters
@@ -37,11 +38,12 @@ export const useChannelStore = defineStore('channel', {
 	},
 	actions: {
 		// actions change the state, which can be accessed with "this"
-		async getCurrentChannel(name: string, id:number, role: string) {
+		async getCurrentChannel(name: string, id:number, role: string, kind: string) {
 			const config = useRuntimeConfig();
 			this.name = name;
 			this.id = id;
 			this.userRole = role;
+			this.kind = kind;
 			await this.getMessages();
 			await this.getUserList();
 		},

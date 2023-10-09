@@ -12,8 +12,10 @@ import authConfig from '@config/auth.config';
 import Socket from '@type/socket';
 import type { Server } from '@type/server';
 import { GameplayService } from '@game/gameplay.service';
+import { SocialService } from '@chat/social.service';
 import { Logger } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
+import { StatusService } from '@user/status/status.service';
 import { Move } from '@type/gameplay';
 
 @WebSocketGateway({
@@ -27,14 +29,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@WebSocketServer() server: Server;
 	private logger = new Logger(this.constructor.name);
 
-	protected gamesInProgress = new Map<string, GameplayService>();
+	public gamesInProgress = new Map<string, GameplayService>();
 	protected matchMaking = new Array<Socket>();
 	protected disconnectedUsers = new Array<string>();
 
 	constructor(
 		private gameService: GameService,
 		private authService: AuthService,
-		private prisma: PrismaService
+		private socialService: SocialService,
+		private prisma: PrismaService,
 	) {}
 
 	afterInit(): void {
@@ -53,6 +56,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	async handleDisconnect(socket: Socket): Promise<void> {
 		if (!socket.user) return;
+		this.socialService.emit(`user:${socket.user.id}:status`, { status: 'online' });
 		await this.gameService.onDisconnection(socket);
 
 		if (this.gamesInProgress.has(socket.id)) {
@@ -88,11 +92,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.logger.debug(`${this.matchMaking.length} users waiting for a game`);
 
 		if (this.matchMaking.length >= 2) {
-			const users = this.matchMaking.splice(0, 2);
-			const game = new GameplayService(users[0], users[1], this.prisma);
-			this.gamesInProgress.set(users[0].id, game);
-			this.gamesInProgress.set(users[1].id, game);
-			this.logger.debug(`Game start with users ${users[0].user.id} and ${users[1].user.id}`);
+			const sockets = this.matchMaking.splice(0, 2);
+			const game = new GameplayService(sockets[0], sockets[1], this.prisma);
+			this.gamesInProgress.set(sockets[0].id, game);
+			this.gamesInProgress.set(sockets[1].id, game);
+			this.logger.debug(`Game start with users ${sockets[0].user.id} and ${sockets[1].user.id}`);
+			this.socialService.emit(`user:${sockets[0].user.id}:status`, { status: 'ingame' });
+			this.socialService.emit(`user:${sockets[1].user.id}:status`, { status: 'ingame' });
 		} else {
 			socket.emit('game:queueing');
 		}

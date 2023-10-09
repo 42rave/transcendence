@@ -33,7 +33,32 @@ export default defineNuxtComponent({
     },
     isOwnerOrAdmin() {
       return this.isOwner() || this.isAdmin();
-    }
+    },
+
+    async promoteUser(userId) {
+      const promoted = await this.$api.post(`/chat/channel/${this.$channel.id}/promote/${userId}`);
+      if (promoted)
+      {
+        this.$channel.role = promoted.role;
+      }
+    },
+    
+    async demoteUser(userId) {
+      const demoted = await this.$api.post(`/chat/channel/${this.$channel.id}/demote/${userId}`);
+      if (demoted)
+      {
+        this.$channel.role = demoted.role;
+      }
+    },
+
+    async transferOwnership(userId) {
+      const newOwner = await this.$api.post(`/chat/channel/${this.$channel.id}/transfer/${userId}`);
+      if (newOwner)
+      {
+        this.$channel.role = newOwner.role;
+      }
+    },
+
   }
 })
 </script>
@@ -64,16 +89,13 @@ export default defineNuxtComponent({
             {{user.status}}
           </p>
           <div class="d-flex flex-row">
-            <div class="my-auto remove-zone" @click.prevent="console.log('do something')">
+            <div class="my-auto remove-zone" @click.prevent="promoteUser(user.id)">
               <v-icon color="red" class="btn">mdi-chevron-up</v-icon>
             </div>
-            <div class="my-auto remove-zone" @click.prevent="console.log('do something')">
+            <div class="my-auto remove-zone" @click.prevent="demoteUser(user.id)">
               <v-icon color="red" class="btn">mdi-chevron-down</v-icon>
             </div>
-            <div class="my-auto remove-zone" @click.prevent="console.log('do something')">
-              <v-icon color="red" class="btn">mdi-minus</v-icon>
-            </div>
-            <div class="my-auto remove-zone" @click.prevent="console.log('do something')">
+            <div class="my-auto remove-zone" @click.prevent="transferOwnership(user.id)">
               <v-icon color="red" class="btn">mdi-plus</v-icon>
             </div>
           </div>

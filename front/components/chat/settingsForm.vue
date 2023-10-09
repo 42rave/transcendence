@@ -53,7 +53,6 @@ export default defineNuxtComponent({
 </script>
 
 <template>
-        BOOON, tout ne marche pas, mais c'est un début sur lequel tu peux te baser..
           <v-form v-model="valid" fast-fail @submit.prevent ref="form">
              <v-container>
                 <v-row>

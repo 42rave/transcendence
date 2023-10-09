@@ -68,6 +68,18 @@ export default defineNuxtComponent({
     this.socket?.on('chat:unbanning', (data: number) => {
     });
 
+    this.socket?.on('chat:promote', (data: any) => {
+      this.$event('alert:success', {message: `${this.$channel.name} has a new admin`})
+    });
+
+    this.socket?.on('chat:demote', (data: any) => {
+      this.$event('alert:error', {message: `${this.$channel.name} lost an admin`})
+    });
+
+    this.socket?.on('chat:transfer', (data: any) => {
+      this.$event('alert:success', {message: `${this.$channel.name} has a new owner`})
+    });
+
   },
 
   unmounted() {
@@ -79,6 +91,9 @@ export default defineNuxtComponent({
     this.socket.off('chat:banning');
     this.socket.off('chat:unbanned');
     this.socket.off('chat:unbanning');
+    this.socket?.off('chat:promote');
+    this.socket?.off('chat:demote');
+    this.socket?.off('chat:transfer');
   },
 
   methods: {

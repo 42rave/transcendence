@@ -570,6 +570,7 @@ export class ChannelService {
 				});
 			});
 		}
+		
 
 		const channel = await this.prisma.channel
 			.update({
@@ -582,7 +583,7 @@ export class ChannelService {
 			})
 			.catch(() => {
 				throw new BadRequestException('Cannot update channel', {
-					description: 'Something went horribly wrong'
+					description: 'Name already taken'
 				});
 			});
 		this.socialService.emit('chat:update', channel);

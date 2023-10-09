@@ -5,8 +5,8 @@ export default defineNuxtComponent({
 </script>
 
 <template>
-  <div id="game-container">
-    <GamePlay :socket='this.gameSocket' :left='true' />
+  <div v-if="this.$sockets.gameConnected" id="game-container">
+    <GameTest :socket='this.gameSocket' />
   </div>
 </template>
 

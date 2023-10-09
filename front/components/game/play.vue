@@ -10,7 +10,7 @@ const backendPlayerRes = new Vector2(0.25, 1.5);
 const backendBallRes = new Vector2(0.25, 0.25);
 const mapRatio = backendRes.x / backendRes.y;
 const speed = 0.005;
-const maxFps = 30;
+const maxFps = 60;
 
 export default defineNuxtComponent({
   name: 'Game',
@@ -52,6 +52,7 @@ export default defineNuxtComponent({
     }
   }),
   mounted() {
+    console.log('game socket: ', this.socket);
     this.container = document.getElementById('game-container');
     this.container_observer = new ResizeObserver(() => {
       console.log('resize');

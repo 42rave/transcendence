@@ -36,7 +36,6 @@ export default defineNuxtComponent({
       size: backendBallRes.clone(),
       speed: Vector2.zero(),
       color: 'white',
-      radius: 1000,
     }),
     inputs: {
       ArrowDown: false,
@@ -66,6 +65,21 @@ export default defineNuxtComponent({
     this.ctx = this.canvas.getContext('2d');
     this.resizeCanvas();
 
+    // get Players colors from local storage
+    const color_p1 = localStorage.getItem('p1_color');
+    const color_p2 = localStorage.getItem('p2_color');
+    const color_ball = localStorage.getItem('ball_color');
+
+    if (color_p1 && this.isColor(color_p1)) {
+      this.playerLeft.color = color_p1;
+    }
+    if (color_p2 && this.isColor(color_p2)) {
+      this.playerRight.color = color_p2;
+    }
+    if (color_ball && this.isColor(color_ball)) {
+      this.ball.color = color_ball;
+    }
+
     // console logs fps each second
     setInterval(() => {
       this.frames.fps = Math.round(1000 / this.frames.delta);
@@ -82,7 +96,6 @@ export default defineNuxtComponent({
     this.socket.on("game:ball", (data: {position: Vector2, speed: Vector2}) => {
       this.ball.setPosition(new Vector2(data.position.x, data.position.y));
       this.ball.setSpeed(new Vector2(data.speed.x * speed, data.speed.y * speed));
-      //this.ball.radius = data.radius;
     });
     this.drawLoop(0);
   },
@@ -95,6 +108,11 @@ export default defineNuxtComponent({
     this.unbindEvents()
   },
   methods: {
+    isColor(strColor: string) {
+      const s = new Option().style;
+      s.color = strColor;
+      return s.color !== '';
+    },
     async drawLoop(timestamp: number) {
       if (!this.ctx) return ;
 

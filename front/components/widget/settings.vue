@@ -18,6 +18,13 @@
           </template>
           <WidgetTotpSettings />
         </v-card>
+        <div class="my-3 w-100"/>
+        <v-card width="100%" class="overflow-visible" prepend-icon="mdi-pencil-box-multiple-outline">
+          <template v-slot:title>
+            Custom color
+          </template>
+          <WidgetCustomColor />
+        </v-card>
       </div>
     </div>
   </v-card>

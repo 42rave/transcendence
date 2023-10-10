@@ -149,7 +149,7 @@ export default defineNuxtComponent({
 
       <v-divider :thickness="2" inset vertical></v-divider>
 
-      <v-window v-model="tab">
+      <v-window v-model="tab" style="width: 100%">
       	<v-window-item value="channels">
           <v-card flat width="300">
             <v-card-text>
@@ -182,11 +182,7 @@ export default defineNuxtComponent({
         </v-window-item>
 
         <v-window-item value="private_messages">
-          <v-card flat>
-            <v-card-text>
-              <p>liste des conversations privées</p>
-            </v-card-text>
-          </v-card>
+          <ChatPrivmsg :socket="socket"/>
         </v-window-item>
 
         <v-window-item value="channel_settings">

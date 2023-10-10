@@ -148,6 +148,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('game:invite')
 	privateQueueing(@ConnectedSocket() socket: Socket, @Body() data: SingleTargetDto) {
+		const liveGame = this.gamesInProgress.get(socket.id);
+		if (liveGame) {
+			return;
+		}
 		//check is game condition start (user invited you as well)
 		const opponentInvites: Map<number, Socket> = this.privateMatchMaking.get(data.targetUserId);
 		if (opponentInvites) {

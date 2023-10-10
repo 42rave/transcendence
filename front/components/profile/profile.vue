@@ -77,7 +77,9 @@ export default defineNuxtComponent({
                 <ProfileRelations :socket="this.socket" kind="Blocked" class="flex-grow-1" style="flex-basis: 325px;" />
               </div>
             </v-window-item>
-            <v-window-item> Stats </v-window-item>
+            <v-window-item>
+              <ProfileStats :user="this.user" />
+            </v-window-item>
             <v-window-item>
               <ProfileMatch :user="this.user" />
             </v-window-item>

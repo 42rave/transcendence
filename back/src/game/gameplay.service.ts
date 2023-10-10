@@ -25,7 +25,7 @@ export class GameplayService {
 		delta: 0
 	};
 
-	protected winner = undefined;
+	public winner = undefined;
 
 	constructor(
 		player_1: Socket,
@@ -72,6 +72,8 @@ export class GameplayService {
 			this.player_2.socket = socket;
 			this.player_2.socket?.emit('game:start', { side: 'right' });
 		}
+		this.emitToPlayers('game:score', { p1_score: this.player_1.score, p2_score: this.player_2.score });
+		this.emitToPlayers('game:ball', { position: this.game.ball.position, speed: this.game.ball.speed, radius: this.game.ball.radius });
 	}
 
 	disconnectedUser(socketId: string) {
@@ -221,12 +223,10 @@ export class GameplayService {
 		if (ball.speed.y > 0 && ball.position.y + ball.radius > this.game.field.y) {
 			ball.position.y = this.game.field.y;
 			ball.speed.y = -ball.speed.y;
-			//this.emitToPlayers('game:ball', { position: ball.position, speed: ball.speed, radius: ball.radius });
 			collide = true;
 		} else if (ball.speed.y < 0 && ball.position.y - ball.radius < 0) {
 			ball.position.y = 0;
 			ball.speed.y = -ball.speed.y;
-			//this.emitToPlayers('game:ball', { position: ball.position, speed: ball.speed, radius: ball.radius });
 			collide = true;
 		}
 

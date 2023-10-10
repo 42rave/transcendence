@@ -304,7 +304,7 @@ export class GameplayService {
 		if (this.isMarked(this.game.ball)) {
 			this.logger.debug(`Score: ${this.player_1.score} - ${this.player_2.score}`);
 			this.emitToPlayers('game:score', { p1_score: this.player_1.score, p2_score: this.player_2.score });
-			if (this.player_1.score >= 2 || this.player_2.score >= 2) {
+			if (this.player_1.score >= 13 || this.player_2.score >= 13) {
 				this.winner = this.player_1.score > this.player_2.score ? this.player_1.socket.user : this.player_2.socket.user;
 			} else this.resetBall(this.game.ball);
 		}

@@ -135,8 +135,8 @@ export class GameService extends BroadcastService {
 			lostNb: gameLost,
 			drawNb: gameDrawn,
 			winRatio: gameNb === 0 ? 0 : Math.round((gameWon / gameNb) * 100),
-			goalScored: 0,
-			goalTaken: 0,
+			goalScored: goalScored,
+			goalTaken: goalTaken,
 			goalRatio: goalTaken === 0 ? goalScored : parseFloat(((goalScored / goalTaken) * 100).toFixed(2))
 		};
 	}

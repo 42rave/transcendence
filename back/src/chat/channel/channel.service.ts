@@ -296,27 +296,12 @@ export class ChannelService {
 	}
 
 	async quit(user: User, targetChannelId: number) {
-		const foundChannel = await this.prisma.channel.findFirst({
-			where: {
-				AND: [
-					{ id: targetChannelId },
-					{ NOT: [{ kind: ChannelKind.DIRECT }] },
-					{
-						channelConnection: {
-							some: {
-								AND: [
-									{ userId: user.id },
-									{ NOT: [{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }] }
-								]
-							}
-						}
-					}
-				]
-			},
+		const foundChannel = await this.prisma.channel.findUnique({
+			where: { id: targetChannelId },
 			include: {
 				channelConnection: {
 					where: {
-						AND: [{ userId: user.id }, { NOT: [{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }] }]
+						NOT: [{ OR: [{ role: ChannelRole.INVITED }, { role: ChannelRole.BANNED }] }]
 					}
 				}
 			}
@@ -324,7 +309,7 @@ export class ChannelService {
 		if (!foundChannel) {
 			throw new ForbiddenException('Cannot quit channel', {
 				cause: new Error(),
-				description: 'The channel does not exist or you are not in it'
+				description: 'The channel does not exist'
 			});
 		}
 		if (this.isUserOwner(user.id, foundChannel.channelConnection)) {
@@ -350,12 +335,14 @@ export class ChannelService {
 				data: { role: ChannelRole.OWNER }
 			});
 			this.socialService.emit('chat:promote', promotedOwner, targetChannelId.toString());
+			//disconnect the owner (shorter because we know he is not invited/banned)
 			await this.prisma.channelConnection.delete({
 				where: { connectionId: { userId: user.id, channelId: targetChannelId } }
 			});
 			this.socialService.emit('chat:quit', user.id, targetChannelId.toString());
 			await this.socialService.quitRoom(user.id, targetChannelId.toString());
 		} else {
+			//disconnect user (make sure not to remove invite/banned
 			await this.prisma.channelConnection.deleteMany({
 				where: {
 					AND: [

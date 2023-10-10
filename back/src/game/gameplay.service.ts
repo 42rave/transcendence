@@ -63,6 +63,16 @@ export class GameplayService {
 		return [this.player_1.socket, this.player_2.socket];
 	}
 
+	reconnectUser(userId: number, socket: Socket) {
+		if (this.player_1.userId === userId) {
+			this.player_1.socket = socket;
+			this.player_1.socket?.emit('game:start', { side: 'left' });
+		} else if (this.player_2.userId === userId) {
+			this.player_2.socket = socket;
+			this.player_2.socket?.emit('game:start', { side: 'right' });
+		}
+	}
+
 	disconnectedUser(socketId: string) {
 		this.logger.error(`User ${socketId} disconnected`);
 		this.logger.error(`user1: ${this.player_1.socket?.id} user2: ${this.player_2.socket?.id}`);

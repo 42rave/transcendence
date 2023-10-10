@@ -135,12 +135,6 @@ export class GameObject {
 
 	update(delta: number, bounds: Vector2) {
 		this.position.add(this.speed.clone().mul(delta));
-		//console.log(this.position.toString(), this.speed.toString(), this.speed.mul(delta).toString());
-		if (this.position.x < this.size.x / 2) {
-			this.position.x = this.size.x / 2;
-		} else if (this.position.x > bounds.x - this.size.x / 2) {
-			this.position.x = bounds.x - this.size.x / 2;
-		}
 		if (this.position.y < this.size.y / 2) {
 			this.position.y = this.size.y / 2;
 		} else if (this.position.y > bounds.y - this.size.y / 2) {

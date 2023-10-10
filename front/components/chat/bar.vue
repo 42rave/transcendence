@@ -19,19 +19,23 @@ export default defineNuxtComponent({
 
   beforeMount() {
     this.displayChannels();
-    this.channelIconUpdate();
   },
 
   mounted () {
     this.socket?.on('chat:create', (data: IChannel) => {
       this.displayChannels();
-      this.channelIconUpdate();
+      this.channelIconUpdate(data.id);
+    });
 
-    })
+    this.socket?.on('chat:join', (data: IChannel) => {
+      this.displayChannels();
+      this.channelIconUpdate(data.id);
+    });
   },
 
   unmounted() {
     this.socket?.off('chat:create');
+    this.socket?.off('chat:join');
   },
 
   methods: {
@@ -72,7 +76,7 @@ export default defineNuxtComponent({
         if (res)
           this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role, res.channel.kind);
           this.$channel.clearMessages();
-          // this.$refs.form.reset();
+          this.protectedPassword = '';
           this.$userChat.currentConnections();
            this._drawer = false;  
     },
@@ -115,9 +119,7 @@ export default defineNuxtComponent({
     },
 
     async quitChannel(channelId: number) {
-      const res = await this.$api.post(`/chat/channel/${channelId}/quit`);
-      console.log(res);
-      
+      const res = await this.$api.post(`/chat/channel/${channelId}/quit`);     
     }
   },
     watch: {
@@ -163,8 +165,8 @@ export default defineNuxtComponent({
                       <template v-slot:activator="{ props }">
                         <v-btn flat :icon="channelIconUpdate(channel)" v-bind="props"></v-btn>
                       </template>
-                        <v-form @submit.prevent ref="form">
-                          <v-text-field required hide-details v-model="protectedPassword"></v-text-field>
+                        <v-form style="background-color: #212121;" @submit.prevent ref="form">
+                          <v-text-field required hide-details :autofocus=true v-model="protectedPassword"></v-text-field>
                           <v-btn type="submit" block @click="joinProtectedChannel(channel.id)">Join Channel</v-btn>
                         </v-form>
                     </v-menu>
@@ -189,7 +191,7 @@ export default defineNuxtComponent({
           <ChatSettingsForm :socket="this.socket" @channelList:update="updateChannel" />
         </v-window-item>
         <v-window-item value="create_channel">
-          <ChatCreationForm @channelList:update="addNewChannel" />
+          <ChatCreationForm :socket="socket" @channelList:update="addNewChannel" />
         </v-window-item>
       </v-window>
     </div>

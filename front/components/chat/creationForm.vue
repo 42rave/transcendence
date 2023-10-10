@@ -18,6 +18,21 @@ export default defineNuxtComponent({
 
   methods: {
 
+    async joinChannel(id: number) {
+      const res = await this.$api.post(`/chat/channel/${id}/join`, {
+        body: {
+          socketId: this.socket.id
+        }
+      });
+        if (res)
+        {
+          this.$channel.getCurrentChannel(res.channel.name, res.channel.id, res.role, res.channel.kind);
+          this.$channel.clearMessages();
+          this.$userChat.currentConnections();
+          this._drawer = false;    
+        }
+    },
+
     async createChannel() {
       const res = await this.$api.post(`/chat/channel/`, {
         body: {
@@ -33,6 +48,7 @@ export default defineNuxtComponent({
         this.$refs.form.reset();
         this.channelKind = 'PUBLIC';
         this.protectedPassword = '';
+        this.joinChannel(res.id);
       }
     },
 

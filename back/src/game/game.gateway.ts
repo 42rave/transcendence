@@ -4,7 +4,7 @@ import {
 	OnGatewayInit,
 	SubscribeMessage,
 	WebSocketGateway,
-	WebSocketServer
+	WebSocketServer,
 } from '@nestjs/websockets';
 import { AuthService } from '@auth/auth.service';
 import { GameService } from './game.service';
@@ -13,9 +13,10 @@ import Socket from '@type/socket';
 import type { Server } from '@type/server';
 import { GameplayService } from '@game/gameplay.service';
 import { SocialService } from '@chat/social.service';
-import { Logger } from '@nestjs/common';
+import { Logger, UsePipes, ValidationPipe, Body } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { Move } from '@type/gameplay';
+import { SingleTargetDto } from '@type/user.dto';
 
 @WebSocketGateway({
 	namespace: 'game',
@@ -30,6 +31,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	public gamesInProgress = new Map<string, GameplayService>();
 	protected matchMaking = new Array<Socket>();
+	//map<senderUserId, InviteeUserId, Socket of Sender
+	protected privateMatchMaking = new Map<number, Map<number, Socket>>
 	protected disconnectedUsers = new Map<number, GameplayService>();
 
 	constructor(
@@ -84,7 +87,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage('game:queueing')
-	async test(socket: Socket): Promise<void> {
+	startQueueing(socket: Socket) {
 		this.matchMaking = this.matchMaking.filter((_s) => _s.user.id !== socket.user.id);
 
 		// Checks if the user is already in a game
@@ -120,6 +123,31 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.socialService.emit(`user:${sockets[1].user.id}:status`, { status: 'ingame' });
 		} else {
 			socket.emit('game:queueing');
+		}
+	}
+
+	@UsePipes(new ValidationPipe())
+	@SubscribeMessage('game:invite')
+	privateQueueing(socket: Socket, @Body() data: SingleTargetDto) {
+		this.matchMaking = this.matchMaking.filter((_s) => _s.user.id !== socket.user.id);
+
+		//check is game condition start (user invited you as well)
+		const opponentInvites: Map<number, Socket> = this.privateMatchMaking.get(data.targetUserId)
+		const myOpponentSocket = opponentInvites.get(socket.user.id)
+			if (myOpponentSocket) {
+				this.privateMatchMaking.delete(socket.user.id)
+				this.privateMatchMaking.delete(data.targetUserId)
+				const game = new GameplayService(socket, myOpponentSocket, this.prisma);
+				this.gamesInProgress.set(socket.id, game);
+				this.gamesInProgress.set(myOpponentSocket.id, game);
+				this.logger.debug(`Game start with users ${socket.user.id} and ${myOpponentSocket.user.id}`);
+				this.socialService.emit(`user:${socket.user.id}:status`, { status: 'ingame' });
+				this.socialService.emit(`user:${myOpponentSocket.user.id}:status`, { status: 'ingame' });
+				return;
+		} else {
+			let myInvites = this.privateMatchMaking.get(socket.user.id);
+			myInvites.set(data.targetUserId, socket);
+			this.privateMatchMaking.set(socket.user.id, myInvites)
 		}
 	}
 

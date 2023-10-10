@@ -19,3 +19,8 @@ export class UserDto {
 	@IsNotEmpty()
 	avatar: string;
 }
+
+export class SingleTargetDto {
+	@IsNumber()
+	targetUserId: number
+}

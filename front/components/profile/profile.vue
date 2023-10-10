@@ -4,7 +4,7 @@ import type { User } from '~/types/user';
 enum Status {
   OFFLINE = 'offline',
   ONLINE = 'online',
-  IN_GAME = 'in game',
+  IN_GAME = 'ingame',
 }
 
 export default defineNuxtComponent({

@@ -1,5 +1,7 @@
 import { GameState } from '@prisma/client';
 
+export * from './gameplay';
+
 export declare type LadderDisplay = {
 	id: number;
 	username: string;

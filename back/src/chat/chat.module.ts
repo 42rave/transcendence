@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ChatController } from './chat.controller';
 import { PrismaModule } from '@prisma/prisma.module';
 import { SocialService } from './social.service';
@@ -14,7 +14,7 @@ import { PrivmsgService } from '@chat/privmsg/privmsg.service';
 import { StatusModule } from '@user/status/status.module';
 
 @Module({
-	imports: [AuthModule, PrismaModule, StatusModule],
+	imports: [forwardRef(() => AuthModule), PrismaModule, StatusModule],
 	controllers: [ChatController, ChannelController, MessageController, PrivmsgController],
 	providers: [ChatGateway, SocialService, ChannelService, MessageService, PrivmsgService, UserService],
 	exports: [SocialService]

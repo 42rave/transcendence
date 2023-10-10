@@ -3,11 +3,10 @@ import { GameService } from './game.service';
 import type { LadderDisplay, HistoryDisplay, GameStats } from '@type/game';
 import { AuthenticatedGuard } from '@guard/authenticated.guard';
 
+//The request handler
 @Controller('game')
 export class GameController {
-	constructor(private readonly gameService: GameService) {
-		void this.gameService;
-	}
+	constructor(private readonly gameService: GameService) {}
 
 	//@Get()
 	//@UseGuards(...AuthenticatedGuard)

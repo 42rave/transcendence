@@ -29,6 +29,9 @@ export default defineNuxtConfig({
     sockets: [{
       name: 'chat',
       url: process.env.WS_BASE_URL || 'ws://localhost/',
-    }]
+    }, {
+      name: 'game',
+      url: process.env.WS_BASE_URL || 'ws://localhost/',
+    }],
   }
 })

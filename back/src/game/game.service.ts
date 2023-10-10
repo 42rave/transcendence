@@ -5,13 +5,14 @@ import { BroadcastService } from '@broadcast/broadcast.service';
 import type { LadderDisplay, HistoryDisplay, GameStats } from '@type/game';
 import { GameState } from '@prisma/client';
 
+//the game itself
 @Injectable()
 export class GameService extends BroadcastService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly socialService: SocialService
 	) {
-		super('BroadcastService');
+		super();
 	}
 
 	/* This returns a LadderDisplay array.

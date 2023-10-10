@@ -5,16 +5,12 @@ export default defineNuxtComponent({
   data: () => ({
      config: useRuntimeConfig(),
   }),
-
-  methods: {
-
-  }
 })
 </script>
 
 <template>
   <div class="chatPage">
-    <ChatBox v-if="$sockets.isChatConnected" :socket="socket" :gameSocket="gameSocket"/>
+    <ChatBox v-if="$sockets.isChatConnected && $sockets.isGameConnected" :socket="socket" :gameSocket="gameSocket"/>
     <div class="ma-auto d-flex flex-column" v-else>
       <v-progress-circular class="ma-auto" indeterminate size="64" color="purple" />
         Connecting

@@ -79,7 +79,12 @@ export class GameplayService {
 			this.player_2.socket = socket;
 			this.player_2.socket?.emit('game:start', { side: 'right' });
 		}
-		this.emitToPlayers('game:score', { p1_score: this.player_1.score, p2_score: this.player_2.score });
+		this.emitToPlayers('game:score', {
+			p1_name: this.player_1.username,
+			p1_score: this.player_1.score,
+			p2_name: this.player_2.username,
+			p2_score: this.player_2.score
+		});
 		this.emitToPlayers('game:ball', {
 			position: this.game.ball.position,
 			speed: this.game.ball.speed,
@@ -303,7 +308,12 @@ export class GameplayService {
 
 		if (this.isMarked(this.game.ball)) {
 			this.logger.debug(`Score: ${this.player_1.score} - ${this.player_2.score}`);
-			this.emitToPlayers('game:score', { p1_score: this.player_1.score, p2_score: this.player_2.score });
+			this.emitToPlayers('game:score', {
+				p1_name: this.player_1.username,
+				p1_score: this.player_1.score,
+				p2_name: this.player_2.username,
+				p2_score: this.player_2.score
+			});
 			if (this.player_1.score >= 13 || this.player_2.score >= 13) {
 				this.winner = this.player_1.score > this.player_2.score ? this.player_1.socket.user : this.player_2.socket.user;
 			} else this.resetBall(this.game.ball);

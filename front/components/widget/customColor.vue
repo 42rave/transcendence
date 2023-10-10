@@ -33,9 +33,9 @@ export default defineNuxtComponent({
       this.p1_color = '#fff';
       this.ball_color = '#fff';
       this.p2_color = '#fff';
-      this.localStorage.removeItem('p1_color');
-      this.localStorage.removeItem('ball_color');
-      this.localStorage.removeItem('p2_color');
+      localStorage.removeItem('p1_color');
+      localStorage.removeItem('ball_color');
+      localStorage.removeItem('p2_color');
       this.$event('alert:success', { message: 'Colors reset' });
     },
     updateColors() {

@@ -68,7 +68,7 @@ export class ChannelController {
 	}
 
 	@Post(':targetChannelId/quit')
-	@UseGuards(...AuthenticatedGuard)
+	@UseGuards(...AuthenticatedGuard, IsInChannelGuard)
 	@UsePipes(ValidationPipe)
 	async quit(@Param('targetChannelId', ParseIntPipe) channelId: number, @Req() req: Request) {
 		return await this.channelService.quit(req.user, channelId);

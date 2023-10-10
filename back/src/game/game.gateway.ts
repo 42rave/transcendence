@@ -66,13 +66,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.matchMaking = this.matchMaking.filter((arg) => arg !== socket);
 
 		if (this.gamesInProgress.has(socket.id)) {
-			// add to the disconnectedUserList
 			const game = this.gamesInProgress.get(socket.id);
-			this.disconnectedUsers.set(socket.user.id, game);
 
 			//removing user from gameInProgress
 			this.gamesInProgress.delete(socket.id);
 
+			if (game.winner) return;
+			// add to the disconnectedUserList
+			this.disconnectedUsers.set(socket.user.id, game);
 			this.logger.debug(
 				`User ${socket.user.id} (${socket.id}) disconnected, waiting 10s before removing him from the queue`
 			);
@@ -94,18 +95,26 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// Checks if the user is already in a game
 		const liveGame = this.gamesInProgress.get(socket.id);
 		if (liveGame) {
-			liveGame.reconnectUser(socket.user.id, socket);
-			return;
+			if (liveGame.winner) {
+				this.gamesInProgress.delete(socket.id);
+			} else {
+				liveGame.reconnectUser(socket.user.id, socket);
+				return;
+			}
 		}
 		// Checks if user is in the disconnected queue, if yes don't allow him to join the queue
 		const game = this.disconnectedUsers.get(socket.user.id);
 		if (game) {
-			this.disconnectedUsers.delete(socket.user.id);
+			if (game.winner) {
+				this.disconnectedUsers.delete(socket.user.id);
+			} else {
+				this.disconnectedUsers.delete(socket.user.id);
 
-			//reconnect the user to the game.
-			this.gamesInProgress.set(socket.id, game);
-			game.reconnectUser(socket.user.id, socket);
-			return;
+				//reconnect the user to the game.
+				this.gamesInProgress.set(socket.id, game);
+				game.reconnectUser(socket.user.id, socket);
+				return;
+			}
 		}
 		//if one of the disconnected users is this user
 		//reconnect user, remove him from disconnected users and return
@@ -116,7 +125,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		if (this.matchMaking.length >= 2) {
 			const sockets = this.matchMaking.splice(0, 2);
-			const game = new GameplayService(sockets[0], sockets[1], this.prisma);
+			const game = new GameplayService(
+				sockets[0],
+				sockets[1],
+				this.prisma,
+				this.gamesInProgress,
+				this.matchMaking,
+				this.privateMatchMaking,
+				this.disconnectedUsers,
+				this.socialService
+			);
 			this.gamesInProgress.set(sockets[0].id, game);
 			this.gamesInProgress.set(sockets[1].id, game);
 			this.logger.debug(`Game start with users ${sockets[0].user.id} and ${sockets[1].user.id}`);
@@ -137,7 +155,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			if (myOpponentSocket) {
 				this.privateMatchMaking.delete(socket.user.id);
 				this.privateMatchMaking.delete(data.targetUserId);
-				const game = new GameplayService(socket, myOpponentSocket, this.prisma);
+				const game = new GameplayService(
+					socket,
+					myOpponentSocket,
+					this.prisma,
+					this.gamesInProgress,
+					this.matchMaking,
+					this.privateMatchMaking,
+					this.disconnectedUsers,
+					this.socialService
+				);
 				socket?.emit('game:redirect');
 				myOpponentSocket?.emit('game:redirect');
 				this.gamesInProgress.set(socket.id, game);

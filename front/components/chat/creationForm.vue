@@ -68,7 +68,7 @@ export default defineNuxtComponent({
 
                   <v-col cols="12" v-if="this.channelKind === 'PROTECTED'" >
                     <v-text-field v-model="protectedPassword"
-                      label="Password (optional)"
+                      label="Password"
                       hide-details
                       required
                     ></v-text-field>

@@ -129,4 +129,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (!game) return;
 		game.eventMovePaddle(socket, move);
 	}
+
+	@SubscribeMessage('game:invite')
+	async debugInvite(): Promise<void> {}
 }

@@ -2,7 +2,7 @@
 
 export default defineNuxtComponent({
   name: 'ChatConvDisplay',
-  props: ['socket'],
+  props: ['socket', 'gameSocket'],
   data: () => ({
    	config: useRuntimeConfig()
  }),
@@ -40,7 +40,7 @@ export default defineNuxtComponent({
               <span class="text">{{ message.user.username }}</span>
             </div>
 
-            <ChatActionMenu :message="message" :id="id"/>
+            <ChatActionMenu :message="message" :id="id" :socket="socket" :gameSocket="gameSocket"/>
 
             <v-card :color="message.userId != this.$auth.user.id ? 'primary' : 'success'" style="width: fit-content;">
               <v-card-text class="white--text pa-2 d-flex flex-column" style="word-break: break-word;">

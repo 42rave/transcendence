@@ -71,7 +71,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			//removing user from gameInProgress
 			this.gamesInProgress.delete(socket.id);
 
-			if (game.winner) return ;
+			if (game.winner) return;
 			// add to the disconnectedUserList
 			this.disconnectedUsers.set(socket.user.id, game);
 			this.logger.debug(
@@ -97,8 +97,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (liveGame) {
 			if (liveGame.winner) {
 				this.gamesInProgress.delete(socket.id);
-			}
-			else {
+			} else {
 				liveGame.reconnectUser(socket.user.id, socket);
 				return;
 			}
@@ -107,9 +106,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		const game = this.disconnectedUsers.get(socket.user.id);
 		if (game) {
 			if (game.winner) {
-				this.disconnectedUsers.delete(socket.user.id)
-			}
-			else {
+				this.disconnectedUsers.delete(socket.user.id);
+			} else {
 				this.disconnectedUsers.delete(socket.user.id);
 
 				//reconnect the user to the game.
@@ -127,7 +125,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		if (this.matchMaking.length >= 2) {
 			const sockets = this.matchMaking.splice(0, 2);
-			const game = new GameplayService(sockets[0], sockets[1], this.prisma);
+			const game = new GameplayService(
+				sockets[0],
+				sockets[1],
+				this.prisma,
+				this.gamesInProgress,
+				this.matchMaking,
+				this.privateMatchMaking,
+				this.disconnectedUsers,
+				this.socialService
+			);
 			this.gamesInProgress.set(sockets[0].id, game);
 			this.gamesInProgress.set(sockets[1].id, game);
 			this.logger.debug(`Game start with users ${sockets[0].user.id} and ${sockets[1].user.id}`);
@@ -148,7 +155,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			if (myOpponentSocket) {
 				this.privateMatchMaking.delete(socket.user.id);
 				this.privateMatchMaking.delete(data.targetUserId);
-				const game = new GameplayService(socket, myOpponentSocket, this.prisma);
+				const game = new GameplayService(
+					socket,
+					myOpponentSocket,
+					this.prisma,
+					this.gamesInProgress,
+					this.matchMaking,
+					this.privateMatchMaking,
+					this.disconnectedUsers,
+					this.socialService
+				);
 				socket?.emit('game:redirect');
 				myOpponentSocket?.emit('game:redirect');
 				this.gamesInProgress.set(socket.id, game);

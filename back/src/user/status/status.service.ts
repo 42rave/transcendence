@@ -18,7 +18,8 @@ export class StatusService {
 		const gameSocketIds: { socketIds } = await this.gameService.fetchSockets(id);
 		if (gameSocketIds) {
 			for (let i = 0; i < gameSocketIds.socketIds.length; i++) {
-				if (this.gameGateway.gamesInProgress.get(gameSocketIds.socketIds[i])) {
+				const gameInProgress = this.gameGateway.gamesInProgress.get(gameSocketIds.socketIds[i]);
+				if (gameInProgress) {
 					status = 'ingame';
 					break;
 				}

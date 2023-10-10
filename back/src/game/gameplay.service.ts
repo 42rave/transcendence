@@ -4,6 +4,7 @@ import { Logger } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 
 import { GamePosition, GameState } from '@prisma/client';
+import { SocialService } from '@chat/social.service';
 
 const frameRate = 60;
 const speed_factor = 0.005;
@@ -30,7 +31,13 @@ export class GameplayService {
 	constructor(
 		player_1: Socket,
 		player_2: Socket,
-		private readonly prisma: PrismaService
+		private readonly prisma: PrismaService,
+		private gamesInProgress: Map<string, GameplayService>,
+		private matchMaking: Array<Socket>,
+		//map<senderUserId, InviteeUserId, Socket of Sender
+		private privateMatchMaking: Map<number, Map<number, Socket>>,
+		private disconnectedUsers: Map<number, GameplayService>,
+		private socialService: SocialService
 	) {
 		this.game = new GameField({});
 
@@ -73,7 +80,11 @@ export class GameplayService {
 			this.player_2.socket?.emit('game:start', { side: 'right' });
 		}
 		this.emitToPlayers('game:score', { p1_score: this.player_1.score, p2_score: this.player_2.score });
-		this.emitToPlayers('game:ball', { position: this.game.ball.position, speed: this.game.ball.speed, radius: this.game.ball.radius });
+		this.emitToPlayers('game:ball', {
+			position: this.game.ball.position,
+			speed: this.game.ball.speed,
+			radius: this.game.ball.radius
+		});
 	}
 
 	disconnectedUser(socketId: string) {
@@ -304,7 +315,7 @@ export class GameplayService {
 			}, 1000 / frameRate);
 		} else {
 			//this.stopDebugLogger();
-			this.prisma.game.create({
+			await this.prisma.game.create({
 				data: {
 					createdAt: this.date,
 					records: {
@@ -330,10 +341,14 @@ export class GameplayService {
 			this.player_1.socket.emit('game:finished', {
 				win: this.player_1.userId === this.winner.id
 			});
+			this.gamesInProgress.delete(this.player_1.socket.id);
 			this.player_2.socket.emit('game:finished', {
 				win: this.player_2.userId === this.winner.id
 			});
+			this.gamesInProgress.delete(this.player_2.socket.id);
 			this.logger.debug(`winner is ${this.winner.username}`);
+			this.socialService.emit(`user:${this.player_1.userId}:status`, { status: 'online' });
+			this.socialService.emit(`user:${this.player_2.userId}:status`, { status: 'online' });
 		}
 	}
 }

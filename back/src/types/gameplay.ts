@@ -230,12 +230,14 @@ export class GameField {
 
 export class Player {
 	userId: number;
+	username: string;
 	socket: Socket; // Handled by Socket IO
 	score: number;
 	paddle: Paddle;
 
 	constructor(userId: number, socket: Socket, paddle: Paddle) {
 		this.userId = userId;
+		this.username = socket.user.username;
 		this.socket = socket;
 		this.score = 0;
 		this.paddle = paddle;

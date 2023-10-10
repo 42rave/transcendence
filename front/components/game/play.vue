@@ -14,7 +14,7 @@ const speed = 0.005;
 
 export default defineNuxtComponent({
   name: 'Game',
-  props: ['socket', 'left'],
+  props: ['socket', 'left', 'player_left', 'player_right'],
   data: () => ({
     container: null as HTMLElement | null,
     container_observer: null as ResizeObserver | null,
@@ -24,12 +24,12 @@ export default defineNuxtComponent({
     playerLeft: new Player({
       position: new Vector2(0.5, backendRes.y / 2),
       size: backendPlayerRes.clone(),
-    }, 0),
+    }, 0, 'Player 1'),
     playerRight: new Player({
       position: new Vector2(backendRes.x - 0.5, backendRes.y / 2),
       size: backendPlayerRes.clone(),
       color: 'white'
-    }, 0),
+    }, 0, 'Player 2'),
     ball: new Ball({
       position: backendRes.clone().div(2),
       size: backendBallRes.clone(),
@@ -79,6 +79,9 @@ export default defineNuxtComponent({
       this.ball.color = color_ball;
     }
 
+    this.playerLeft.name = this.player_left;
+    this.playerRight.name = this.player_right;
+
     // console logs fps each second
     setInterval(() => {
       this.frames.fps = Math.round(1000 / this.frames.delta);
@@ -90,10 +93,12 @@ export default defineNuxtComponent({
       else if (move == 2) player.setSpeed(Vector2.down().mul(speed));
       else player.setSpeed(Vector2.zero());
     })
-    this.socket.on("game:score", (data: {p1_score: number, p2_score: number}) => {
+    this.socket.on("game:score", (data: {p1_score: number, p2_score: number, p1_name: string, p2_name: string}) => {
       // console.log(data);
       this.playerLeft.score = data.p1_score;
       this.playerRight.score = data.p2_score;
+      this.playerLeft.name = data.p1_name;
+      this.playerRight.name = data.p2_name;
     })
 
     this.ball.setPosition(new Vector2(backendRes.x / 2, backendRes.y / 2));
@@ -165,8 +170,13 @@ export default defineNuxtComponent({
     displayScores() {
       if (!this.ctx) return;
       this.ctx.fillStyle = 'grey';
-      this.ctx.font = '0.75rem Arial';
-      this.ctx.fillText(`${this.playerLeft.score} - ${this.playerRight.score}`, this.canvas!.width / 2 - 20, 20);
+      this.ctx.font = '1.25rem Arial';
+      const text = `${this.playerLeft.name} ${this.playerLeft.score} - ${this.playerRight.score} ${this.playerRight.name}`;
+
+      const textWidth = this.ctx.measureText(text).width;
+      this.ctx.fillStyle = 'white';
+      this.ctx.fillText(text, this.canvas!.width / 2 - textWidth / 2, 20);
+
     },
     resizeCanvas() {
       let canvasWidth = this.container!.clientWidth;

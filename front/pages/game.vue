@@ -17,10 +17,6 @@ export default defineNuxtComponent({
     this.gameSocket.on('game:finished', ({win}: {win: boolean}) => {
       this.win = win;
       this.status = 3;
-      setTimeout(() => {
-        this.status = 0;
-        this.win = false;
-      }, 5000);
     });
   },
   unmounted() {
@@ -40,7 +36,7 @@ export default defineNuxtComponent({
 <template>
   <div v-if="this.$sockets.gameConnected" class="gamePage">
     <div v-if='status === 3'>
-      <GameFinished :win='this.win' />
+      <GameFinished @dismiss="() => { this.status = 0; this.win = false }" :win='this.win' />
     </div>
     <div id="game-container" v-else-if="status === 2">
       <GamePlay :socket='this.gameSocket' :left='this.left' />

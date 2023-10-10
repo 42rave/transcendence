@@ -5,6 +5,7 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
+	ConnectedSocket
 } from '@nestjs/websockets';
 import { AuthService } from '@auth/auth.service';
 import { GameService } from './game.service';
@@ -32,7 +33,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	public gamesInProgress = new Map<string, GameplayService>();
 	protected matchMaking = new Array<Socket>();
 	//map<senderUserId, InviteeUserId, Socket of Sender
-	protected privateMatchMaking = new Map<number, Map<number, Socket>>
+	protected privateMatchMaking = new Map<number, Map<number, Socket>>();
 	protected disconnectedUsers = new Map<number, GameplayService>();
 
 	constructor(
@@ -87,7 +88,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage('game:queueing')
-	startQueueing(socket: Socket) {
+	startQueueing(@ConnectedSocket() socket: Socket) {
 		this.matchMaking = this.matchMaking.filter((_s) => _s.user.id !== socket.user.id);
 
 		// Checks if the user is already in a game
@@ -126,28 +127,32 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 	}
 
-	@UsePipes(new ValidationPipe())
+	@UsePipes(ValidationPipe)
 	@SubscribeMessage('game:invite')
-	privateQueueing(socket: Socket, @Body() data: SingleTargetDto) {
-		this.matchMaking = this.matchMaking.filter((_s) => _s.user.id !== socket.user.id);
-
+	privateQueueing(@ConnectedSocket() socket: Socket, @Body() data: SingleTargetDto) {
 		//check is game condition start (user invited you as well)
-		const opponentInvites: Map<number, Socket> = this.privateMatchMaking.get(data.targetUserId)
-		const myOpponentSocket = opponentInvites.get(socket.user.id)
+		const opponentInvites: Map<number, Socket> = this.privateMatchMaking.get(data.targetUserId);
+		if (opponentInvites) {
+			const myOpponentSocket = opponentInvites.get(socket.user.id);
 			if (myOpponentSocket) {
-				this.privateMatchMaking.delete(socket.user.id)
-				this.privateMatchMaking.delete(data.targetUserId)
+				this.privateMatchMaking.delete(socket.user.id);
+				this.privateMatchMaking.delete(data.targetUserId);
 				const game = new GameplayService(socket, myOpponentSocket, this.prisma);
+				socket?.emit('game:redirect');
+				myOpponentSocket?.emit('game:redirect');
 				this.gamesInProgress.set(socket.id, game);
 				this.gamesInProgress.set(myOpponentSocket.id, game);
 				this.logger.debug(`Game start with users ${socket.user.id} and ${myOpponentSocket.user.id}`);
 				this.socialService.emit(`user:${socket.user.id}:status`, { status: 'ingame' });
 				this.socialService.emit(`user:${myOpponentSocket.user.id}:status`, { status: 'ingame' });
 				return;
+			}
 		} else {
-			let myInvites = this.privateMatchMaking.get(socket.user.id);
+			let myInvites: Map<number, Socket> = this.privateMatchMaking.get(socket.user.id);
+			if (!myInvites) myInvites = new Map<number, Socket>();
 			myInvites.set(data.targetUserId, socket);
-			this.privateMatchMaking.set(socket.user.id, myInvites)
+			this.privateMatchMaking.set(socket.user.id, myInvites);
+			return;
 		}
 	}
 

@@ -99,6 +99,10 @@ export default defineNuxtComponent({
     this.socket?.on('chat:invite', (data: any) => {    
     });
 
+	this.gameSocket?.on('game:redirect', () => {
+		this.$router.push('/game');
+	});
+
   },
 
   unmounted() {

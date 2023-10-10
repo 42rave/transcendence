@@ -22,5 +22,5 @@ export class UserDto {
 
 export class SingleTargetDto {
 	@IsNumber()
-	targetUserId: number
+	targetUserId: number;
 }

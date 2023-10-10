@@ -7,7 +7,7 @@ interface IMessage {
 }
 export default defineNuxtComponent({
   name: 'ChatBox',
-  props: ['socket'],
+  props: ['socket', 'gameSocket'],
   data: () => ({
     drawer: true,
     
@@ -130,7 +130,7 @@ export default defineNuxtComponent({
       <h2>{{this.$channel.name}}</h2>
       <ChatMenu @click="drawer = !drawer" :drawer="drawer"/>
     </div>
-      <ChatConvDisplay :socket="socket" @drawer:click="drawer = !drawer"/>
+      <ChatConvDisplay :socket="socket" :gameSocket="gameSocket" @drawer:click="drawer = !drawer"/>
         <div class="chatFooter">
           <ChatMessageInput :socket="socket"/>
         </div>

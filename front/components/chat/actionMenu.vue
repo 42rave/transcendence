@@ -2,15 +2,15 @@
 
 export default defineNuxtComponent({
   name: 'ChatActionMenu',
-  props: ['socket', 'message', 'id'],
+  props: ['socket', 'gameSocket', 'message', 'id'],
   data: () => ({
    	config: useRuntimeConfig(),
     timer: 1,
  }),
 
   methods: {
-    inviteBTN() {
-      console.log("invite to play");
+    inviteBTN( userId: number) {
+      this.gameSocket.emit('game:invite', {targetUserId: userId});
     },
 
     async blockBTN(targetUserId: number) {
@@ -99,7 +99,7 @@ export default defineNuxtComponent({
 <template>
   <v-menu v-if="this.$auth.user.id != message.userId" :activator="`#author-${id}`" :close-on-content-click=false>
     <v-card max-width="10rem">
-      <v-btn @click="inviteBTN" size="small" block>Let's play !</v-btn>
+      <v-btn @click="inviteBTN(message.userId)" size="small" block>Let's play !</v-btn>
       <v-divider></v-divider>
       <v-btn v-if="isUserBlocked(message.userId)" @click="unblockBTN(message.userId)" size="small" block>unblock</v-btn>
       <v-btn v-else @click="blockBTN(message.userId)" size="small" block>block</v-btn>

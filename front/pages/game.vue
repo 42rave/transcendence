@@ -4,6 +4,7 @@ export default defineNuxtComponent({
   data: () => ({
     status: 0,
     left: true,
+    win: false,
   }),
   mounted() {
     this.gameSocket.on('game:queueing', () => {
@@ -13,10 +14,19 @@ export default defineNuxtComponent({
       this.status = 2;
       this.left = side === 'left';
     });
+    this.gameSocket.on('game:finished', ({win}: {win: boolean}) => {
+      this.win = win;
+      this.status = 3;
+      setTimeout(() => {
+        this.status = 0;
+        this.win = false;
+      }, 5000);
+    });
   },
   unmounted() {
     this.gameSocket.off('game:queueing');
     this.gameSocket.off('game:start');
+    this.gameSocket.off('game:finished');
   },
   methods: {
     gameConnect() {
@@ -29,7 +39,10 @@ export default defineNuxtComponent({
 
 <template>
   <div v-if="this.$sockets.gameConnected" class="gamePage">
-    <div id="game-container" v-if="status === 2">
+    <div v-if='status === 3'>
+      <GameFinished :win='this.win' />
+    </div>
+    <div id="game-container" v-else-if="status === 2">
       <GamePlay :socket='this.gameSocket' :left='this.left' />
     </div>
     <div v-else-if="status === 1">

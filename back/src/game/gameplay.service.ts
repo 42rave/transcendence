@@ -3,6 +3,8 @@ import Socket from '@type/socket';
 import { Logger } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 
+import { GamePosition, GameState } from '@prisma/client';
+
 const frameRate = 60;
 const speed_factor = 0.005;
 const acceleration_factor = 1.05;
@@ -40,7 +42,7 @@ export class GameplayService {
 		this.player_2.socket?.emit('game:start', { side: 'right' });
 
 		this.logger.log(`Game started between ${this.player_1.socket.id} and ${this.player_2.socket.id}`);
-		this.startDebugLogger();
+		//this.startDebugLogger();
 		this.resetBall(this.game.ball);
 		try {
 			this.gameLoop();
@@ -256,12 +258,10 @@ export class GameplayService {
 	isMarked(ball: Ball): boolean {
 		if (ball.position.x - ball.radius <= 0) {
 			this.player_2.score += 1;
-			this.emitToPlayers('game:score', { player: this.player_2?.userId, score: this.player_2.score });
 			return true;
 		}
 		if (ball.position.x + ball.radius >= this.game.field.x) {
 			this.player_1.score += 1;
-			this.emitToPlayers('game:score', { player: this.player_1?.userId, score: this.player_1.score });
 			return true;
 		}
 		return false;
@@ -292,7 +292,11 @@ export class GameplayService {
 		this.moveBall(this.game.ball);
 
 		if (this.isMarked(this.game.ball)) {
-			this.resetBall(this.game.ball);
+			this.logger.debug(`Score: ${this.player_1.score} - ${this.player_2.score}`);
+			this.emitToPlayers('game:score', { p1_score: this.player_1.score, p2_score: this.player_2.score });
+			if (this.player_1.score >= 2 || this.player_2.score >= 2) {
+				this.winner = this.player_1.score > this.player_2.score ? this.player_1.socket.user : this.player_2.socket.user;
+			} else this.resetBall(this.game.ball);
 		}
 
 		if (!this.winner) {
@@ -301,7 +305,38 @@ export class GameplayService {
 			}, 1000 / frameRate);
 		} else {
 			// TODO: insert game history in database
-			this.stopDebugLogger();
+			//this.stopDebugLogger();
+			this.prisma.game.create({
+				data: {
+					createdAt: this.date,
+					records: {
+						create: [
+							{
+								playerId: this.player_1.userId,
+								position: GamePosition.LEFT,
+								score: this.player_1.score,
+								result: this.player_1.userId === this.winner.id ? GameState.WON : GameState.LOST
+							},
+							{
+								playerId: this.player_2.userId,
+								position: GamePosition.RIGHT,
+								score: this.player_2.score,
+								result: this.player_2.userId === this.winner.id ? GameState.WON : GameState.LOST
+							}
+						]
+					}
+				},
+				include: { records: { include: { player: true } } }
+			});
+
+			this.player_1.socket.emit('game:finished', {
+				win: this.player_1.userId === this.winner.id
+			});
+			this.player_2.socket.emit('game:finished', {
+				win: this.player_2.userId === this.winner.id
+			});
+			//this.emitToPlayers('game:finished', )
+			this.logger.debug(`winner is ${this.winner.username}`);
 		}
 	}
 }

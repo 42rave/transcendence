@@ -30,7 +30,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	public gamesInProgress = new Map<string, GameplayService>();
 	protected matchMaking = new Array<Socket>();
-	protected disconnectedUsers = new Array<string>();
+	protected disconnectedUsers = new Map<number, GameplayService>();
 
 	constructor(
 		private gameService: GameService,
@@ -49,33 +49,37 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			socket.disconnect(true);
 			return;
 		}
-		// TODO:  Check if user is already in a game
 		await this.gameService.onConnection(socket);
 	}
 
 	async handleDisconnect(socket: Socket): Promise<void> {
 		if (!socket.user) return;
+		//this should be a get status but because of circular imports defaulting to online.
 		this.socialService.emit(`user:${socket.user.id}:status`, { status: 'online' });
 		await this.gameService.onDisconnection(socket);
 
-		if (this.gamesInProgress.has(socket.id)) {
-			// remove from matchMaking
-			this.disconnectedUsers.push(socket.id);
+		//cancel queue if tab is closed
+		this.matchMaking = this.matchMaking.filter((arg) => arg !== socket);
 
+		if (this.gamesInProgress.has(socket.id)) {
+			// add to the disconnectedUserList
 			const game = this.gamesInProgress.get(socket.id);
+			this.disconnectedUsers.set(socket.user.id, game);
+
+			//removing user from gameInProgress
+			this.gamesInProgress.delete(socket.id);
 
 			this.logger.debug(
 				`User ${socket.user.id} (${socket.id}) disconnected, waiting 10s before removing him from the queue`
 			);
 			setTimeout(() => {
-				if (this.disconnectedUsers.includes(socket.id)) {
-					this.disconnectedUsers.splice(this.disconnectedUsers.indexOf(socket.id), 1);
+				if (this.disconnectedUsers.has(socket.user.id)) {
+					this.disconnectedUsers.delete(socket.user.id);
 					this.logger.debug(`User ${socket.user.id} (${socket.id}) removed from the disconnected queue`);
-					game.disconnectedUser(socket.id);
 
 					// TODO: remove from gamesInProgress and set the other player as winner
 				}
-			}, 5000);
+			}, 10000);
 		}
 	}
 
@@ -86,6 +90,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// this.matchMaking = this.matchMaking.filter((_s) => _s.user.id !== socket.user.id);
 
 		// TODO: Check if user is already in a game, if yes don't allow him to join the queue
+		const game = this.disconnectedUsers.get(socket.user.id);
+		if (game) {
+			this.disconnectedUsers.delete(socket.user.id);
+
+			//reconnect the user to the game.
+			this.gamesInProgress.set(socket.id, game);
+			game.reconnectUser(socket.user.id, socket);
+			return;
+		}
+		//if one of the disconnected users is this user
+		//reconnect user, remove him from disconnected users and return
+
 		this.matchMaking.push(socket);
 
 		this.logger.debug(`${this.matchMaking.length} users waiting for a game`);

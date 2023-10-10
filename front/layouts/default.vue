@@ -11,7 +11,7 @@ export default defineNuxtComponent({
         home: {
           name: 'Home',
           path: '/',
-          icon: 'mdi-home',
+          icon: 'mdi-account',
         },
         about: {
           name: 'Chat',

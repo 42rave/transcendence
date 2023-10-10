@@ -30,7 +30,8 @@ export default defineNuxtComponent({
     the current channel state is reset 
     and the user is redirected to channel 0 */
     this.socket?.on('chat:kicked', (data: any) => {
-		  this.$userChat.removeConnection(data.id);
+		  this.$channel.removeUser(data);
+      this.$userChat.removeConnection(data.id);
       $event('alert:error', {message: `You are kicked from ${data.name}`});
       if (data.id === this.$channel.id)
       {
@@ -58,15 +59,13 @@ export default defineNuxtComponent({
     });
 
     /*  if a user is banned from the channel */
-    this.socket?.on('chat:banning', (data: number) => {   
-    });
+    this.socket?.on('chat:banning');
 
     this.socket?.on('chat:unbanned', (data: any) => {
       $event('alert:success', {message: `You are unbanned from ${data}`});
     });
 
-    this.socket?.on('chat:unbanning', (data: number) => {
-    });
+    this.socket?.on('chat:unbanning');
 
     this.socket?.on('chat:promote', (data: any) => {
       if (data.channelId === this.$channel.id && data.userId === this.$auth.user.id)
@@ -86,10 +85,11 @@ export default defineNuxtComponent({
         $event('alert:success', {message: `${data.user.username} is demoted on ${data.channel.name}`});
     });
 
-    this.socket?.on('chat:transfer', (data: any) => {
-    });
+    this.socket?.on('chat:transfer');
 
-    this.socket?.on('chat:quit', (data: any) => {    
+    this.socket?.on('chat:quit', (data: number) => {  
+      if (data == this.$auth.user.id)
+        $event('alert:success', {message: `You left`});
     });
 
     this.socket?.on('chat:invited', (data: any) => {

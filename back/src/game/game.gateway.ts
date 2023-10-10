@@ -83,13 +83,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 	}
 
-	// TODO: Remove this one, only for testing purpose
-	@SubscribeMessage('test')
+	@SubscribeMessage('game:queueing')
 	async test(socket: Socket): Promise<void> {
-		// TODO: Uncomment this line, it permit to remove duplicate user in the queue
-		// this.matchMaking = this.matchMaking.filter((_s) => _s.user.id !== socket.user.id);
+		this.matchMaking = this.matchMaking.filter((_s) => _s.user.id !== socket.user.id);
 
-		// TODO: Check if user is already in a game, if yes don't allow him to join the queue
+		// Checks if the user is already in a game
+		const liveGame = this.gamesInProgress.get(socket.id);
+		if (liveGame) {
+			liveGame.reconnectUser(socket.user.id, socket);
+			return;
+		}
+		// Checks if user is in the disconnected queue, if yes don't allow him to join the queue
 		const game = this.disconnectedUsers.get(socket.user.id);
 		if (game) {
 			this.disconnectedUsers.delete(socket.user.id);

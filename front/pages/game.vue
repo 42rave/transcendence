@@ -21,7 +21,7 @@ export default defineNuxtComponent({
   methods: {
     gameConnect() {
       this.status = 1;
-      this.gameSocket.emit('test');
+      this.gameSocket.emit('game:queueing');
     }
   }
 })

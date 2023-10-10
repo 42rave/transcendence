@@ -24,13 +24,12 @@ export default defineNuxtComponent({
     playerLeft: new Player({
       position: new Vector2(0.5, backendRes.y / 2),
       size: backendPlayerRes.clone(),
-      color: 'white'
-    }),
+    }, 0),
     playerRight: new Player({
       position: new Vector2(backendRes.x - 0.5, backendRes.y / 2),
       size: backendPlayerRes.clone(),
       color: 'white'
-    }),
+    }, 0),
     ball: new Ball({
       position: backendRes.clone().div(2),
       size: backendBallRes.clone(),
@@ -91,12 +90,18 @@ export default defineNuxtComponent({
       else if (move == 2) player.setSpeed(Vector2.down().mul(speed));
       else player.setSpeed(Vector2.zero());
     })
+    this.socket.on("game:score", (data: {p1_score: number, p2_score: number}) => {
+      console.log(data);
+      this.playerLeft.score = data.p1_score;
+      this.playerRight.score = data.p2_score;
+    })
 
     this.ball.setPosition(new Vector2(backendRes.x / 2, backendRes.y / 2));
     this.socket.on("game:ball", (data: {position: Vector2, speed: Vector2}) => {
       this.ball.setPosition(new Vector2(data.position.x, data.position.y));
       this.ball.setSpeed(new Vector2(data.speed.x * speed, data.speed.y * speed));
     });
+
     this.drawLoop(0);
   },
   unmounted() {
@@ -138,6 +143,7 @@ export default defineNuxtComponent({
       this.inputs.oldSpeed = this.inputs.speed;
 
       this.displayFps();
+      this.displayScores();
       window.requestAnimationFrame(this.drawLoop);
       return ;
     },
@@ -155,6 +161,12 @@ export default defineNuxtComponent({
       this.ctx.fillStyle = 'grey';
       this.ctx.font = '0.75rem Arial';
       this.ctx.fillText(`fps: ${this.frames.fps} (${this.frames.delta.toFixed(2)}ms)`, 10, 20);
+    },
+    displayScores() {
+      if (!this.ctx) return;
+      this.ctx.fillStyle = 'grey';
+      this.ctx.font = '0.75rem Arial';
+      this.ctx.fillText(`${this.playerLeft.score} - ${this.playerRight.score}`, this.canvas!.width / 2 - 20, 20);
     },
     resizeCanvas() {
       let canvasWidth = this.container!.clientWidth;

@@ -59,13 +59,15 @@ export default defineNuxtComponent({
     });
 
     /*  if a user is banned from the channel */
-    this.socket?.on('chat:banning');
+    this.socket?.on('chat:banning', (data: any) => {
+    });
 
     this.socket?.on('chat:unbanned', (data: any) => {
       $event('alert:success', {message: `You are unbanned from ${data}`});
     });
 
-    this.socket?.on('chat:unbanning');
+    this.socket?.on('chat:unbanning', (data: any) => {
+    });
 
     this.socket?.on('chat:promote', (data: any) => {
       if (data.channelId === this.$channel.id && data.userId === this.$auth.user.id)
@@ -85,7 +87,8 @@ export default defineNuxtComponent({
         $event('alert:success', {message: `${data.user.username} is demoted on ${data.channel.name}`});
     });
 
-    this.socket?.on('chat:transfer');
+    this.socket?.on('chat:transfer', (data: any) => {
+    });
 
     this.socket?.on('chat:quit', (data: number) => {  
       if (data == this.$auth.user.id)

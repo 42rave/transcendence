@@ -91,7 +91,7 @@ export default defineNuxtComponent({
       else player.setSpeed(Vector2.zero());
     })
     this.socket.on("game:score", (data: {p1_score: number, p2_score: number}) => {
-      console.log(data);
+      // console.log(data);
       this.playerLeft.score = data.p1_score;
       this.playerRight.score = data.p2_score;
     })

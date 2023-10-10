@@ -23,7 +23,7 @@ export default defineNuxtComponent({
   methods: {
     async uploadFile(e: any) {
       try {
-        console.log(e.target.files[0]);
+        // console.log(e.target.files[0]);
         const formData = new FormData();
         formData.append("file", e.target.files[0]);
         this.uploading = true;

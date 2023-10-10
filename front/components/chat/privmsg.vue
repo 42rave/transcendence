@@ -86,7 +86,7 @@ export default defineNuxtComponent({
   		<div v-if="this.loading" class="d-flex justify-center">
     		<v-progress-circular indeterminate color="primary"></v-progress-circular>
   		</div>
-  		<v-list-item v-else-if="this.user" @click="console.log(user)">
+  		<v-list-item v-else-if="this.user">
    			<template v-slot:prepend>
       			<v-avatar :image="user.avatar" />
     		</template>

@@ -33,5 +33,13 @@ export default defineNuxtConfig({
       name: 'game',
       url: process.env.WS_BASE_URL || 'ws://localhost/',
     }],
+  },
+  hooks: {
+	  'pages:extend' (pages) {
+	  	pages.push({
+	  		path: '/',
+	  		file: '/app/pages/profile/index.vue',
+	  	});
+	  }
   }
 })

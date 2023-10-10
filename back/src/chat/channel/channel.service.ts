@@ -332,7 +332,8 @@ export class ChannelService {
 			}
 			const promotedOwner = await this.prisma.channelConnection.update({
 				where: { connectionId: { userId: newOwner.userId, channelId: newOwner.channelId } },
-				data: { role: ChannelRole.OWNER }
+				data: { role: ChannelRole.OWNER },
+				include: { channel: true, user: true }
 			});
 			this.socialService.emit('chat:promote', promotedOwner, targetChannelId.toString());
 			//disconnect the owner (shorter because we know he is not invited/banned)

@@ -42,7 +42,6 @@ export class GameplayService {
 		this.player_2.socket?.emit('game:start', { side: 'right' });
 
 		this.logger.log(`Game started between ${this.player_1.socket.id} and ${this.player_2.socket.id}`);
-		//this.startDebugLogger();
 		this.resetBall(this.game.ball);
 		try {
 			this.gameLoop();
@@ -304,7 +303,6 @@ export class GameplayService {
 				this.gameLoop();
 			}, 1000 / frameRate);
 		} else {
-			// TODO: insert game history in database
 			//this.stopDebugLogger();
 			this.prisma.game.create({
 				data: {
@@ -335,7 +333,6 @@ export class GameplayService {
 			this.player_2.socket.emit('game:finished', {
 				win: this.player_2.userId === this.winner.id
 			});
-			//this.emitToPlayers('game:finished', )
 			this.logger.debug(`winner is ${this.winner.username}`);
 		}
 	}

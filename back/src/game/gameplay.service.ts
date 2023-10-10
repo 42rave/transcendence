@@ -45,8 +45,16 @@ export class GameplayService {
 
 		this.player_1 = new Player(player_1.user.id, player_1, this.game.paddle1);
 		this.player_2 = new Player(player_2.user.id, player_2, this.game.paddle2);
-		this.player_1.socket?.emit('game:start', { side: 'left' });
-		this.player_2.socket?.emit('game:start', { side: 'right' });
+		this.player_1.socket?.emit('game:start', {
+			side: 'left',
+			p1_name: this.player_1.username,
+			p2_name: this.player_2.username
+		});
+		this.player_2.socket?.emit('game:start', {
+			side: 'right',
+			p1_name: this.player_1.username,
+			p2_name: this.player_2.username
+		});
 
 		this.logger.log(`Game started between ${this.player_1.socket.id} and ${this.player_2.socket.id}`);
 		this.resetBall(this.game.ball);
@@ -74,10 +82,18 @@ export class GameplayService {
 	reconnectUser(userId: number, socket: Socket) {
 		if (this.player_1.userId === userId) {
 			this.player_1.socket = socket;
-			this.player_1.socket?.emit('game:start', { side: 'left' });
+			this.player_1.socket?.emit('game:start', {
+				side: 'left',
+				p1_name: this.player_1.username,
+				p2_name: this.player_2.username
+			});
 		} else if (this.player_2.userId === userId) {
 			this.player_2.socket = socket;
-			this.player_2.socket?.emit('game:start', { side: 'right' });
+			this.player_2.socket?.emit('game:start', {
+				side: 'right',
+				p1_name: this.player_1.username,
+				p2_name: this.player_2.username
+			});
 		}
 		this.emitToPlayers('game:score', {
 			p1_name: this.player_1.username,

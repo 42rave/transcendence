@@ -165,7 +165,7 @@ export class GameObject {
 }
 
 export class Player extends GameObject {
-	constructor(args: any, public score: number) {
+	constructor(args: any, public score: number, public name: string) {
 		super(args);
 	}
 }
